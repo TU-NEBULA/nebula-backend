@@ -10,6 +10,7 @@ import com.team_nebula.nebula.domain.User.entity.User;
 import com.team_nebula.nebula.domain.User.repository.UserRepository;
 import com.team_nebula.nebula.domain.oauth.dto.CustomOAuth2User;
 import com.team_nebula.nebula.domain.oauth.dto.GoogleResponse;
+import com.team_nebula.nebula.domain.oauth.dto.KakaoResponse;
 import com.team_nebula.nebula.domain.oauth.dto.OAuth2Response;
 import com.team_nebula.nebula.domain.oauth.dto.UserDTO;
 
@@ -34,8 +35,10 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 		if (registrationId.equals("google")) {
 
 			oAuth2Response = new GoogleResponse(oAuth2User.getAttributes());
-		}
-		else {
+		}else if (registrationId.equals("kakao")) {
+
+			oAuth2Response = new KakaoResponse(oAuth2User.getAttributes());
+		} else {
 
 			return null;
 		}
@@ -55,10 +58,11 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
 			userRepository.save(userEntity);
 
-			UserDTO userDTO = new UserDTO();
-			userDTO.setUsername(username);
-			userDTO.setName(oAuth2Response.getName());
-			userDTO.setRole("ROLE_USER");
+			UserDTO userDTO = UserDTO.builder()
+				.username(username)
+				.name(oAuth2Response.getName())
+				.role("ROLE_USER")
+				.build();
 
 			return new CustomOAuth2User(userDTO);
 		}
@@ -69,10 +73,11 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
 			userRepository.save(existData);
 
-			UserDTO userDTO = new UserDTO();
-			userDTO.setUsername(existData.getUsername());
-			userDTO.setName(oAuth2Response.getName());
-			userDTO.setRole(existData.getRole());
+			UserDTO userDTO = UserDTO.builder()
+				.username(existData.getUsername())
+				.name(oAuth2Response.getName())
+				.role(existData.getRole())
+				.build();
 
 			return new CustomOAuth2User(userDTO);
 		}
