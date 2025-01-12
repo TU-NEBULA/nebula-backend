@@ -7,6 +7,8 @@ import java.util.Map;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 
+import com.team_nebula.nebula.domain.user.dto.request.UserDTO;
+
 public class CustomOAuth2User implements OAuth2User {
 
 	private final UserDTO userDTO;

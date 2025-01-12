@@ -1,4 +1,4 @@
-package com.team_nebula.nebula.domain.User.entity;
+package com.team_nebula.nebula.domain.user.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -24,6 +24,7 @@ public class User {
 	@Column(name = "username", nullable = false)
 	private String username;
 
+	@Column(name = "name", nullable = false)
 	private String name;
 
 	@Column(name = "email", nullable = false)

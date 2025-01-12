@@ -8,7 +8,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.team_nebula.nebula.domain.oauth.dto.CustomOAuth2User;
-import com.team_nebula.nebula.domain.oauth.dto.UserDTO;
+import com.team_nebula.nebula.domain.user.dto.request.UserDTO;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

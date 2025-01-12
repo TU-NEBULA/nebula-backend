@@ -2,11 +2,11 @@ package com.team_nebula.nebula.domain.oauth.dto;
 
 import java.util.Map;
 
-public class KakaoResponse implements OAuth2Response {
+public class KakaoResponseDTO implements OAuth2Response {
 
 	private final Map<String, Object> attributes;
 
-	public KakaoResponse(Map<String, Object> attributes) {
+	public KakaoResponseDTO(Map<String, Object> attributes) {
 		this.attributes = attributes;
 	}
 

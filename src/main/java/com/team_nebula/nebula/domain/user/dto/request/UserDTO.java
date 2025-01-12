@@ -1,8 +1,7 @@
-package com.team_nebula.nebula.domain.oauth.dto;
+package com.team_nebula.nebula.domain.user.dto.request;
 
 import lombok.Builder;
 import lombok.Getter;
-import lombok.Setter;
 
 @Getter
 @Builder
