@@ -9,7 +9,7 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 
 import com.team_nebula.nebula.domain.user.entity.User;
-import com.team_nebula.nebula.domain.user.repository.UserRepository;
+import com.team_nebula.nebula.domain.user.repository.mysql.UserRepository;
 import com.team_nebula.nebula.domain.oauth.dto.CustomOAuth2User;
 import com.team_nebula.nebula.domain.oauth.dto.GoogleResponseDTO;
 import com.team_nebula.nebula.domain.oauth.dto.KakaoResponseDTO;
