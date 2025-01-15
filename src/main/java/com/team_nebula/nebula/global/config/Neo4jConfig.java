@@ -10,8 +10,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.data.neo4j.config.EnableNeo4jAuditing;
 import org.springframework.data.neo4j.core.transaction.Neo4jTransactionManager;
 import org.springframework.data.neo4j.repository.config.EnableNeo4jRepositories;
-
-import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 
 @Configuration
@@ -39,7 +37,6 @@ public class Neo4jConfig {
                 .withConnectionAcquisitionTimeout(30, TimeUnit.SECONDS) // 연결 대기 시간 (초 단위)
                 .withConnectionTimeout(15, TimeUnit.SECONDS) // 연결 설정 시간 (초 단위)
                 .withMaxTransactionRetryTime(15, TimeUnit.SECONDS) // 트랜잭션 재시도 시간 (초 단위)
-                .withEncryption() // TLS(SSL) 활성화 (필요시)
                 .build();
 
         return GraphDatabase.driver(uri, AuthTokens.basic(username, password), config);
