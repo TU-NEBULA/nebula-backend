@@ -1,4 +1,4 @@
-package com.team_nebula.nebula.domain.user.repository;
+package com.team_nebula.nebula.domain.user.repository.mysql;
 
 import java.util.Optional;
 
