@@ -12,6 +12,7 @@ import org.springframework.data.neo4j.core.transaction.Neo4jTransactionManager;
 import org.springframework.data.neo4j.repository.config.EnableNeo4jRepositories;
 
 import java.time.Duration;
+import java.util.concurrent.TimeUnit;
 
 @Configuration
 @EnableNeo4jAuditing
@@ -35,9 +36,9 @@ public class Neo4jConfig {
 
         Config config = Config.builder()
                 .withMaxConnectionPoolSize(50) // 최대 연결 수
-                .withConnectionAcquisitionTimeout(Duration.ofSeconds(30)) // 연결 대기 시간
-                .withConnectionTimeout(Duration.ofSeconds(15)) // 연결 설정 시간
-                .withMaxTransactionRetryTime(Duration.ofSeconds(15)) // 트랜잭션 재시도 시간
+                .withConnectionAcquisitionTimeout(30, TimeUnit.SECONDS) // 연결 대기 시간 (초 단위)
+                .withConnectionTimeout(15, TimeUnit.SECONDS) // 연결 설정 시간 (초 단위)
+                .withMaxTransactionRetryTime(15, TimeUnit.SECONDS) // 트랜잭션 재시도 시간 (초 단위)
                 .withEncryption() // TLS(SSL) 활성화 (필요시)
                 .build();
 
