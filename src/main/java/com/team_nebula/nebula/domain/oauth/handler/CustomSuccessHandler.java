@@ -16,10 +16,8 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import lombok.extern.slf4j.Slf4j;
 
 @Component
-@Slf4j
 public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 
 	private final JWTUtil jwtUtil;
@@ -46,7 +44,6 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 
 		String token = jwtUtil.createJwt(username, role, 60*60*60L);
 
-		log.info(token);
 		response.addCookie(createCookie("Authorization", token));
 		response.sendRedirect("http://localhost:3000/");
 	}
