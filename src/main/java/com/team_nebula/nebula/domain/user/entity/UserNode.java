@@ -20,13 +20,13 @@ import java.util.Set;
 public class UserNode extends BaseEntity {
 
     @Id
-    private Long userId;
+    private String username;
 
     @Relationship(type = "CREATED", direction = Relationship.Direction.OUTGOING)
     private Set<Star> stars = new HashSet<>();
 
     @Relationship(type = "GENERATED", direction = Relationship.Direction.OUTGOING)
-    private Set<Category> booksRead = new HashSet<>();
+    private Set<Category> categorySet = new HashSet<>();
 
 
 }
