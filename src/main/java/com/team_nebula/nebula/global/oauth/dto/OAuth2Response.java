@@ -1,4 +1,4 @@
-package com.team_nebula.nebula.domain.oauth.dto;
+package com.team_nebula.nebula.global.oauth.dto;
 
 public interface OAuth2Response {
 

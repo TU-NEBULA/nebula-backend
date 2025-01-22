@@ -1,4 +1,4 @@
-package com.team_nebula.nebula.domain.oauth.dto;
+package com.team_nebula.nebula.global.oauth.dto;
 
 import java.util.ArrayList;
 import java.util.Collection;

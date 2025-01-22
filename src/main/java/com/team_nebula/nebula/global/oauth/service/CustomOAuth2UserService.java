@@ -1,4 +1,4 @@
-package com.team_nebula.nebula.domain.oauth.service;
+package com.team_nebula.nebula.global.oauth.service;
 
 import java.util.Optional;
 
@@ -8,22 +8,21 @@ import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 
+import com.team_nebula.nebula.global.oauth.dto.GoogleResponseDTO;
+import com.team_nebula.nebula.global.oauth.dto.KakaoResponseDTO;
+import com.team_nebula.nebula.global.oauth.dto.OAuth2Response;
+import com.team_nebula.nebula.global.oauth.dto.TokenResponseDTO;
 import com.team_nebula.nebula.domain.user.entity.User;
 import com.team_nebula.nebula.domain.user.repository.mysql.UserRepository;
-import com.team_nebula.nebula.domain.oauth.dto.CustomOAuth2User;
-import com.team_nebula.nebula.domain.oauth.dto.GoogleResponseDTO;
-import com.team_nebula.nebula.domain.oauth.dto.KakaoResponseDTO;
-import com.team_nebula.nebula.domain.oauth.dto.OAuth2Response;
+import com.team_nebula.nebula.global.oauth.dto.CustomOAuth2User;
 import com.team_nebula.nebula.domain.user.dto.request.UserDTO;
 import com.team_nebula.nebula.global.apipayload.code.status.ErrorStatus;
 import com.team_nebula.nebula.global.apipayload.exception.GeneralException;
 import com.team_nebula.nebula.global.util.JWTUtil;
 
-import io.jsonwebtoken.ExpiredJwtException;
-import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Service
 public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
@@ -97,44 +96,20 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 		}
 	}
 
-	public void reissue(HttpServletRequest request, HttpServletResponse response) {
+	public TokenResponseDTO reissue(Long userId, String refreshToken) {
 
-		String refreshToken = null;
-		Cookie[] cookies = request.getCookies();
-		if (cookies != null) {
-			for (Cookie cookie : cookies) {
-				if (cookie.getName().equals("refreshToken")) {
-					refreshToken = cookie.getValue();
-					break;
-				}
-			}
-		}
+		log.info(userId + " " + refreshToken);
+		User user = userRepository.findByIdAndRefreshToken(userId, refreshToken)
+			.orElseThrow(() -> new GeneralException(ErrorStatus._USER_NOT_FOUND));
 
-		if (refreshToken == null) {
-			throw new GeneralException(ErrorStatus._REFRESH_TOKEN_INVALID);
-		}
+		String username = jwtUtil.getUsername(user.getUsername());
+		String role = jwtUtil.getRole(user.getRole());
 
-		try {
-			jwtUtil.isExpired(refreshToken);
-		} catch (ExpiredJwtException e) {
-			throw new GeneralException(ErrorStatus._REFRESH_TOKEN_EXPIRED);
-		}
+		String authorization = jwtUtil.createJwt(username, role, 60 * 60 * 24L);
 
-		String username = jwtUtil.getUsername(refreshToken);
-		String role = jwtUtil.getRole(refreshToken);
-
-		String accessToken = jwtUtil.createJwt(username, role, 60 * 60L);
-
-		Cookie accessTokenCookie = createCookie("Authorization", accessToken);
-		response.addCookie(accessTokenCookie);
-	}
-
-	private Cookie createCookie(String name, String value) {
-		Cookie cookie = new Cookie(name, value);
-		cookie.setMaxAge(60*60*60);
-		cookie.setPath("/");
-		cookie.setHttpOnly(true);
-		// cookie.setSecure(true);
-		return cookie;
+		return TokenResponseDTO.builder()
+			.authorization(authorization)
+			.refreshToken(refreshToken)
+			.build();
 	}
 }

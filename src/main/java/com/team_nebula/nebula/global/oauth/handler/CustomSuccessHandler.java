@@ -1,4 +1,4 @@
-package com.team_nebula.nebula.domain.oauth.handler;
+package com.team_nebula.nebula.global.oauth.handler;
 
 import java.io.IOException;
 import java.util.Collection;
@@ -9,11 +9,13 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
 
-import com.team_nebula.nebula.domain.oauth.dto.CustomOAuth2User;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.team_nebula.nebula.global.oauth.dto.CustomOAuth2User;
+import com.team_nebula.nebula.global.oauth.dto.TokenResponseDTO;
+import com.team_nebula.nebula.global.apipayload.ApiResponse;
 import com.team_nebula.nebula.global.util.JWTUtil;
 
 import jakarta.servlet.ServletException;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
@@ -28,12 +30,13 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 	}
 
 	@Override
-	public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws
+	public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
+		Authentication authentication) throws
 		IOException,
 		ServletException {
 
 		//OAuth2User
-		CustomOAuth2User customUserDetails = (CustomOAuth2User) authentication.getPrincipal();
+		CustomOAuth2User customUserDetails = (CustomOAuth2User)authentication.getPrincipal();
 
 		String username = customUserDetails.getUsername();
 
@@ -42,22 +45,25 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 		GrantedAuthority auth = iterator.next();
 		String role = auth.getAuthority();
 
-		String token = jwtUtil.createJwt(username, role, 60 * 60 * 24L);
+		String authorization = jwtUtil.createJwt(username, role, 60 * 60 * 24L);
 		String refreshToken = jwtUtil.createJwt(username, role, 60 * 60 * 24L * 7);
 
-		response.addCookie(createCookie("Authorization", token, 60 * 60 * 24));
-		response.addCookie(createCookie("refreshToken", refreshToken, 60 * 60 * 24 * 7));
-		response.sendRedirect("http://localhost:3000/");
-	}
+		response.setContentType("application/json");
+		response.setCharacterEncoding("UTF-8");
 
-	private Cookie createCookie(String key, String value, int maxAge) {
+		TokenResponseDTO tokenResponse = TokenResponseDTO.builder()
+			.authorization(authorization)
+			.refreshToken(refreshToken)
+			.build();
 
-		Cookie cookie = new Cookie(key, value);
-		cookie.setMaxAge(maxAge);
-		//cookie.setSecure(true);
-		cookie.setPath("/");
-		cookie.setHttpOnly(true);
+		ApiResponse<TokenResponseDTO> apiResponse = ApiResponse.onSuccess(tokenResponse);
 
-		return cookie;
+		ObjectMapper objectMapper = new ObjectMapper();
+		String jsonResponse = objectMapper.writeValueAsString(apiResponse);
+
+		response.getWriter().write(jsonResponse);
+		response.getWriter().flush();
+
+		// response.sendRedirect("http://localhost:3000/");
 	}
 }
