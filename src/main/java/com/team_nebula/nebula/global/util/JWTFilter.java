@@ -7,12 +7,11 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import com.team_nebula.nebula.domain.oauth.dto.CustomOAuth2User;
+import com.team_nebula.nebula.global.oauth.dto.CustomOAuth2User;
 import com.team_nebula.nebula.domain.user.dto.request.UserDTO;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
@@ -26,42 +25,32 @@ public class JWTFilter extends OncePerRequestFilter {
 	}
 
 	@Override
-	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws
+	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
+		FilterChain filterChain) throws
 		ServletException, IOException {
 
-		//cookie들을 불러온 뒤 Authorization Key에 담긴 쿠키를 찾음
-		String authorization = null;
-		Cookie[] cookies = request.getCookies();
+		String path = request.getRequestURI();
 
-		for (Cookie cookie : cookies) {
-
-			System.out.println(cookie.getName());
-			if (cookie.getName().equals("Authorization")) {
-
-				authorization = cookie.getValue();
-			}
-		}
-
-		//Authorization 헤더 검증
-		if (authorization == null) {
-
-			System.out.println("token null");
+		if (path.startsWith("/v3/api-docs") || path.startsWith("/swagger-ui")) {
 			filterChain.doFilter(request, response);
-
-			//조건이 해당되면 메소드 종료 (필수)
 			return;
 		}
 
-		//토큰
-		String token = authorization;
-
-		//토큰 소멸 시간 검증
-		if (jwtUtil.isExpired(token)) {
-
-			System.out.println("token expired");
+		String authorizationHeader = request.getHeader("Authorization");
+		if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
+			System.out.println("Authorization header is missing or invalid");
 			filterChain.doFilter(request, response);
+			return;
+		}
 
-			//조건이 해당되면 메소드 종료 (필수)
+		// Bearer 토큰 추출
+		String token = authorizationHeader.substring(7); // "Bearer " 이후의 토큰 값
+
+		// 토큰 검증
+		if (jwtUtil.isExpired(token)) {
+			System.out.println("Token expired");
+			response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+			response.getWriter().write("Token expired");
 			return;
 		}
 
@@ -78,7 +67,8 @@ public class JWTFilter extends OncePerRequestFilter {
 		CustomOAuth2User customOAuth2User = new CustomOAuth2User(userDTO);
 
 		//스프링 시큐리티 인증 토큰 생성
-		Authentication authToken = new UsernamePasswordAuthenticationToken(customOAuth2User, null, customOAuth2User.getAuthorities());
+		Authentication authToken = new UsernamePasswordAuthenticationToken(customOAuth2User, null,
+			customOAuth2User.getAuthorities());
 
 		//세션에 사용자 등록
 		SecurityContextHolder.getContext().setAuthentication(authToken);
