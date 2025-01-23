@@ -86,13 +86,17 @@ public class SecurityConfig {
 		//경로별 인가 작업
 		http
 			.authorizeHttpRequests((auth) -> auth
-				.requestMatchers("/").permitAll()
+				.requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html", "/h2-console/**").permitAll()
 				.anyRequest().authenticated());
 
 		//세션 설정 : STATELESS
 		http
 			.sessionManagement((session) -> session
 				.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+
+		http
+			.headers(headers -> headers
+				.frameOptions(frameOptions -> frameOptions.disable()));
 
 		return http.build();
 	}
