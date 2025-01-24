@@ -12,10 +12,10 @@ public interface CategoryRepository extends Neo4jRepository<Category, Long> {
     boolean existsByName(String name);
 
     @Query("""
-    MATCH (u:UserNode {username: $username})-[:GENERATED]->(c:Category)
+    MATCH (u:UserNode {userId: $userId})-[:GENERATED]->(c:Category)
     OPTIONAL MATCH (c)<-[:BELONGS_TO]-(s:Star)
     RETURN c.id AS id, c.name AS name, COUNT(s) AS includedStarCnt
     """)
-    List<Map<String, Object>> findUserCategoriesWithStarCount(@Param("username") String username);
+    List<Map<String, Object>> findUserCategoriesWithStarCount(@Param("userId") Long userId);
 
 }

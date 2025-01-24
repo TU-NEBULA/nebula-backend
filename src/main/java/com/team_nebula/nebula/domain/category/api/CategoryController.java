@@ -25,9 +25,9 @@ public class CategoryController {
     }
 
     // 카테고리 전체 조회 API
-    @GetMapping("/{userName}")
-    public ApiResponse<GetCategoryListResponseDto> getCategoryList(@PathVariable String userName) {
-        GetCategoryListResponseDto responseDto = categoryService.getCategoryList(userName);
+    @GetMapping("/{userId}")
+    public ApiResponse<GetCategoryListResponseDto> getCategoryList(@PathVariable Long userId) {
+        GetCategoryListResponseDto responseDto = categoryService.getCategoryList(userId);
         return ApiResponse.onSuccess(responseDto);
     }
 }

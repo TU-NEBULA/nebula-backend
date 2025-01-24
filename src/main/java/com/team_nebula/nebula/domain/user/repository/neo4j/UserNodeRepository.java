@@ -6,8 +6,8 @@ import org.springframework.data.neo4j.repository.query.Query;
 
 import java.util.Optional;
 
-public interface UserNodeRepository extends Neo4jRepository<UserNode, String> {
+public interface UserNodeRepository extends Neo4jRepository<UserNode, Long> {
 
-    @Query("MATCH (u:UserNode {username: $username}) RETURN u")
-    Optional<UserNode> findByUsername(String username);
+    @Query("MATCH (u:UserNode {userId: $userId}) RETURN u")
+    Optional<UserNode> findByUserId(Long userId);
 }

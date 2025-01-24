@@ -27,7 +27,7 @@ public class CategoryService {
     public CreateCategoryResponseDto createCategory(CreateCategoryRequestDto request) {
 
         // userName으로 임시 인증 -> 추후에 JWT 유저 인증으로 수정할 계획
-        UserNode userNode = userNodeRepository.findByUsername(request.getUserName())
+        UserNode userNode = userNodeRepository.findByUserId(request.getUserId())
                 .orElseThrow(() -> new GeneralException(ErrorStatus._USER_NOT_FOUND));
 
         // 카테고리 중복 여부 체크
@@ -53,12 +53,13 @@ public class CategoryService {
                 .build();
     }
 
-    public GetCategoryListResponseDto getCategoryList(String userName) {
+    public GetCategoryListResponseDto getCategoryList(Long userId) {
 
-        UserNode userNode = userNodeRepository.findByUsername(userName)
-                .orElseThrow(() -> new GeneralException(ErrorStatus._USER_NOT_FOUND));
+        List<Map<String, Object>> categoryData = categoryRepository.findUserCategoriesWithStarCount(userId);
 
-        List<Map<String, Object>> categoryData = categoryRepository.findUserCategoriesWithStarCount(userName);
+        if (categoryData.isEmpty()) {
+            throw new GeneralException(ErrorStatus._CATEGORY_NOT_FOUND);
+        }
 
         List<GetCategoryOneResponseDto> categroyList = categoryData.stream()
                 .map(data -> GetCategoryOneResponseDto.builder()
