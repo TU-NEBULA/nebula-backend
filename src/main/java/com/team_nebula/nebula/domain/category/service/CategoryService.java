@@ -26,7 +26,7 @@ public class CategoryService {
 
     public CreateCategoryResponseDto createCategory(CreateCategoryRequestDto request) {
 
-        // userName으로 임시 인증 -> 추후에 JWT 유저 인증으로 수정할 계획
+        // userId 임시 인증 -> 추후에 JWT 유저 인증으로 수정할 계획
         UserNode userNode = userNodeRepository.findByUserId(request.getUserId())
                 .orElseThrow(() -> new GeneralException(ErrorStatus._USER_NOT_FOUND));
 
