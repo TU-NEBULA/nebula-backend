@@ -33,12 +33,16 @@ public class User {
 	@Column(name = "role", nullable = false)
 	private String role;
 
+	@Column(name = "refresh_token")
+	private String refreshToken;
+
 	@Builder
-	public User(String username, String name, String email, String role) {
+	public User(String username, String name, String email, String role, String refreshToken) {
 		this.username = username;
 		this.name = name;
 		this.email = email;
 		this.role = role;
+		this.refreshToken = refreshToken;
 	}
 
 	public void updateEmail(String email) {
@@ -47,5 +51,9 @@ public class User {
 
 	public void updateName(String name) {
 		this.name = name;
+	}
+
+	public void updateRefreshToken(String refreshToken) {
+		this.refreshToken = refreshToken;
 	}
 }

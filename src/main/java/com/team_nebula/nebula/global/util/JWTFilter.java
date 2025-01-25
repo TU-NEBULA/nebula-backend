@@ -7,8 +7,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import com.team_nebula.nebula.global.oauth.dto.CustomOAuth2User;
 import com.team_nebula.nebula.domain.user.dto.request.UserDTO;
+import com.team_nebula.nebula.global.oauth.dto.CustomOAuth2User;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -29,15 +29,9 @@ public class JWTFilter extends OncePerRequestFilter {
 		FilterChain filterChain) throws
 		ServletException, IOException {
 
-		String path = request.getRequestURI();
-
-		if (path.startsWith("/v3/api-docs") || path.startsWith("/swagger-ui")) {
-			filterChain.doFilter(request, response);
-			return;
-		}
-
 		String authorizationHeader = request.getHeader("Authorization");
-		if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
+
+		if (!jwtUtil.validateAuthorizationHeader(authorizationHeader)) {
 			System.out.println("Authorization header is missing or invalid");
 			filterChain.doFilter(request, response);
 			return;
@@ -61,6 +55,7 @@ public class JWTFilter extends OncePerRequestFilter {
 		UserDTO userDTO = UserDTO.builder()
 			.username(username)
 			.role(role)
+			.refreshToken(token)
 			.build();
 
 		//UserDetails에 회원 정보 객체 담기

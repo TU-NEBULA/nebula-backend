@@ -10,9 +10,13 @@ import org.springframework.security.web.authentication.SimpleUrlAuthenticationSu
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.team_nebula.nebula.domain.user.entity.User;
+import com.team_nebula.nebula.domain.user.repository.mysql.UserRepository;
+import com.team_nebula.nebula.global.apipayload.ApiResponse;
+import com.team_nebula.nebula.global.apipayload.code.status.ErrorStatus;
+import com.team_nebula.nebula.global.apipayload.exception.GeneralException;
 import com.team_nebula.nebula.global.oauth.dto.CustomOAuth2User;
 import com.team_nebula.nebula.global.oauth.dto.TokenResponseDTO;
-import com.team_nebula.nebula.global.apipayload.ApiResponse;
 import com.team_nebula.nebula.global.util.JWTUtil;
 
 import jakarta.servlet.ServletException;
@@ -22,10 +26,11 @@ import jakarta.servlet.http.HttpServletResponse;
 @Component
 public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 
+	private final UserRepository userRepository;
 	private final JWTUtil jwtUtil;
 
-	public CustomSuccessHandler(JWTUtil jwtUtil) {
-
+	public CustomSuccessHandler(UserRepository userRepository, JWTUtil jwtUtil) {
+		this.userRepository = userRepository;
 		this.jwtUtil = jwtUtil;
 	}
 
@@ -47,6 +52,12 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 
 		String authorization = jwtUtil.createJwt(username, role, 60 * 60 * 24L);
 		String refreshToken = jwtUtil.createJwt(username, role, 60 * 60 * 24L * 7);
+
+		User user = userRepository.findByUsername(username)
+			.orElseThrow(() -> new GeneralException(ErrorStatus._USER_NOT_FOUND));
+
+		user.updateRefreshToken(refreshToken);
+		userRepository.save(user);
 
 		response.setContentType("application/json");
 		response.setCharacterEncoding("UTF-8");

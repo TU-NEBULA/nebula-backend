@@ -12,8 +12,8 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 
-import com.team_nebula.nebula.domain.oauth.handler.CustomSuccessHandler;
-import com.team_nebula.nebula.domain.oauth.service.CustomOAuth2UserService;
+import com.team_nebula.nebula.global.oauth.handler.CustomSuccessHandler;
+import com.team_nebula.nebula.global.oauth.service.CustomOAuth2UserService;
 import com.team_nebula.nebula.global.util.JWTFilter;
 import com.team_nebula.nebula.global.util.JWTUtil;
 
@@ -86,7 +86,7 @@ public class SecurityConfig {
 		//경로별 인가 작업
 		http
 			.authorizeHttpRequests((auth) -> auth
-				.requestMatchers("/").permitAll()
+				.requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
 				.anyRequest().authenticated());
 
 		//세션 설정 : STATELESS
