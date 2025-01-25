@@ -116,6 +116,9 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
 		String authorization = jwtUtil.createJwt(username, role, 60 * 60 * 24L);
 
-		return TokenResponseDTO.builder().authorization(authorization).refreshToken(refreshToken).build();
+		return TokenResponseDTO
+			.builder()
+			.authorization(authorization)
+			.refreshToken(refreshToken).build();
 	}
 }
