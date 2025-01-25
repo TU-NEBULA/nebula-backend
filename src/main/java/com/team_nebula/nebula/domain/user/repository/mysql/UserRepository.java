@@ -9,4 +9,6 @@ import com.team_nebula.nebula.domain.user.entity.User;
 public interface UserRepository extends JpaRepository<User, Long> {
 
 	Optional<User> findByUsername(String username);
+
+	boolean existsByIdAndRefreshToken(Long id, String refreshToken);
 }

@@ -12,8 +12,8 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 
-import com.team_nebula.nebula.domain.oauth.handler.CustomSuccessHandler;
-import com.team_nebula.nebula.domain.oauth.service.CustomOAuth2UserService;
+import com.team_nebula.nebula.global.oauth.handler.CustomSuccessHandler;
+import com.team_nebula.nebula.global.oauth.service.CustomOAuth2UserService;
 import com.team_nebula.nebula.global.util.JWTFilter;
 import com.team_nebula.nebula.global.util.JWTUtil;
 
