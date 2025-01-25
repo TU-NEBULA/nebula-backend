@@ -1,4 +1,4 @@
-package com.team_nebula.nebula.global.oauth.controller;
+package com.team_nebula.nebula.global.oauth.api;
 
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -12,11 +12,13 @@ import com.team_nebula.nebula.global.apipayload.exception.GeneralException;
 import com.team_nebula.nebula.global.oauth.dto.TokenResponseDTO;
 import com.team_nebula.nebula.global.oauth.service.CustomOAuth2UserService;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequiredArgsConstructor
+@Tag(name = "[인증]")
 @RequestMapping("/api/v1/oauth")
 public class OAuthController {
 
