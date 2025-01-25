@@ -30,7 +30,7 @@ public class OAuthController {
 		String refreshToken = request.getHeader("Authorization").substring(7);
 
 		if (refreshToken.trim().isEmpty()) {
-			throw new GeneralException(ErrorStatus._REFRESH_TOKEN_INVALID);
+			throw new GeneralException(ErrorStatus._UNAUTHORIZED_USER);
 		}
 
 		TokenResponseDTO dto = customOAuth2UserService.reissue(user.getId(), refreshToken);

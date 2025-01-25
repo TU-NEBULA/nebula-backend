@@ -36,7 +36,7 @@ public class AuthArgumentResolver implements HandlerMethodArgumentResolver {
 
 		// 토큰 유효성 검증
 		if (!jwtUtil.validateAuthorizationHeader(authorization)) {
-			throw new GeneralException(ErrorStatus._REFRESH_TOKEN_INVALID);
+			throw new GeneralException(ErrorStatus._UNAUTHORIZED_USER);
 		}
 
 		// 토큰에서 사용자 추출하기
