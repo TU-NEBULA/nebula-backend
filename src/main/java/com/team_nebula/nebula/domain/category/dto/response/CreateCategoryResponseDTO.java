@@ -5,13 +5,15 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
+import java.time.LocalDateTime;
 
 @Getter
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class GetCategoryListResponseDto {
-    private int totalCount;
-    private List<GetCategoryOneResponseDto> categoryList;
+public class CreateCategoryResponseDTO {
+    private Long categoryId;
+    private String name;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 }
