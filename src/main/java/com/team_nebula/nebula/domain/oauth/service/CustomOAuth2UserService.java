@@ -2,6 +2,12 @@ package com.team_nebula.nebula.domain.oauth.service;
 
 import java.util.Optional;
 
+import com.team_nebula.nebula.domain.user.entity.UserNode;
+import com.team_nebula.nebula.domain.user.repository.neo4j.UserNodeRepository;
+import com.team_nebula.nebula.global.apipayload.code.status.ErrorStatus;
+import com.team_nebula.nebula.global.apipayload.exception.GeneralException;
+import com.team_nebula.nebula.global.util.JWTUtil;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
@@ -22,7 +28,6 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 	private final UserRepository userRepository;
 
 	public CustomOAuth2UserService(UserRepository userRepository) {
-
 		this.userRepository = userRepository;
 	}
 
