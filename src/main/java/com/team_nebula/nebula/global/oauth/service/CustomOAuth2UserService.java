@@ -20,9 +20,6 @@ import com.team_nebula.nebula.global.oauth.dto.OAuth2Response;
 import com.team_nebula.nebula.global.oauth.dto.TokenResponseDTO;
 import com.team_nebula.nebula.global.util.JWTUtil;
 
-import lombok.extern.slf4j.Slf4j;
-
-@Slf4j
 @Service
 public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 

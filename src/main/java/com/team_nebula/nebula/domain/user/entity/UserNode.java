@@ -26,7 +26,7 @@ public class UserNode extends BaseEntity {
     private Set<Star> stars = new HashSet<>();
 
     @Relationship(type = "GENERATED", direction = Relationship.Direction.OUTGOING)
-    private Set<Category> booksRead = new HashSet<>();
+    private Set<Category> categorySet = new HashSet<>();
 
 
 }
