@@ -10,7 +10,9 @@ import org.springframework.stereotype.Service;
 
 import com.team_nebula.nebula.domain.user.dto.request.UserDTO;
 import com.team_nebula.nebula.domain.user.entity.User;
+import com.team_nebula.nebula.domain.user.entity.UserNode;
 import com.team_nebula.nebula.domain.user.repository.mysql.UserRepository;
+import com.team_nebula.nebula.domain.user.repository.neo4j.UserNodeRepository;
 import com.team_nebula.nebula.global.apipayload.code.status.ErrorStatus;
 import com.team_nebula.nebula.global.apipayload.exception.GeneralException;
 import com.team_nebula.nebula.global.oauth.dto.CustomOAuth2User;
@@ -24,11 +26,14 @@ import com.team_nebula.nebula.global.util.JWTUtil;
 public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
 	private final UserRepository userRepository;
+	private final UserNodeRepository userNodeRepository;
 	private final JWTUtil jwtUtil;
 
-	public CustomOAuth2UserService(UserRepository userRepository, JWTUtil jwtUtil) {
+	public CustomOAuth2UserService(UserRepository userRepository,
+		UserNodeRepository userNodeRepository, JWTUtil jwtUtil) {
 
 		this.userRepository = userRepository;
+		this.userNodeRepository = userNodeRepository;
 		this.jwtUtil = jwtUtil;
 	}
 
@@ -58,8 +63,10 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
 		String refreshToken = jwtUtil.createJwt(username, "ROLE_USER", 60 * 60 * 24L * 7);
 
+		// 초기 로그인 시
 		if (existData.isEmpty()) {
 
+			// MySQL 저장
 			User userEntity = User.builder()
 				.username(username)
 				.name(oAuth2Response.getName())
@@ -69,6 +76,11 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 				.build();
 
 			userRepository.save(userEntity);
+
+			// Neo4j 저장
+			UserNode userNode = UserNode.builder().userId(userEntity.getId()).build();
+
+			userNodeRepository.save(userNode);
 
 			UserDTO userDTO = UserDTO.builder()
 				.username(username)
