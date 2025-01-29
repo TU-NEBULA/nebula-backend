@@ -5,7 +5,6 @@ import com.team_nebula.nebula.domain.keyword.entity.Keyword;
 import com.team_nebula.nebula.domain.link.entity.Link;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Lob;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -39,8 +38,9 @@ public class Star extends BaseEntity {
     private String summaryAI;
 
     @Lob
-    private String memoUser;
+    private String userMemo;
 
+    // 조회수
     private int views;
 
     @Property("html_file_url")
@@ -60,7 +60,7 @@ public class Star extends BaseEntity {
         this.siteUrl = siteUrl;
         this.thumbnailUrl = thumbnailUrl;
         this.summaryAI = summaryAI;
-        this.memoUser = memoUser;
+        this.userMemo = memoUser;
         this.views = views;
         this.htmlFileUrl = htmlFileUrl;
         this.embedding = embedding;

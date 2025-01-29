@@ -24,7 +24,7 @@ public class Link extends BaseEntity {
 
     private double similarityScore;
 
-    @Property("linked_nodes_Id")
+    @Property("linked_two_node_Id")
     private List<Long> linkedNode;
 
     public Link(int sharedKeywordNum, double similarityScore, List<Long> linkedNode) {
