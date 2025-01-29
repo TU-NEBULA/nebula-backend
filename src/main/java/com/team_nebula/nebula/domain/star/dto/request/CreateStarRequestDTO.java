@@ -16,10 +16,18 @@ public class CreateStarRequestDTO {
     private List<String> keywordList;
 
     public String getSummaryAI() {
-        return (summaryAI == null || summaryAI.isBlank()) ? "No summary provided" : summaryAI;
+        if (summaryAI == null || summaryAI.isBlank()) {
+            return "사용자가 AI요약을 하지 않았습니다.";
+        } else {
+            return summaryAI;
+        }
     }
 
     public String getUserMemo() {
-        return (userMemo == null || userMemo.isBlank()) ? "No memo provided" : userMemo;
+        if (userMemo == null || userMemo.isBlank()) {
+            return "사용자가 메모를 입력하지 않았습니다.";
+        } else {
+            return userMemo;
+        }
     }
 }
