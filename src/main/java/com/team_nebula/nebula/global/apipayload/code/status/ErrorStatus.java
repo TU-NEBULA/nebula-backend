@@ -23,7 +23,9 @@ public enum ErrorStatus implements BaseErrorCode {
 
 	_STAR_CREATION_FAILED(HttpStatus.CREATED, "STAR5000", "스타 생성에 실패했습니다."),
 
-	_KEYWORD_NOT_FOUND(HttpStatus.NOT_FOUND, "KEYWORD4001", "키워드가 존재하지 않습니다.");
+	_KEYWORD_NOT_FOUND(HttpStatus.NOT_FOUND, "KEYWORD4001", "키워드가 존재하지 않습니다."),
+
+	MULTIPARTFILE_CONVERT_FAIL(HttpStatus.INTERNAL_SERVER_ERROR,"MULTIPARTFILE5000","MultipartFile -> File로 변환이 실패하였습니다.");
 
 	private HttpStatus httpStatus;
 	private String code;

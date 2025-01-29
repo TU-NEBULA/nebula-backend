@@ -1,9 +1,8 @@
 package com.team_nebula.nebula.domain.star.service;
 
-import com.team_nebula.nebula.domain.category.repository.CategoryRepository;
 import com.team_nebula.nebula.domain.category.service.CategoryCommandService;
+import com.team_nebula.nebula.domain.image.S3Service;
 import com.team_nebula.nebula.domain.keyword.entity.Keyword;
-import com.team_nebula.nebula.domain.keyword.repository.KeywordRepository;
 import com.team_nebula.nebula.domain.keyword.service.KeywordCommandService;
 import com.team_nebula.nebula.domain.link.service.LinkCommandService;
 import com.team_nebula.nebula.domain.star.dto.request.CreateStarFileDTO;
@@ -27,6 +26,7 @@ public class StarCommandServiceImpl implements StarCommandService {
     private final CategoryCommandService categoryCommandService;
     private final KeywordCommandService keywordCommandService;
     private final LinkCommandService linkCommandService;
+    private final S3Service s3Service;
 
     @Override
     public CreateStarResponseDTO createStar(CreateStarFileDTO requestDTO){
@@ -65,8 +65,8 @@ public class StarCommandServiceImpl implements StarCommandService {
         Star star = new Star();
         star.setTitle(starRequestDTO.getTitle());
         star.setSiteUrl(starRequestDTO.getSiteUrl());
-        star.setThumbnailUrl(s3Service.uploadFile(requestDTO.getThumbnailImage()));
-        star.setHtmlFileUrl(s3Service.uploadFile(requestDTO.getHtmlFile()));
+        star.setThumbnailUrl(s3Service.saveThumbnail(requestDTO.getThumbnailImage(), starRequestDTO.getTitle()));
+        star.setHtmlFileUrl(s3Service.saveHtmlFile(requestDTO.getHtmlFile(), starRequestDTO.getTitle()));
         star.setSummaryAI(starRequestDTO.getSummaryAI());
         star.setUserMemo(starRequestDTO.getUserMemo());
         star.setViews(0);
