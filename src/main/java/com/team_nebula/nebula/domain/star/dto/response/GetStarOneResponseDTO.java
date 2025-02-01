@@ -11,10 +11,9 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class CreateStarResponseDTO {
-
-    private Long starId;
-    private String title;
-    private String categoryName;
-    private List<String> keywordList;
+public class GetStarOneResponseDTO {
+    private Long linkId;
+    private int sharedKeywordNum;
+    private double similarityScore;
+    private List<Long> linkedNodeIdList;
 }

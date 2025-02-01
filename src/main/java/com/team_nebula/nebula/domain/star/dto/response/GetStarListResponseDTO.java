@@ -11,10 +11,9 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class CreateStarResponseDTO {
-
-    private Long starId;
-    private String title;
-    private String categoryName;
-    private List<String> keywordList;
+public class GetStarListResponseDTO {
+    private int totalStarCnt;
+    private int totalLinkCnt;
+    private List<GetStarOneResponseDTO> starListDto;
+    private List<GetLinkOneResponseDTO> linkListDto;
 }

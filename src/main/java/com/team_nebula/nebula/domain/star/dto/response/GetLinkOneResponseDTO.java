@@ -11,10 +11,14 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class CreateStarResponseDTO {
-
+public class GetLinkOneResponseDTO {
     private Long starId;
-    private String title;
     private String categoryName;
+    private String title;
+    private String siteUrl;
+    private String thumbnailUrl;
+    private String summaryAI;
+    private String userMemo;
+    private int views;
     private List<String> keywordList;
 }
