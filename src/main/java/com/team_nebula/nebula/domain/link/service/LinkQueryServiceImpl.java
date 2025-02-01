@@ -3,7 +3,6 @@ package com.team_nebula.nebula.domain.link.service;
 import com.team_nebula.nebula.domain.link.entity.Link;
 import com.team_nebula.nebula.domain.link.repository.LinkRepository;
 import com.team_nebula.nebula.domain.star.dto.response.GetLinkOneResponseDTO;
-import com.team_nebula.nebula.domain.star.dto.response.GetStarOneResponseDTO;
 import com.team_nebula.nebula.domain.user.entity.UserNode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -17,6 +16,7 @@ public class LinkQueryServiceImpl implements LinkQueryService {
 
     private final LinkRepository linkRepository;
 
+    // 링크 노드 전체 조회
     @Override
     public List<GetLinkOneResponseDTO> getAllLink(UserNode userNode){
         List<Map<String, Object>> linkDataList = linkRepository.findLinksByUserId(userNode.getUserId());

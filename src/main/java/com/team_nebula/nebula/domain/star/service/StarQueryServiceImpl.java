@@ -2,15 +2,13 @@ package com.team_nebula.nebula.domain.star.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.team_nebula.nebula.domain.category.repository.CategoryRepository;
-import com.team_nebula.nebula.domain.keyword.repository.KeywordRepository;
 import com.team_nebula.nebula.domain.link.service.LinkQueryService;
+import com.team_nebula.nebula.domain.star.converter.StarConverter;
 import com.team_nebula.nebula.domain.star.dto.request.CreateStarFileDTO;
 import com.team_nebula.nebula.domain.star.dto.request.CreateStarRequestDTO;
 import com.team_nebula.nebula.domain.star.dto.response.GetLinkOneResponseDTO;
 import com.team_nebula.nebula.domain.star.dto.response.GetStarListResponseDTO;
 import com.team_nebula.nebula.domain.star.dto.response.GetStarOneResponseDTO;
-import com.team_nebula.nebula.domain.star.entity.Star;
 import com.team_nebula.nebula.domain.star.repository.StarRepository;
 import com.team_nebula.nebula.domain.user.entity.UserNode;
 import com.team_nebula.nebula.domain.user.repository.neo4j.UserNodeRepository;
@@ -31,6 +29,8 @@ public class StarQueryServiceImpl implements StarQueryService {
     private final UserNodeRepository userNodeRepository;
     private final LinkQueryService linkQueryService;
 
+
+    // 스타 JSON 데이터 파싱
     @Override
     public CreateStarFileDTO starDataParsing(MultipartFile thumbnailImage, MultipartFile htmlFile, String starJsonData){
 
@@ -54,6 +54,7 @@ public class StarQueryServiceImpl implements StarQueryService {
         return requestDTO;
     }
 
+    // 스타 + 링크 전체 조회
     @Override
     public GetStarListResponseDTO getStarList(Long userId){
 
@@ -75,23 +76,21 @@ public class StarQueryServiceImpl implements StarQueryService {
                 .build();
     }
 
-    @Override
-    public List<GetStarOneResponseDTO> getAllStar(UserNode userNode){
+    // 스타 노드 전체 조회
+    public List<GetStarOneResponseDTO> getAllStar(UserNode userNode) {
         List<Map<String, Object>> starDataList = starRepository.findStarsByUserId(userNode.getUserId());
 
         return starDataList.stream()
-                .map(data -> GetStarOneResponseDTO.builder()
-                        .starId(((Star) data.get("s")).getId())
-                        .categoryName((String) data.get("categoryName"))
-                        .title(((Star) data.get("s")).getTitle())
-                        .siteUrl(((Star) data.get("s")).getSiteUrl())
-                        .thumbnailUrl(((Star) data.get("s")).getThumbnailUrl())
-                        .summaryAI(((Star) data.get("s")).getSummaryAI())
-                        .userMemo(((Star) data.get("s")).getUserMemo())
-                        .views(((Star) data.get("s")).getViews())
-                        .keywordList((List<String>) data.get("keywordList"))
-                        .build())
+                .map(StarConverter::convertToStarOneDto)
                 .toList();
+    }
+
+    // 단일 스타 조회
+    public GetStarOneResponseDTO getStarOne(Long starId) {
+        Map<String, Object> data = starRepository.findStarDetailById(starId)
+                .orElseThrow(() -> new GeneralException(ErrorStatus._STAR_NOT_FOUND));
+
+        return StarConverter.convertToStarOneDto(data);
     }
 
 }
