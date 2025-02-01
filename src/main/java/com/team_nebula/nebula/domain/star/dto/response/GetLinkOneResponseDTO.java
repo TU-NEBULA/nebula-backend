@@ -12,13 +12,8 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class GetLinkOneResponseDTO {
-    private Long starId;
-    private String categoryName;
-    private String title;
-    private String siteUrl;
-    private String thumbnailUrl;
-    private String summaryAI;
-    private String userMemo;
-    private int views;
-    private List<String> keywordList;
+    private Long linkId;
+    private int sharedKeywordNum;
+    private double similarity;
+    private List<Long> linkedNodeIdList;
 }

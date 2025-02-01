@@ -2,6 +2,7 @@ package com.team_nebula.nebula.domain.star.api;
 
 import com.team_nebula.nebula.domain.star.dto.request.CreateStarFileDTO;
 import com.team_nebula.nebula.domain.star.dto.response.CreateStarResponseDTO;
+import com.team_nebula.nebula.domain.star.dto.response.GetStarListResponseDTO;
 import com.team_nebula.nebula.domain.star.service.StarCommandService;
 import com.team_nebula.nebula.domain.star.service.StarQueryService;
 import com.team_nebula.nebula.global.apipayload.ApiResponse;
@@ -28,6 +29,13 @@ public class StarController {
         CreateStarFileDTO requestDTO = starQueryService.starDataParsing(thumbnailImage, htmlFile, starJsonData);
 
         CreateStarResponseDTO responseDTO = starCommandService.createStar(requestDTO);
+        return ApiResponse.onSuccessCreated(responseDTO);
+    }
+
+    @GetMapping("/{userId}")
+    public ApiResponse<GetStarListResponseDTO> getStars(@PathVariable Long userId){
+        GetStarListResponseDTO responseDTO = starQueryService.getStarList(userId);
+
         return ApiResponse.onSuccessCreated(responseDTO);
     }
 }

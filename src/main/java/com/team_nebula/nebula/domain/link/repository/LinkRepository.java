@@ -5,6 +5,9 @@ import org.springframework.data.neo4j.repository.Neo4jRepository;
 import org.springframework.data.neo4j.repository.query.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
+import java.util.Map;
+
 public interface LinkRepository extends Neo4jRepository<Link, Long> {
 
     @Query("""
@@ -18,4 +21,13 @@ public interface LinkRepository extends Neo4jRepository<Link, Long> {
         MERGE (s2)-[:LINKED]->(l)
     """)
     void createLinksBetweenStars(@Param("starId") Long starId);
+
+    @Query("""
+        MATCH (s:Star)-[:LINKED]->(l:Link)<-[:LINKED]-(s2:Star)
+        WHERE s.userId = $userId OR s2.userId = $userId
+        RETURN l, l.linked_two_node_Id AS linkedNodeIdList, 
+               l.sharedKeywordNum AS sharedKeywordNum, 
+               l.similarityScore AS similarity
+    """)
+    List<Map<String, Object>> findLinksByUserId(@Param("userId") Long userId);
 }

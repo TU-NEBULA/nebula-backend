@@ -12,8 +12,13 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class GetStarOneResponseDTO {
-    private Long linkId;
-    private int sharedKeywordNum;
-    private double similarityScore;
-    private List<Long> linkedNodeIdList;
+    private Long starId;
+    private String categoryName;
+    private String title;
+    private String siteUrl;
+    private String thumbnailUrl;
+    private String summaryAI;
+    private String userMemo;
+    private int views;
+    private List<String> keywordList;
 }
