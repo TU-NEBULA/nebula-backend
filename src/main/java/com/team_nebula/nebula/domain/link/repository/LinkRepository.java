@@ -30,4 +30,19 @@ public interface LinkRepository extends Neo4jRepository<Link, Long> {
                l.similarityScore AS similarity
     """)
     List<Map<String, Object>> findLinksByUserId(@Param("userId") Long userId);
+
+    @Query("""
+    MATCH (u:UserNode)-[:CREATED]->(s:Star)-[:BELONGS_TO]->(c:Category)
+    WHERE u.userId = $userId AND c.categoryId = $categoryId
+    
+    MATCH (s)-[:LINKED]->(l:Link)<-[:LINKED]-(s2:Star)
+    WHERE (u)-[:CREATED]->(s2)
+    
+    RETURN l, 
+           l.linked_two_node_Id AS linkedNodeIdList, 
+           l.sharedKeywordNum AS sharedKeywordNum, 
+           l.similarityScore AS similarity
+    """)
+    List<Map<String, Object>> findLinkInCategory(@Param("userId") Long userId, @Param("categoryId") Long categoryId);
+
 }

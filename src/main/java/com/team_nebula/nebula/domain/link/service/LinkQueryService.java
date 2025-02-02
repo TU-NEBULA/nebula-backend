@@ -7,4 +7,6 @@ import java.util.List;
 
 public interface LinkQueryService {
     public List<GetLinkOneResponseDTO> getAllLink(UserNode userNode);
+
+    public List<GetLinkOneResponseDTO> getLinkInCategory(Long userId, Long categoryId);
 }

@@ -30,6 +30,7 @@ public class StarController {
         CreateStarFileDTO requestDTO = starQueryService.starDataParsing(thumbnailImage, htmlFile, starJsonData);
 
         CreateStarResponseDTO responseDTO = starCommandService.createStar(requestDTO);
+
         return ApiResponse.onSuccessCreated(responseDTO);
     }
 
@@ -43,6 +44,13 @@ public class StarController {
     @GetMapping("/{starId}")
     public ApiResponse<GetStarOneResponseDTO> getStarOne(@PathVariable Long starId){
         GetStarOneResponseDTO responseDTO = starQueryService.getStarOne(starId);
+
+        return ApiResponse.onSuccess(responseDTO);
+    }
+
+    @GetMapping("/{userId}/{categoryId}")
+    public ApiResponse<GetStarListResponseDTO> getStarListByCategory(@PathVariable Long userId, Long categoryId){
+        GetStarListResponseDTO responseDTO = starQueryService.getStarListInCategory(userId, categoryId);
 
         return ApiResponse.onSuccess(responseDTO);
     }

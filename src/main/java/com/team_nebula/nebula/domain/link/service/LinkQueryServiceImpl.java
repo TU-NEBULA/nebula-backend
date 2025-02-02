@@ -33,4 +33,19 @@ public class LinkQueryServiceImpl implements LinkQueryService {
                 .toList();
 
     }
+
+    @Override
+    public List<GetLinkOneResponseDTO> getLinkInCategory(Long userId, Long categoryId){
+        List<Map<String, Object>> linkDataList = linkRepository.findLinkInCategory(userId, categoryId);
+
+        return linkDataList.stream()
+                .map(data -> GetLinkOneResponseDTO.builder()
+                        .linkId(((Link) data.get("l")).getId())
+                        .sharedKeywordNum((int) data.get("sharedKeywordNum"))
+                        .similarity((double) data.get("similarity"))
+                        .linkedNodeIdList((List<Long>) data.get("linkedNodeIdList"))
+                        .build())
+                .toList();
+    }
+
 }
