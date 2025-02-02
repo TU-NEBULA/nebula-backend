@@ -2,7 +2,6 @@ package com.team_nebula.nebula.domain.star.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.team_nebula.nebula.domain.category.entity.Category;
 import com.team_nebula.nebula.domain.category.repository.CategoryRepository;
 import com.team_nebula.nebula.domain.link.service.LinkQueryService;
 import com.team_nebula.nebula.domain.star.converter.StarConverter;
@@ -108,7 +107,7 @@ public class StarQueryServiceImpl implements StarQueryService {
         UserNode userNode = userNodeRepository.findByUserId(userId)
                 .orElseThrow(() -> new GeneralException(ErrorStatus._USER_NOT_FOUND));
 
-        List<GetStarOneResponseDTO> starsInCategory = getStarinCategory(userId, categoryId);
+        List<GetStarOneResponseDTO> starsInCategory = getStarInCategory(userId, categoryId);
         List<GetLinkOneResponseDTO> linksInCategory = linkQueryService.getLinkInCategory(userId, categoryId);
 
         return GetStarListResponseDTO.builder()
@@ -120,12 +119,38 @@ public class StarQueryServiceImpl implements StarQueryService {
                 .build();
     }
 
-
-    public List<GetStarOneResponseDTO> getStarinCategory(Long userId, Long categoryId) {
+    public List<GetStarOneResponseDTO> getStarInCategory(Long userId, Long categoryId) {
         List<Map<String, Object>> starDataList = starRepository.findStarsInCategory(userId, categoryId);
 
         return starDataList.stream()
                 .map(StarConverter::convertToStarOneDto)
                 .toList();
     }
+
+    @Override
+    public GetStarListResponseDTO getStarListInKeyword(Long userId, Long keywordId){
+        // 유저 인증
+        UserNode userNode = userNodeRepository.findByUserId(userId)
+                .orElseThrow(() -> new GeneralException(ErrorStatus._USER_NOT_FOUND));
+
+        List<GetStarOneResponseDTO> starsInCategory = getStarInKeyword(userId, keywordId);
+        List<GetLinkOneResponseDTO> linksInCategory = linkQueryService.getLinkInKeyword(userId, keywordId);
+
+        return GetStarListResponseDTO.builder()
+                .type("Keyword")
+                .totalStarCnt(starsInCategory.size())
+                .totalLinkCnt(linksInCategory.size())
+                .starListDto(starsInCategory)
+                .linkListDto(linksInCategory)
+                .build();
+    }
+
+    public List<GetStarOneResponseDTO> getStarInKeyword(Long userId, Long keywordId) {
+        List<Map<String, Object>> starDataList = starRepository.findStarsInKeyword(userId, keywordId);
+
+        return starDataList.stream()
+                .map(StarConverter::convertToStarOneDto)
+                .toList();
+    }
+
 }

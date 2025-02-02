@@ -34,6 +34,7 @@ public class LinkQueryServiceImpl implements LinkQueryService {
 
     }
 
+    // 카테고리별 링크 노드 조회
     @Override
     public List<GetLinkOneResponseDTO> getLinkInCategory(Long userId, Long categoryId){
         List<Map<String, Object>> linkDataList = linkRepository.findLinkInCategory(userId, categoryId);
@@ -47,5 +48,21 @@ public class LinkQueryServiceImpl implements LinkQueryService {
                         .build())
                 .toList();
     }
+
+    // 키워드별 링크 노드 조회
+    @Override
+    public List<GetLinkOneResponseDTO> getLinkInKeyword(Long userId, Long keywordId){
+        List<Map<String, Object>> linkDataList = linkRepository.findLinkInKeyword(userId, keywordId);
+
+        return linkDataList.stream()
+                .map(data -> GetLinkOneResponseDTO.builder()
+                        .linkId(((Link) data.get("l")).getId())
+                        .sharedKeywordNum((int) data.get("sharedKeywordNum"))
+                        .similarity((double) data.get("similarity"))
+                        .linkedNodeIdList((List<Long>) data.get("linkedNodeIdList"))
+                        .build())
+                .toList();
+    }
+
 
 }

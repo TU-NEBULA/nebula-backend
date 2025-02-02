@@ -19,4 +19,6 @@ public interface StarQueryService {
     public GetStarOneResponseDTO getStarOne(Long starId);
 
     public GetStarListResponseDTO getStarListInCategory(Long userId, Long categoryId);
+
+    public GetStarListResponseDTO getStarListInKeyword(Long userId, Long keywordId);
 }

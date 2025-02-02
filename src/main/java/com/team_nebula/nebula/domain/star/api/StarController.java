@@ -49,8 +49,15 @@ public class StarController {
     }
 
     @GetMapping("/{userId}/{categoryId}")
-    public ApiResponse<GetStarListResponseDTO> getStarListByCategory(@PathVariable Long userId, Long categoryId){
+    public ApiResponse<GetStarListResponseDTO> getStarListByCategory(@PathVariable Long userId, @PathVariable Long categoryId){
         GetStarListResponseDTO responseDTO = starQueryService.getStarListInCategory(userId, categoryId);
+
+        return ApiResponse.onSuccess(responseDTO);
+    }
+
+    @GetMapping("/{userId}/{keywordId}")
+    public ApiResponse<GetStarListResponseDTO> getStarListByKeyword(@PathVariable Long userId, @PathVariable Long keywordId){
+        GetStarListResponseDTO responseDTO = starQueryService.getStarListInKeyword(userId, keywordId);
 
         return ApiResponse.onSuccess(responseDTO);
     }
