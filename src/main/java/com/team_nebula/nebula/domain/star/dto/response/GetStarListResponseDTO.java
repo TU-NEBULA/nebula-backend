@@ -12,6 +12,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class GetStarListResponseDTO {
+    private String type;
     private int totalStarCnt;
     private int totalLinkCnt;
     private List<GetStarOneResponseDTO> starListDto;
