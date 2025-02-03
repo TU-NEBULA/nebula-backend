@@ -16,9 +16,11 @@ import com.team_nebula.nebula.global.apipayload.code.status.ErrorStatus;
 import com.team_nebula.nebula.global.apipayload.exception.GeneralException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class StarCommandServiceImpl implements StarCommandService {
 
     private final StarRepository starRepository;
@@ -62,15 +64,16 @@ public class StarCommandServiceImpl implements StarCommandService {
     public Star createStarEntity(CreateStarFileDTO requestDTO, UserNode userNode){
         CreateStarRequestDTO starRequestDTO = requestDTO.getStarRequestDTO();
 
-        Star star = new Star();
-        star.setTitle(starRequestDTO.getTitle());
-        star.setSiteUrl(starRequestDTO.getSiteUrl());
-        star.setThumbnailUrl(s3Service.saveThumbnail(requestDTO.getThumbnailImage(), starRequestDTO.getTitle()));
-        star.setHtmlFileUrl(s3Service.saveHtmlFile(requestDTO.getHtmlFile(), starRequestDTO.getTitle()));
-        star.setSummaryAI(starRequestDTO.getSummaryAI());
-        star.setUserMemo(starRequestDTO.getUserMemo());
-        star.setViews(0);
-        star.setEmbedding(starRequestDTO.getEmbedding());
+        Star star = Star.builder()
+                .title(starRequestDTO.getTitle())
+                .siteUrl(starRequestDTO.getSiteUrl())
+                .thumbnailUrl(s3Service.saveThumbnail(requestDTO.getThumbnailImage(), starRequestDTO.getTitle()))
+                .htmlFileUrl(s3Service.saveHtmlFile(requestDTO.getHtmlFile(), starRequestDTO.getTitle()))
+                .summaryAI(starRequestDTO.getSummaryAI())
+                .userMemo(starRequestDTO.getUserMemo())
+                .views(0)
+                .embedding(starRequestDTO.getEmbedding())
+                .build();
 
         Star savedStar = starRepository.save(star);
         if (savedStar.getId() == null) {

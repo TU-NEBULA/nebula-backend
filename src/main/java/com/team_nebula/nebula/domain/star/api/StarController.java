@@ -21,7 +21,7 @@ public class StarController {
     private final StarCommandService starCommandService;
     private final StarQueryService starQueryService;
 
-    @PostMapping("/")
+    @PostMapping("")
     public ApiResponse<CreateStarResponseDTO> createStar(
             @RequestPart(value = "thumbnailImage",required = false) MultipartFile thumbnailImage,
             @RequestPart(value = "htmlFile",required = false) MultipartFile htmlFile,

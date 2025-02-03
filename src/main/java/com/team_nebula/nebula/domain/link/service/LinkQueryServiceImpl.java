@@ -6,12 +6,14 @@ import com.team_nebula.nebula.domain.star.dto.response.GetLinkOneResponseDTO;
 import com.team_nebula.nebula.domain.user.entity.UserNode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class LinkQueryServiceImpl implements LinkQueryService {
 
     private final LinkRepository linkRepository;

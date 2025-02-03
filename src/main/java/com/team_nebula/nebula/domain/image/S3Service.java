@@ -42,7 +42,7 @@ public class S3Service {
 
     private String uploadToS3(MultipartFile file, String dirName, String dataInfo)  {
         File uploadFile = convert(file)
-                .orElseThrow(() -> new GeneralException(ErrorStatus.MULTIPARTFILE_CONVERT_FAIL));
+                .orElseThrow(() -> new GeneralException(ErrorStatus._MULTIPARTFILE_CONVERT_FAIL));
 
         String fileName = dirName + dataInfo + "/" + UUID.randomUUID() + "_" + file.getOriginalFilename();
         String fileUrl = putS3(uploadFile, fileName);

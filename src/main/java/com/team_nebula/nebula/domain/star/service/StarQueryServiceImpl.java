@@ -16,6 +16,7 @@ import com.team_nebula.nebula.global.apipayload.code.status.ErrorStatus;
 import com.team_nebula.nebula.global.apipayload.exception.GeneralException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
@@ -23,6 +24,7 @@ import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class StarQueryServiceImpl implements StarQueryService {
 
     private final StarRepository starRepository;
@@ -46,12 +48,12 @@ public class StarQueryServiceImpl implements StarQueryService {
             throw new RuntimeException("Invalid JSON format for starJsonData.");
         }
 
-        CreateStarFileDTO requestDTO = new CreateStarFileDTO();
-        requestDTO.setThumbnailImage(thumbnailImage);
-        requestDTO.setHtmlFile(htmlFile);
-        requestDTO.setStarRequestDTO(request);
+        return CreateStarFileDTO.builder()
+                .thumbnailImage(thumbnailImage)
+                .htmlFile(htmlFile)
+                .starRequestDTO(request)
+                .build();
 
-        return requestDTO;
     }
 
     // 스타 + 링크 전체 조회

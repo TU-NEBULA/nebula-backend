@@ -11,10 +11,12 @@ import com.team_nebula.nebula.global.apipayload.code.status.ErrorStatus;
 import com.team_nebula.nebula.global.apipayload.exception.GeneralException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class CategoryCommandServiceImpl implements CategoryCommandService {
 
     private final CategoryRepository categoryRepository;
@@ -34,8 +36,9 @@ public class CategoryCommandServiceImpl implements CategoryCommandService {
         }
 
         // 카테고리 노드 생성
-        Category category = new Category();
-        category.setName(request.getName());
+        Category category = Category.builder()
+                .name(request.getName())
+                .build();
         categoryRepository.save(category);
 
         // 유저->카테고리 관계 연결
