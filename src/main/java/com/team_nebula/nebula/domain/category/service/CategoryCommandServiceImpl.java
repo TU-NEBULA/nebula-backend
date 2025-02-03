@@ -4,16 +4,19 @@ import com.team_nebula.nebula.domain.category.dto.request.CreateCategoryRequestD
 import com.team_nebula.nebula.domain.category.dto.response.CreateCategoryResponseDTO;
 import com.team_nebula.nebula.domain.category.entity.Category;
 import com.team_nebula.nebula.domain.category.repository.CategoryRepository;
+import com.team_nebula.nebula.domain.star.entity.Star;
 import com.team_nebula.nebula.domain.user.entity.UserNode;
 import com.team_nebula.nebula.domain.user.repository.neo4j.UserNodeRepository;
 import com.team_nebula.nebula.global.apipayload.code.status.ErrorStatus;
 import com.team_nebula.nebula.global.apipayload.exception.GeneralException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class CategoryCommandServiceImpl implements CategoryCommandService {
 
     private final CategoryRepository categoryRepository;
@@ -33,13 +36,14 @@ public class CategoryCommandServiceImpl implements CategoryCommandService {
         }
 
         // 카테고리 노드 생성
-        Category category = new Category();
-        category.setName(request.getName());
+        Category category = Category.builder()
+                .name(request.getName())
+                .build();
         categoryRepository.save(category);
 
         // 유저->카테고리 관계 연결
         userNode.getCategorySet().add(category);
-        categoryRepository.save(category);
+        userNodeRepository.save(userNode);
 
         return CreateCategoryResponseDTO.builder()
                 .categoryId(category.getId())
@@ -48,6 +52,16 @@ public class CategoryCommandServiceImpl implements CategoryCommandService {
                 .updatedAt(category.getUpdatedAt())
                 .build();
     }
+
+    @Override
+    public void linkStarToCategory(Star star, String categoryName){
+        Category category = categoryRepository.findByName(categoryName)
+                .orElseThrow(() -> new GeneralException(ErrorStatus._CATEGORY_NOT_FOUND));
+
+        category.getStars().add(star);
+        categoryRepository.save(category);
+    }
+
 }
 
 

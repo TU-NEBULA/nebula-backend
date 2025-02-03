@@ -20,7 +20,7 @@ public class CategoryController {
     private final CategoryQueryService categoryQueryService;
 
     // 카데고리 생성 API
-    @PostMapping("/")
+    @PostMapping("")
     public ApiResponse<CreateCategoryResponseDTO> createCategory(CreateCategoryRequestDTO request) {
         CreateCategoryResponseDTO responseDto = categoryCommandService.createCategory(request);
         return ApiResponse.onSuccessCreated(responseDto);

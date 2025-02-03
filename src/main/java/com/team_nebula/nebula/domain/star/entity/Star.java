@@ -5,10 +5,9 @@ import com.team_nebula.nebula.domain.keyword.entity.Keyword;
 import com.team_nebula.nebula.domain.link.entity.Link;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Lob;
-import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 import org.springframework.data.neo4j.core.schema.Id;
 import org.springframework.data.neo4j.core.schema.Node;
 import org.springframework.data.neo4j.core.schema.Property;
@@ -19,7 +18,6 @@ import java.util.Set;
 
 @Node
 @Getter
-@Setter
 @NoArgsConstructor
 public class Star extends BaseEntity {
 
@@ -39,8 +37,9 @@ public class Star extends BaseEntity {
     private String summaryAI;
 
     @Lob
-    private String memoUser;
+    private String userMemo;
 
+    // 조회수
     private int views;
 
     @Property("html_file_url")
@@ -54,17 +53,17 @@ public class Star extends BaseEntity {
     @Relationship(type = "TAGGED", direction = Relationship.Direction.OUTGOING)
     private Set<Keyword> keywords = new HashSet<>();
 
-    public Star(String title, String siteUrl, String thumbnailUrl, String summaryAI, String memoUser, int views,
-                String htmlFileUrl, String embedding, Set<Link> links, Set<Keyword> keywords) {
+    @Builder
+    public Star(String title, String siteUrl, String thumbnailUrl, String summaryAI, String userMemo, String memoUser, int views,
+                String htmlFileUrl, String embedding) {
         this.title = title;
         this.siteUrl = siteUrl;
         this.thumbnailUrl = thumbnailUrl;
         this.summaryAI = summaryAI;
-        this.memoUser = memoUser;
+        this.userMemo = userMemo;
+        this.userMemo = memoUser;
         this.views = views;
         this.htmlFileUrl = htmlFileUrl;
         this.embedding = embedding;
-        this.links = links;
-        this.keywords = keywords;
     }
 }

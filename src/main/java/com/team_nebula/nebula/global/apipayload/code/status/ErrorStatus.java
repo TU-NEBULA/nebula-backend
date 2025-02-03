@@ -19,8 +19,14 @@ public enum ErrorStatus implements BaseErrorCode {
 	_USER_NOT_FOUND(HttpStatus.NOT_FOUND, "USER4001", "사용자가 없습니다."),
 
 	_CATEGORY_ALREADY_EXIST(HttpStatus.CONFLICT, "CATEGORY4000", "이미 존재하는 카테고리입니다."),
-	_CATEGORY_NOT_FOUND(HttpStatus.NOT_FOUND, "CATEGORY4001", "카테고리를 찾을 수 없습니다.");
+	_CATEGORY_NOT_FOUND(HttpStatus.NOT_FOUND, "CATEGORY4001", "카테고리를 찾을 수 없습니다."),
 
+	_STAR_NOT_FOUND(HttpStatus.NOT_FOUND, "STAR4001", "해당 스타 정보를 찾을 수 없습니다."),
+	_STAR_CREATION_FAILED(HttpStatus.CREATED, "STAR5000", "스타 생성에 실패했습니다."),
+
+	_KEYWORD_NOT_FOUND(HttpStatus.NOT_FOUND, "KEYWORD4001", "키워드가 존재하지 않습니다."),
+
+	_MULTIPARTFILE_CONVERT_FAIL(HttpStatus.INTERNAL_SERVER_ERROR,"MULTIPARTFILE5000","MultipartFile -> File로 변환이 실패하였습니다.");
 
 	private HttpStatus httpStatus;
 	private String code;
