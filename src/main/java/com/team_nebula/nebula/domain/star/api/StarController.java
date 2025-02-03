@@ -21,6 +21,7 @@ public class StarController {
     private final StarCommandService starCommandService;
     private final StarQueryService starQueryService;
 
+    // 스타 생성 API
     @PostMapping("")
     public ApiResponse<CreateStarResponseDTO> createStar(
             @RequestPart(value = "thumbnailImage",required = false) MultipartFile thumbnailImage,
@@ -34,6 +35,7 @@ public class StarController {
         return ApiResponse.onSuccessCreated(responseDTO);
     }
 
+    // 스타 전체 조회 API
     @GetMapping("/{userId}")
     public ApiResponse<GetStarListResponseDTO> getStarList(@PathVariable Long userId){
         GetStarListResponseDTO responseDTO = starQueryService.getStarList(userId);
@@ -41,6 +43,7 @@ public class StarController {
         return ApiResponse.onSuccess(responseDTO);
     }
 
+    // 스타 단일 조회 API
     @GetMapping("/{starId}")
     public ApiResponse<GetStarOneResponseDTO> getStarOne(@PathVariable Long starId){
         GetStarOneResponseDTO responseDTO = starQueryService.getStarOne(starId);
@@ -48,6 +51,7 @@ public class StarController {
         return ApiResponse.onSuccess(responseDTO);
     }
 
+    // 카테고리별 스타 조회 API
     @GetMapping("/{userId}/{categoryId}")
     public ApiResponse<GetStarListResponseDTO> getStarListByCategory(@PathVariable Long userId, @PathVariable Long categoryId){
         GetStarListResponseDTO responseDTO = starQueryService.getStarListInCategory(userId, categoryId);
@@ -55,6 +59,7 @@ public class StarController {
         return ApiResponse.onSuccess(responseDTO);
     }
 
+    // 키워드별 스타 조회 API
     @GetMapping("/{userId}/{keywordId}")
     public ApiResponse<GetStarListResponseDTO> getStarListByKeyword(@PathVariable Long userId, @PathVariable Long keywordId){
         GetStarListResponseDTO responseDTO = starQueryService.getStarListInKeyword(userId, keywordId);
