@@ -1,9 +1,11 @@
 package com.team_nebula.nebula.domain.star.dto.request;
 
+import lombok.Builder;
 import lombok.Getter;
 import java.util.List;
 
 @Getter
+@Builder
 public class CreateStarRequestDTO {
 
     private Long userId;
