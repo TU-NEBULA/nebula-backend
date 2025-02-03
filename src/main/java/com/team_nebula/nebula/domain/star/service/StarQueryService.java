@@ -14,11 +14,16 @@ public interface StarQueryService {
 
     public GetStarListResponseDTO getStarList(Long userId);
 
-    public List<GetStarOneResponseDTO> getAllStar(UserNode userNode);
+    public List<GetStarOneResponseDTO> findAllStar(UserNode userNode);
 
     public GetStarOneResponseDTO getStarOne(Long starId);
 
     public GetStarListResponseDTO getStarListInCategory(Long userId, Long categoryId);
 
+    public List<GetStarOneResponseDTO> findStarInCategory(Long userId, Long categoryId);
+
     public GetStarListResponseDTO getStarListInKeyword(Long userId, Long keywordId);
+
+    public List<GetStarOneResponseDTO> findStarInKeyword(Long userId, Long keywordId);
+
 }
