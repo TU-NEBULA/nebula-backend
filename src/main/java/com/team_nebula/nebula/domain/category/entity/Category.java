@@ -3,10 +3,7 @@ package com.team_nebula.nebula.domain.category.entity;
 import com.team_nebula.nebula.domain.common.BaseEntity;
 import com.team_nebula.nebula.domain.star.entity.Star;
 import jakarta.persistence.GeneratedValue;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.neo4j.core.schema.Node;
 import org.springframework.data.neo4j.core.schema.Relationship;
@@ -16,9 +13,7 @@ import java.util.Set;
 
 @Node
 @Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Category extends BaseEntity {
     @Id
     @GeneratedValue
@@ -28,4 +23,9 @@ public class Category extends BaseEntity {
 
     @Relationship(type = "BELONGS_TO", direction = Relationship.Direction.INCOMING)
     private Set<Star> stars = new HashSet<>();
+
+    @Builder
+    public Category(String name) {
+        this.name = name;
+    }
 }
