@@ -5,6 +5,8 @@ import com.team_nebula.nebula.domain.category.dto.response.CreateCategoryRespons
 import com.team_nebula.nebula.domain.category.dto.response.GetCategoryListResponseDTO;
 import com.team_nebula.nebula.domain.category.service.CategoryCommandService;
 import com.team_nebula.nebula.domain.category.service.CategoryQueryService;
+import com.team_nebula.nebula.domain.user.entity.User;
+import com.team_nebula.nebula.global.annotation.AuthUser;
 import com.team_nebula.nebula.global.apipayload.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -20,16 +22,16 @@ public class CategoryController {
     private final CategoryQueryService categoryQueryService;
 
     // 카데고리 생성 API
-    @PostMapping("")
+    @PostMapping
     public ApiResponse<CreateCategoryResponseDTO> createCategory(CreateCategoryRequestDTO request) {
         CreateCategoryResponseDTO responseDto = categoryCommandService.createCategory(request);
         return ApiResponse.onSuccessCreated(responseDto);
     }
 
     // 카테고리 전체 조회 API
-    @GetMapping("/{userId}")
-    public ApiResponse<GetCategoryListResponseDTO> getCategoryList(@PathVariable Long userId) {
-        GetCategoryListResponseDTO responseDto = categoryQueryService.getCategoryList(userId);
+    @GetMapping
+    public ApiResponse<GetCategoryListResponseDTO> getCategoryList(@AuthUser User user) {
+        GetCategoryListResponseDTO responseDto = categoryQueryService.getCategoryList(user.getId());
         return ApiResponse.onSuccess(responseDto);
     }
 }
