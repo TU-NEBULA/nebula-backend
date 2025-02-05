@@ -23,8 +23,9 @@ public class CategoryController {
 
     // 카데고리 생성 API
     @PostMapping
-    public ApiResponse<CreateCategoryResponseDTO> createCategory(CreateCategoryRequestDTO request) {
-        CreateCategoryResponseDTO responseDto = categoryCommandService.createCategory(request);
+    public ApiResponse<CreateCategoryResponseDTO> createCategory(@AuthUser User user,
+        @RequestBody CreateCategoryRequestDTO request) {
+        CreateCategoryResponseDTO responseDto = categoryCommandService.createCategory(request, user.getId());
         return ApiResponse.onSuccessCreated(responseDto);
     }
 
