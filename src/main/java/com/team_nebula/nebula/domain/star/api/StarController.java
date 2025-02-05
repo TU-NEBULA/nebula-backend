@@ -17,14 +17,14 @@ import org.springframework.web.multipart.MultipartFile;
 @RestController
 @RequiredArgsConstructor
 @Tag(name = "[ 스타 ]")
-@RequestMapping("/api/v1/bookmarks")
+@RequestMapping("/api/v1/stars")
 public class StarController {
 
     private final StarCommandService starCommandService;
     private final StarQueryService starQueryService;
 
     // 스타 생성 API
-    @PostMapping("")
+    @PostMapping
     public ApiResponse<CreateStarResponseDTO> createStar(
             @RequestPart(value = "thumbnailImage",required = false) MultipartFile thumbnailImage,
             @RequestPart(value = "htmlFile",required = false) MultipartFile htmlFile,
@@ -54,7 +54,7 @@ public class StarController {
     }
 
     // 카테고리별 스타 조회 API
-    @GetMapping("/{categoryId}")
+    @GetMapping("categories/{categoryId}")
     public ApiResponse<GetStarListResponseDTO> getStarListByCategory(@AuthUser User user, @PathVariable Long categoryId){
         GetStarListResponseDTO responseDTO = starQueryService.getStarListInCategory(user.getId(), categoryId);
 
@@ -62,7 +62,7 @@ public class StarController {
     }
 
     // 키워드별 스타 조회 API
-    @GetMapping("/{keywordId}")
+    @GetMapping("/keywords/{keywordId}")
     public ApiResponse<GetStarListResponseDTO> getStarListByKeyword(@AuthUser User user, @PathVariable Long keywordId){
         GetStarListResponseDTO responseDTO = starQueryService.getStarListInKeyword(user.getId(), keywordId);
 
