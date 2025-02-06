@@ -62,8 +62,8 @@ jobs:
           ssh -p $EC2_PORT -i ec2_key.pem -o StrictHostKeyChecking=no $EC2_USER@$EC2_HOST '
             # 명령어 실행
             sudo docker pull $DOCKER_USERNAME/nebula
-            sudo docker stop nebula || true
-            sudo docker rm nebula || true
+            sudo docker stop nebula 2>/dev/null || true
+            sudo docker rm nebula 2>/dev/null || true
             sudo docker run -d \
               --name nebula \
               -p 8080:8080 \
