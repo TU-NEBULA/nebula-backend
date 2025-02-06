@@ -25,7 +25,6 @@ public class CategoryCommandServiceImpl implements CategoryCommandService {
     @Override
     public CreateCategoryResponseDTO createCategory(CreateCategoryRequestDTO request, Long userId) {
 
-        // userId 임시 인증 -> 추후에 JWT 유저 인증으로 수정할 계획
         UserNode userNode = userNodeRepository.findByUserId(userId)
                 .orElseThrow(() -> new GeneralException(ErrorStatus._USER_NOT_FOUND));
 
@@ -41,9 +40,13 @@ public class CategoryCommandServiceImpl implements CategoryCommandService {
                 .build();
         categoryRepository.save(category);
 
+        System.out.println("------------ 관계 설정 시작 -------------");
         // 유저->카테고리 관계 연결
         userNode.getCategorySet().add(category);
+        System.out.println("관계 설정 여부" + userNode.getCategorySet().size());
         userNodeRepository.save(userNode);
+        System.out.println("------------ 관계 설정 끝 -------------");
+
 
         return CreateCategoryResponseDTO.builder()
                 .categoryId(category.getId())

@@ -30,7 +30,7 @@ public class CategoryQueryServiceImpl implements CategoryQueryService {
 
         List<GetCategoryOneResponseDTO> categroyList = categoryData.stream()
                 .map(data -> GetCategoryOneResponseDTO.builder()
-                        .id((Long) data.get("id"))
+                        .id((String) data.get("id"))
                         .name((String) data.get("name"))
                         .includedStarCnt(((Number) data.get("includedStarCnt")).intValue())
                         .build())

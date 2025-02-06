@@ -8,8 +8,10 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 
-public interface CategoryRepository extends Neo4jRepository<Category, Long> {
+public interface CategoryRepository extends Neo4jRepository<Category, UUID> {
+
     boolean existsByName(String name);
 
     @Query("""
