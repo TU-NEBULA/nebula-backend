@@ -6,7 +6,7 @@ import com.team_nebula.nebula.domain.star.entity.Star;
 
 public interface CategoryCommandService {
 
-    public CreateCategoryResponseDTO createCategory(CreateCategoryRequestDTO request);
+    public CreateCategoryResponseDTO createCategory(CreateCategoryRequestDTO request, Long userId);
 
     public void linkStarToCategory(Star star, String categoryName);
 

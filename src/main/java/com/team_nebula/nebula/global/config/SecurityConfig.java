@@ -1,5 +1,6 @@
 package com.team_nebula.nebula.global.config;
 
+import java.util.Arrays;
 import java.util.Collections;
 
 import org.springframework.context.annotation.Bean;
@@ -52,8 +53,7 @@ public class SecurityConfig {
 					configuration.setAllowedHeaders(Collections.singletonList("*"));
 					configuration.setMaxAge(3600L);
 
-					configuration.setExposedHeaders(Collections.singletonList("Set-Cookie"));
-					configuration.setExposedHeaders(Collections.singletonList("Authorization"));
+					configuration.setExposedHeaders(Arrays.asList("Set-Cookie", "Authorization"));
 
 					return configuration;
 				}

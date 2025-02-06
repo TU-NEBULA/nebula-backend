@@ -23,10 +23,10 @@ public class CategoryCommandServiceImpl implements CategoryCommandService {
     private final UserNodeRepository userNodeRepository;
 
     @Override
-    public CreateCategoryResponseDTO createCategory(CreateCategoryRequestDTO request) {
+    public CreateCategoryResponseDTO createCategory(CreateCategoryRequestDTO request, Long userId) {
 
         // userId 임시 인증 -> 추후에 JWT 유저 인증으로 수정할 계획
-        UserNode userNode = userNodeRepository.findByUserId(request.getUserId())
+        UserNode userNode = userNodeRepository.findByUserId(userId)
                 .orElseThrow(() -> new GeneralException(ErrorStatus._USER_NOT_FOUND));
 
         // 카테고리 중복 여부 체크
