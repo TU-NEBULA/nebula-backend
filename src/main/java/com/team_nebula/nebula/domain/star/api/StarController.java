@@ -6,8 +6,6 @@ import com.team_nebula.nebula.domain.star.dto.response.GetStarListResponseDTO;
 import com.team_nebula.nebula.domain.star.dto.response.GetStarOneResponseDTO;
 import com.team_nebula.nebula.domain.star.service.StarCommandService;
 import com.team_nebula.nebula.domain.star.service.StarQueryService;
-import com.team_nebula.nebula.domain.user.entity.User;
-import com.team_nebula.nebula.global.annotation.AuthUser;
 import com.team_nebula.nebula.global.apipayload.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -17,14 +15,14 @@ import org.springframework.web.multipart.MultipartFile;
 @RestController
 @RequiredArgsConstructor
 @Tag(name = "[ 스타 ]")
-@RequestMapping("/api/v1/stars")
+@RequestMapping("/api/v1/bookmarks")
 public class StarController {
 
     private final StarCommandService starCommandService;
     private final StarQueryService starQueryService;
 
     // 스타 생성 API
-    @PostMapping
+    @PostMapping("")
     public ApiResponse<CreateStarResponseDTO> createStar(
             @RequestPart(value = "thumbnailImage",required = false) MultipartFile thumbnailImage,
             @RequestPart(value = "htmlFile",required = false) MultipartFile htmlFile,
@@ -38,9 +36,9 @@ public class StarController {
     }
 
     // 스타 전체 조회 API
-    @GetMapping
-    public ApiResponse<GetStarListResponseDTO> getStarList(@AuthUser User user){
-        GetStarListResponseDTO responseDTO = starQueryService.getStarList(user.getId());
+    @GetMapping("/{userId}")
+    public ApiResponse<GetStarListResponseDTO> getStarList(@PathVariable Long userId){
+        GetStarListResponseDTO responseDTO = starQueryService.getStarList(userId);
 
         return ApiResponse.onSuccess(responseDTO);
     }
@@ -54,17 +52,17 @@ public class StarController {
     }
 
     // 카테고리별 스타 조회 API
-    @GetMapping("categories/{categoryId}")
-    public ApiResponse<GetStarListResponseDTO> getStarListByCategory(@AuthUser User user, @PathVariable Long categoryId){
-        GetStarListResponseDTO responseDTO = starQueryService.getStarListInCategory(user.getId(), categoryId);
+    @GetMapping("/{userId}/{categoryId}")
+    public ApiResponse<GetStarListResponseDTO> getStarListByCategory(@PathVariable Long userId, @PathVariable Long categoryId){
+        GetStarListResponseDTO responseDTO = starQueryService.getStarListInCategory(userId, categoryId);
 
         return ApiResponse.onSuccess(responseDTO);
     }
 
     // 키워드별 스타 조회 API
-    @GetMapping("/keywords/{keywordId}")
-    public ApiResponse<GetStarListResponseDTO> getStarListByKeyword(@AuthUser User user, @PathVariable Long keywordId){
-        GetStarListResponseDTO responseDTO = starQueryService.getStarListInKeyword(user.getId(), keywordId);
+    @GetMapping("/{userId}/{keywordId}")
+    public ApiResponse<GetStarListResponseDTO> getStarListByKeyword(@PathVariable Long userId, @PathVariable Long keywordId){
+        GetStarListResponseDTO responseDTO = starQueryService.getStarListInKeyword(userId, keywordId);
 
         return ApiResponse.onSuccess(responseDTO);
     }
