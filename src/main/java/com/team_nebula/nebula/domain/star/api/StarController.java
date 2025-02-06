@@ -6,6 +6,8 @@ import com.team_nebula.nebula.domain.star.dto.response.GetStarListResponseDTO;
 import com.team_nebula.nebula.domain.star.dto.response.GetStarOneResponseDTO;
 import com.team_nebula.nebula.domain.star.service.StarCommandService;
 import com.team_nebula.nebula.domain.star.service.StarQueryService;
+import com.team_nebula.nebula.domain.user.entity.User;
+import com.team_nebula.nebula.global.annotation.AuthUser;
 import com.team_nebula.nebula.global.apipayload.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -68,9 +70,9 @@ public class StarController {
     }
 
     // 스타 검색 API
-    @GetMapping("/{userId}/search")
-    public ApiResponse<GetStarListResponseDTO> searchStar(@RequestParam String title, @PathVariable Long userId){
-        GetStarListResponseDTO responseDTO = starQueryService.searchStars(userId, title);
+    @GetMapping("/search")
+    public ApiResponse<GetStarListResponseDTO> searchStar(@RequestParam String title, @AuthUser User user){
+        GetStarListResponseDTO responseDTO = starQueryService.searchStars(user.getId(), title);
 
         return ApiResponse.onSuccess(responseDTO);
     }
