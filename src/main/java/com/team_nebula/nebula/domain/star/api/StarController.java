@@ -54,7 +54,7 @@ public class StarController {
     }
 
     // 카테고리별 스타 조회 API
-    @GetMapping("categories/{categoryId}")
+    @GetMapping("/categories/{categoryId}")
     public ApiResponse<GetStarListResponseDTO> getStarListByCategory(@AuthUser User user, @PathVariable Long categoryId){
         GetStarListResponseDTO responseDTO = starQueryService.getStarListInCategory(user.getId(), categoryId);
 
@@ -65,6 +65,14 @@ public class StarController {
     @GetMapping("/keywords/{keywordId}")
     public ApiResponse<GetStarListResponseDTO> getStarListByKeyword(@AuthUser User user, @PathVariable Long keywordId){
         GetStarListResponseDTO responseDTO = starQueryService.getStarListInKeyword(user.getId(), keywordId);
+
+        return ApiResponse.onSuccess(responseDTO);
+    }
+
+    // 스타 검색 API
+    @GetMapping("/search")
+    public ApiResponse<GetStarListResponseDTO> searchStar(@RequestParam String title, @AuthUser User user){
+        GetStarListResponseDTO responseDTO = starQueryService.searchStars(user.getId(), title);
 
         return ApiResponse.onSuccess(responseDTO);
     }

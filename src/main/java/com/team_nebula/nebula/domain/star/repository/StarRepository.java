@@ -48,4 +48,37 @@ public interface StarRepository extends Neo4jRepository<Star, Long> {
            COLLECT(k.name) AS keywordList
     """)
     List<Map<String, Object>> findStarsInKeyword(@Param("userId") Long userId, @Param("keywordId") Long keywordId);
+
+    @Query("""
+    MATCH (u:UserNode)-[:CREATED]->(s:Star)
+    WHERE u.userId = $userId
+      AND ($title IS NULL OR toLower(s.title) CONTAINS toLower($title))
+    
+    OPTIONAL MATCH (s)-[:TAGGED]->(k:Keyword)
+    OPTIONAL MATCH (s)-[:BELONGS_TO]->(c:Category)
+
+    OPTIONAL MATCH (s)-[:LINKED]->(l:Link)-[:LINKED]-(s2:Star)
+    WHERE s2 <> s
+    
+    RETURN 
+        COLLECT(DISTINCT {
+            starId: ID(s),
+            categoryName: c.name,
+            title: s.title,
+            siteUrl: s.siteUrl,
+            thumbnailUrl: s.thumbnailUrl,
+            summaryAI: s.summaryAI,
+            userMemo: s.userMemo,
+            views: s.views,
+            keywordList: COLLECT(DISTINCT k.name)
+        }) AS stars,
+        
+        COLLECT(DISTINCT {
+            linkId: ID(l),
+            linkedNodeIdList: [ID(s), ID(s2)],
+            sharedKeywordNum: l.sharedKeywordNum,
+            similarity: l.similarityScore
+        }) AS links
+""")
+    List<Map<String, Object>> searchStars(@Param("userId") Long userId, @Param("title") String title);
 }

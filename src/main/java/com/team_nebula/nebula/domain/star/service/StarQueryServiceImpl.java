@@ -2,7 +2,6 @@ package com.team_nebula.nebula.domain.star.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.team_nebula.nebula.domain.category.repository.CategoryRepository;
 import com.team_nebula.nebula.domain.link.service.LinkQueryService;
 import com.team_nebula.nebula.domain.star.converter.StarConverter;
 import com.team_nebula.nebula.domain.star.dto.request.CreateStarFileDTO;
@@ -153,5 +152,12 @@ public class StarQueryServiceImpl implements StarQueryService {
                 .map(StarConverter::convertToStarOneDto)
                 .toList();
     }
+
+    @Override
+    public GetStarListResponseDTO searchStars(Long userId, String title) {
+        List<Map<String, Object>> queryResult = starRepository.searchStars(userId, title);
+        return StarConverter.convertToStarListDto(queryResult);
+    }
+
 
 }
