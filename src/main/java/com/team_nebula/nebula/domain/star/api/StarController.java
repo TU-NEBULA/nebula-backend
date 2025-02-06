@@ -66,4 +66,12 @@ public class StarController {
 
         return ApiResponse.onSuccess(responseDTO);
     }
+
+    // 스타 검색 API
+    @GetMapping("/{userId}/search")
+    public ApiResponse<GetStarListResponseDTO> searchStar(@RequestParam String title, @PathVariable Long userId){
+        GetStarListResponseDTO responseDTO = starQueryService.searchStars(userId, title);
+
+        return ApiResponse.onSuccess(responseDTO);
+    }
 }
