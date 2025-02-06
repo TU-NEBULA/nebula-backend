@@ -5,12 +5,15 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.UUID;
+
+
 @Getter
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
 public class GetCategoryOneResponseDTO {
-    private String id;
+    private UUID id;
     private String name;
     private int includedStarCnt;
 }
