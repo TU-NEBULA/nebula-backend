@@ -62,11 +62,14 @@ jobs:
           ssh -p $EC2_PORT -i ec2_key.pem -o StrictHostKeyChecking=no $EC2_USER@$EC2_HOST '
             # 명령어 실행
             sudo docker pull $DOCKER_USERNAME/nebula
-            sudo docker stop nebula 2>/dev/null || true
-            sudo docker rm nebula 2>/dev/null || true
-            sudo docker run -d \
-              --name nebula \
-              -p 8080:8080 \
-              $DOCKER_USERNAME/nebula:latest
+            container_id=$(docker ps -aq --filter "name=nubula")
+            if [ -n "$container_id" ]; then
+              echo "컨테이너 존재, 중지"
+              sudo docker stop $container_id
+              sudo docker rm $container_id
+            else
+              echo "컨테이너 없음"
+            fi
+              docker run -d -p 8080:8080 --name nubula $DOCKER_USERNAME/nubula
           '
           
