@@ -42,7 +42,6 @@ public class CategoryCommandServiceImpl implements CategoryCommandService {
 
         // 유저->카테고리 관계 연결
         userNode.getCategorySet().add(category);
-        System.out.println("관계 설정 여부" + userNode.getCategorySet().size());
         userNodeRepository.save(userNode);
 
         return CreateCategoryResponseDTO.builder()
