@@ -47,10 +47,11 @@ public class StarCommandServiceImpl implements StarCommandService {
         categoryCommandService.linkStarToCategory(star, starRequestDTO.getCategoryName());
 
         // 키워드 생성 및 관계 설정
-        Star savedStar = keywordCommandService.linkStarToKeywords(star, starRequestDTO.getKeywordList());
-        if(savedStar.getId() == null) {
-            throw new GeneralException(ErrorStatus._STAR_NOT_FOUND);
-        }
+        keywordCommandService.linkStarToKeywords(star, starRequestDTO.getKeywordList());
+
+        // 키워드+ 카테고리 포함된 스타를 다시 조회
+        Star savedStar = starRepository.findById(star.getId())
+                .orElseThrow(() -> new GeneralException(ErrorStatus._STAR_NOT_FOUND));
 
         // 스타 간 Link 노드 생성
         linkCommandService.createLinksForStar(savedStar);

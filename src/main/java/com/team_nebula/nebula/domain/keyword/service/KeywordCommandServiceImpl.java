@@ -18,16 +18,17 @@ public class KeywordCommandServiceImpl implements KeywordCommandService {
     private final KeywordRepository keywordRepository;
 
     @Override
-    public Star linkStarToKeywords(Star star, List<String> keywordNames) {
+    public void linkStarToKeywords(Star star, List<String> keywordNames) {
         if (keywordNames == null || keywordNames.isEmpty()) {
             throw new GeneralException(ErrorStatus._KEYWORD_NOT_INPUT);
         }
-        Star starWithKeywords = keywordRepository.linkStarToKeywords(star.getId(), keywordNames);
+        System.out.println("----------------------------------------------");
+        System.out.println("스타 아이디 : "+ star.getId());
+        System.out.println("----------------------------------------------");
+        keywordRepository.linkStarToKeywords(star.getId(), keywordNames);
 
         if (star.getKeywords() == null) {
             throw new GeneralException(ErrorStatus._KEYWORD_NOT_FOUND);
         }
-
-        return starWithKeywords;
     }
 }

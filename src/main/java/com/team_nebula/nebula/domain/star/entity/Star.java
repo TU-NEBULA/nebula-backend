@@ -41,7 +41,7 @@ public class Star extends BaseEntity {
 
     // 조회수
     @Property("views")
-    private int views;
+    private Integer views;
 
     @Property("html_file_url")
     private String htmlFileUrl;

@@ -5,5 +5,5 @@ import com.team_nebula.nebula.domain.star.entity.Star;
 import java.util.List;
 
 public interface KeywordCommandService {
-    public Star linkStarToKeywords(Star star, List<String> keywordNames);
+    public void linkStarToKeywords(Star star, List<String> keywordNames);
 }
