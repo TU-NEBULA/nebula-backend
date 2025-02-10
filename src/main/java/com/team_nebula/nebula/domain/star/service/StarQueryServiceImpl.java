@@ -1,5 +1,6 @@
 package com.team_nebula.nebula.domain.star.service;
 
+import com.fasterxml.jackson.core.json.JsonReadFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.team_nebula.nebula.domain.link.service.LinkQueryService;
@@ -19,8 +20,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -33,14 +36,24 @@ public class StarQueryServiceImpl implements StarQueryService {
 
     // 스타 JSON 데이터 파싱
     @Override
-    public CreateStarFileDTO starDataParsing(MultipartFile thumbnailImage, MultipartFile htmlFile, String starJsonData){
-
+    public CreateStarFileDTO starDataParsing(MultipartFile thumbnailImage, MultipartFile htmlFile, String starJsonData) {
         ObjectMapper objectMapper = new ObjectMapper();
+
+        // LocalDateTime 처리
         objectMapper.registerModule(new JavaTimeModule());
 
-        // starJsonData 파싱
+        // 컨트롤문자 허용
+        objectMapper.configure(JsonReadFeature.ALLOW_UNESCAPED_CONTROL_CHARS.mappedFeature(), true);
+        // 작은따옴표 허용
+        objectMapper.configure(JsonReadFeature.ALLOW_SINGLE_QUOTES.mappedFeature(), true);
+        // \ 이스테이프 허용
+        objectMapper.configure(JsonReadFeature.ALLOW_BACKSLASH_ESCAPING_ANY_CHARACTER.mappedFeature(), true);
+
         CreateStarRequestDTO request;
         try {
+            // 유니코드 깨짐 방지
+            starJsonData = new String(starJsonData.getBytes(StandardCharsets.ISO_8859_1), StandardCharsets.UTF_8);
+
             request = objectMapper.readValue(starJsonData, CreateStarRequestDTO.class);
         } catch (Exception e) {
             e.printStackTrace();
@@ -52,8 +65,8 @@ public class StarQueryServiceImpl implements StarQueryService {
                 .htmlFile(htmlFile)
                 .starRequestDTO(request)
                 .build();
-
     }
+
 
     // 스타 + 링크 전체 조회
     @Override
@@ -90,7 +103,7 @@ public class StarQueryServiceImpl implements StarQueryService {
 
     // 단일 스타 조회
     @Override
-    public GetStarOneResponseDTO getStarOne(Long starId) {
+    public GetStarOneResponseDTO getStarOne(UUID starId) {
         Map<String, Object> data = starRepository.findStarDetailById(starId)
                 .orElseThrow(() -> new GeneralException(ErrorStatus._STAR_NOT_FOUND));
 
@@ -99,7 +112,7 @@ public class StarQueryServiceImpl implements StarQueryService {
 
     // 카테고리별 스타 조회
     @Override
-    public GetStarListResponseDTO getStarListInCategory(Long userId, Long categoryId){
+    public GetStarListResponseDTO getStarListInCategory(Long userId, UUID categoryId){
 
         // 유저 인증
         UserNode userNode = userNodeRepository.findByUserId(userId)
@@ -118,7 +131,7 @@ public class StarQueryServiceImpl implements StarQueryService {
     }
 
     @Override
-    public List<GetStarOneResponseDTO> findStarInCategory(Long userId, Long categoryId) {
+    public List<GetStarOneResponseDTO> findStarInCategory(Long userId, UUID categoryId) {
         List<Map<String, Object>> starDataList = starRepository.findStarsInCategory(userId, categoryId);
 
         return starDataList.stream()

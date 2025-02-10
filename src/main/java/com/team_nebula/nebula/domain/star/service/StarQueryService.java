@@ -7,6 +7,7 @@ import com.team_nebula.nebula.domain.user.entity.UserNode;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.UUID;
 
 public interface StarQueryService {
 
@@ -16,11 +17,11 @@ public interface StarQueryService {
 
     public List<GetStarOneResponseDTO> findAllStar(UserNode userNode);
 
-    public GetStarOneResponseDTO getStarOne(Long starId);
+    public GetStarOneResponseDTO getStarOne(UUID starId);
 
-    public GetStarListResponseDTO getStarListInCategory(Long userId, Long categoryId);
+    public GetStarListResponseDTO getStarListInCategory(Long userId, UUID categoryId);
 
-    public List<GetStarOneResponseDTO> findStarInCategory(Long userId, Long categoryId);
+    public List<GetStarOneResponseDTO> findStarInCategory(Long userId, UUID categoryId);
 
     public GetStarListResponseDTO getStarListInKeyword(Long userId, Long keywordId);
 

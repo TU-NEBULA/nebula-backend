@@ -6,13 +6,14 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
+import java.util.UUID;
 
 @Getter
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
 public class GetStarOneResponseDTO {
-    private Long starId;
+    private UUID starId;
     private String categoryName;
     private String title;
     private String siteUrl;

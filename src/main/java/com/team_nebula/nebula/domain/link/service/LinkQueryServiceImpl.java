@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -36,7 +37,7 @@ public class LinkQueryServiceImpl implements LinkQueryService {
 
     // 카테고리별 링크 노드 조회
     @Override
-    public List<GetLinkOneResponseDTO> getLinkInCategory(Long userId, Long categoryId){
+    public List<GetLinkOneResponseDTO> getLinkInCategory(Long userId, UUID categoryId){
         List<Map<String, Object>> linkDataList = linkRepository.findLinkInCategory(userId, categoryId);
 
         return linkDataList.stream()

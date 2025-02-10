@@ -19,8 +19,10 @@ public class Link extends BaseEntity {
     @GeneratedValue
     private long id;
 
+    @Property("sharedKeywordNum")
     private int sharedKeywordNum;
 
+    @Property("similarityScore")
     private double similarityScore;
 
     @Property("linked_two_node_Id")

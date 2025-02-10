@@ -7,6 +7,7 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 public interface LinkRepository extends Neo4jRepository<Link, Long> {
 
@@ -20,7 +21,7 @@ public interface LinkRepository extends Neo4jRepository<Link, Long> {
         MERGE (s1)-[:LINKED]->(l)
         MERGE (s2)-[:LINKED]->(l)
     """)
-    void createLinksBetweenStars(@Param("starId") Long starId);
+    void createLinksBetweenStars(@Param("starId") UUID starId);
 
     @Query("""
         MATCH (s:Star)-[:LINKED]->(l:Link)<-[:LINKED]-(s2:Star)
@@ -43,7 +44,7 @@ public interface LinkRepository extends Neo4jRepository<Link, Long> {
            l.sharedKeywordNum AS sharedKeywordNum, 
            l.similarityScore AS similarity
     """)
-    List<Map<String, Object>> findLinkInCategory(@Param("userId") Long userId, @Param("categoryId") Long categoryId);
+    List<Map<String, Object>> findLinkInCategory(@Param("userId") Long userId, @Param("categoryId") UUID categoryId);
 
     @Query("""
     MATCH (u:UserNode)-[:CREATED]->(s:Star)-[:TAGGED]->(k:Keyword)

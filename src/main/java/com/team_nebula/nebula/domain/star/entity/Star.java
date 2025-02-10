@@ -3,7 +3,6 @@ package com.team_nebula.nebula.domain.star.entity;
 import com.team_nebula.nebula.domain.common.BaseEntity;
 import com.team_nebula.nebula.domain.keyword.entity.Keyword;
 import com.team_nebula.nebula.domain.link.entity.Link;
-import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Lob;
 import lombok.Builder;
 import lombok.Getter;
@@ -15,6 +14,7 @@ import org.springframework.data.neo4j.core.schema.Relationship;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.UUID;
 
 @Node
 @Getter
@@ -22,8 +22,7 @@ import java.util.Set;
 public class Star extends BaseEntity {
 
     @Id
-    @GeneratedValue
-    private Long id;
+    private UUID id;
 
     private String title;
 
@@ -37,9 +36,11 @@ public class Star extends BaseEntity {
     private String summaryAI;
 
     @Lob
+    @Property("userMemo")
     private String userMemo;
 
     // 조회수
+    @Property("views")
     private int views;
 
     @Property("html_file_url")
@@ -56,6 +57,7 @@ public class Star extends BaseEntity {
     @Builder
     public Star(String title, String siteUrl, String thumbnailUrl, String summaryAI, String userMemo, String memoUser, int views,
                 String htmlFileUrl, String embedding) {
+        this.id = UUID.randomUUID();
         this.title = title;
         this.siteUrl = siteUrl;
         this.thumbnailUrl = thumbnailUrl;

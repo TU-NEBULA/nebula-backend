@@ -11,8 +11,11 @@ import com.team_nebula.nebula.global.annotation.AuthUser;
 import com.team_nebula.nebula.global.apipayload.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
@@ -24,15 +27,16 @@ public class StarController {
     private final StarQueryService starQueryService;
 
     // 스타 생성 API
-    @PostMapping
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ApiResponse<CreateStarResponseDTO> createStar(
+            @AuthUser User user,
             @RequestPart(value = "thumbnailImage",required = false) MultipartFile thumbnailImage,
             @RequestPart(value = "htmlFile",required = false) MultipartFile htmlFile,
             @RequestPart(value = "star JSON data") String starJsonData
     ){
         CreateStarFileDTO requestDTO = starQueryService.starDataParsing(thumbnailImage, htmlFile, starJsonData);
 
-        CreateStarResponseDTO responseDTO = starCommandService.createStar(requestDTO);
+        CreateStarResponseDTO responseDTO = starCommandService.createStar(user, requestDTO);
 
         return ApiResponse.onSuccessCreated(responseDTO);
     }
@@ -47,7 +51,7 @@ public class StarController {
 
     // 스타 단일 조회 API
     @GetMapping("/{starId}")
-    public ApiResponse<GetStarOneResponseDTO> getStarOne(@PathVariable Long starId){
+    public ApiResponse<GetStarOneResponseDTO> getStarOne(@PathVariable UUID starId){
         GetStarOneResponseDTO responseDTO = starQueryService.getStarOne(starId);
 
         return ApiResponse.onSuccess(responseDTO);
@@ -55,7 +59,7 @@ public class StarController {
 
     // 카테고리별 스타 조회 API
     @GetMapping("/categories/{categoryId}")
-    public ApiResponse<GetStarListResponseDTO> getStarListByCategory(@AuthUser User user, @PathVariable Long categoryId){
+    public ApiResponse<GetStarListResponseDTO> getStarListByCategory(@AuthUser User user, @PathVariable UUID categoryId){
         GetStarListResponseDTO responseDTO = starQueryService.getStarListInCategory(user.getId(), categoryId);
 
         return ApiResponse.onSuccess(responseDTO);
