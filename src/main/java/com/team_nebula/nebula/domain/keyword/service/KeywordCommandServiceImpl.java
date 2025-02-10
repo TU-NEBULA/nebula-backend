@@ -22,9 +22,7 @@ public class KeywordCommandServiceImpl implements KeywordCommandService {
         if (keywordNames == null || keywordNames.isEmpty()) {
             throw new GeneralException(ErrorStatus._KEYWORD_NOT_INPUT);
         }
-        System.out.println("----------------------------------------------");
-        System.out.println("스타 아이디 : "+ star.getId());
-        System.out.println("----------------------------------------------");
+
         keywordRepository.linkStarToKeywords(star.getId(), keywordNames);
 
         if (star.getKeywords() == null) {

@@ -29,7 +29,7 @@ public class LinkQueryServiceImpl implements LinkQueryService {
                         .linkId(((Link) data.get("l")).getId())
                         .sharedKeywordNum((int) data.get("sharedKeywordNum"))
                         .similarity((double) data.get("similarity"))
-                        .linkedNodeIdList((List<Long>) data.get("linkedNodeIdList"))
+                        .linkedNodeIdList((List<UUID>) data.get("linkedNodeIdList"))
                         .build())
                 .toList();
 
@@ -45,7 +45,7 @@ public class LinkQueryServiceImpl implements LinkQueryService {
                         .linkId(((Link) data.get("l")).getId())
                         .sharedKeywordNum((int) data.get("sharedKeywordNum"))
                         .similarity((double) data.get("similarity"))
-                        .linkedNodeIdList((List<Long>) data.get("linkedNodeIdList"))
+                        .linkedNodeIdList((List<UUID>) data.get("linkedNodeIdList"))
                         .build())
                 .toList();
     }
@@ -60,7 +60,7 @@ public class LinkQueryServiceImpl implements LinkQueryService {
                         .linkId(((Link) data.get("l")).getId())
                         .sharedKeywordNum((int) data.get("sharedKeywordNum"))
                         .similarity((double) data.get("similarity"))
-                        .linkedNodeIdList((List<Long>) data.get("linkedNodeIdList"))
+                        .linkedNodeIdList((List<UUID>) data.get("linkedNodeIdList"))
                         .build())
                 .toList();
     }

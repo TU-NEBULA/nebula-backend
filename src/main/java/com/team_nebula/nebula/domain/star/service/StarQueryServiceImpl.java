@@ -46,7 +46,7 @@ public class StarQueryServiceImpl implements StarQueryService {
         objectMapper.configure(JsonReadFeature.ALLOW_UNESCAPED_CONTROL_CHARS.mappedFeature(), true);
         // 작은따옴표 허용
         objectMapper.configure(JsonReadFeature.ALLOW_SINGLE_QUOTES.mappedFeature(), true);
-        // \ 이스테이프 허용
+        // \ 이스케이프 허용
         objectMapper.configure(JsonReadFeature.ALLOW_BACKSLASH_ESCAPING_ANY_CHARACTER.mappedFeature(), true);
 
         CreateStarRequestDTO request;
