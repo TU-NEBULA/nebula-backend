@@ -25,7 +25,6 @@ public class CategoryCommandServiceImpl implements CategoryCommandService {
     @Override
     public CreateCategoryResponseDTO createCategory(CreateCategoryRequestDTO request, Long userId) {
 
-        // userId 임시 인증 -> 추후에 JWT 유저 인증으로 수정할 계획
         UserNode userNode = userNodeRepository.findByUserId(userId)
                 .orElseThrow(() -> new GeneralException(ErrorStatus._USER_NOT_FOUND));
 
