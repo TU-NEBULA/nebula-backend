@@ -43,12 +43,12 @@ public interface LinkRepository extends Neo4jRepository<Link, UUID> {
 
     @Query("""
     MATCH (u:UserNode)-[:CREATED]->(s:Star)-[:BELONGS_TO]->(c:Category)
-    WHERE u.userId = $userId AND c.categoryId = $categoryId
+    WHERE u.userId = $userId AND c.id = $categoryId
     
     MATCH (s)-[:LINKED]->(l:Link)<-[:LINKED]-(s2:Star)
     WHERE (u)-[:CREATED]->(s2)
     
-    RETURN l,
+    RETURN l.id AS linkId,
            l.linked_two_node_Id AS linkedNodeIdList,
            l.sharedKeywordNum AS sharedKeywordNum,
            l.similarityScore AS similarity

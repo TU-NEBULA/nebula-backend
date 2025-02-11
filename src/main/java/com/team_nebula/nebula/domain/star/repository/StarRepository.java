@@ -47,7 +47,7 @@ public interface StarRepository extends Neo4jRepository<Star, UUID> {
 
     @Query("""
     MATCH (u:UserNode)-[:CREATED]->(s:Star)-[:BELONGS_TO]->(c:Category)
-    WHERE u.userId = $userId AND c.categoryId = $categoryId
+    WHERE u.userId = $userId AND c.id = $categoryId
     OPTIONAL MATCH (s)-[:TAGGED]->(k:Keyword)
     RETURN s.id AS starId, 
            s.title AS title, 
