@@ -1,5 +1,6 @@
 package com.team_nebula.nebula.domain.star.repository;
 
+import com.team_nebula.nebula.domain.star.dto.response.GetSearchedStarOneResponseDTO;
 import com.team_nebula.nebula.domain.star.dto.response.GetStarOneResponseDTO;
 import com.team_nebula.nebula.domain.star.entity.Star;
 import org.springframework.data.neo4j.repository.Neo4jRepository;
@@ -7,7 +8,6 @@ import org.springframework.data.neo4j.repository.query.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 public interface StarRepository extends Neo4jRepository<Star, UUID> {
@@ -65,14 +65,14 @@ public interface StarRepository extends Neo4jRepository<Star, UUID> {
     MATCH (u:UserNode)-[:CREATED]->(s:Star)-[:TAGGED]->(k:Keyword)
     WHERE u.userId = $userId AND k.name = $keywordId
     OPTIONAL MATCH (s)-[:BELONGS_TO]->(c:Category)
-    RETURN s.id AS starId, 
-           s.title AS title, 
-           s.siteUrl AS siteUrl, 
-           s.thumbnailUrl AS thumbnailUrl, 
-           s.summaryAI AS summaryAI, 
-           s.userMemo AS userMemo, 
-           s.views AS views, 
-           c.name AS categoryName, 
+    RETURN s.id AS starId,
+           s.title AS title,
+           s.siteUrl AS siteUrl,
+           s.thumbnailUrl AS thumbnailUrl,
+           s.summaryAI AS summaryAI,
+           s.userMemo AS userMemo,
+           s.views AS views,
+           c.name AS categoryName,
            COLLECT(k.name) AS keywordList
     """)
     List<GetStarOneResponseDTO> findStarsInKeyword(@Param("userId") Long userId, @Param("keywordId") String keywordId);
@@ -81,34 +81,52 @@ public interface StarRepository extends Neo4jRepository<Star, UUID> {
     MATCH (u:UserNode)-[:CREATED]->(s:Star)
     WHERE u.userId = $userId
       AND ($title IS NULL OR toLower(s.title) CONTAINS toLower($title))
-    
+
     OPTIONAL MATCH (s)-[:TAGGED]->(k:Keyword)
     OPTIONAL MATCH (s)-[:BELONGS_TO]->(c:Category)
 
     OPTIONAL MATCH (s)-[:LINKED]->(l:Link)-[:LINKED]-(s2:Star)
     WHERE s2 <> s
-    
-    RETURN 
+    OPTIONAL MATCH (s2)-[:BELONGS_TO]->(c2:Category)
+    OPTIONAL MATCH (s2)-[:TAGGED]->(k2:Keyword)
+
+    WITH 
+        s, c, COLLECT(DISTINCT k.name) AS keywordList,
+        s2, c2, COLLECT(DISTINCT k2.name) AS linkedKeywordList,
         COLLECT(DISTINCT {
-            starId: ID(s),
-            categoryName: c.name,
-            title: s.title,
-            siteUrl: s.siteUrl,
-            thumbnailUrl: s.thumbnailUrl,
-            summaryAI: s.summaryAI,
-            userMemo: s.userMemo,
-            views: s.views,
-            keywordList: COLLECT(DISTINCT k.name)
-        }) AS stars,
-        
-        COLLECT(DISTINCT {
-            linkId: ID(l),
-            linkedNodeIdList: [ID(s), ID(s2)],
+            linkId: l.id,
             sharedKeywordNum: l.sharedKeywordNum,
             similarity: l.similarityScore
         }) AS links
-    """)
-    List<Map<String, Object>> searchStars(@Param("userId") Long userId, @Param("title") String title);
+
+    RETURN 
+        COLLECT(DISTINCT {
+            searchedStar: {
+                starId: s.id,
+                categoryName: c.name,
+                title: s.title,
+                siteUrl: s.siteUrl,
+                thumbnailUrl: s.thumbnailUrl,
+                summaryAI: s.summaryAI,
+                userMemo: s.userMemo,
+                views: s.views,
+                keywordList: keywordList
+            },
+            linkData: links,
+            linkedStar: {
+                starId: s.id,
+                categoryName: c2.name,
+                title: s2.title,
+                siteUrl: s2.siteUrl,
+                thumbnailUrl: s2.thumbnailUrl,
+                summaryAI: s2.summaryAI,
+                userMemo: s2.userMemo,
+                views: s2.views,
+                keywordList: linkedKeywordList
+            }
+        }) AS result
+""")
+    List<GetSearchedStarOneResponseDTO> searchStars(@Param("userId") Long userId, @Param("title") String title);
 
     @Query("""
             MATCH (s:Star)

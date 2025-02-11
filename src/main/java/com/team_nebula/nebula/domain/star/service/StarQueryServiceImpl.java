@@ -7,9 +7,7 @@ import com.team_nebula.nebula.domain.link.service.LinkQueryService;
 import com.team_nebula.nebula.domain.star.converter.StarConverter;
 import com.team_nebula.nebula.domain.star.dto.request.CreateStarFileDTO;
 import com.team_nebula.nebula.domain.star.dto.request.CreateStarRequestDTO;
-import com.team_nebula.nebula.domain.star.dto.response.GetLinkOneResponseDTO;
-import com.team_nebula.nebula.domain.star.dto.response.GetStarListResponseDTO;
-import com.team_nebula.nebula.domain.star.dto.response.GetStarOneResponseDTO;
+import com.team_nebula.nebula.domain.star.dto.response.*;
 import com.team_nebula.nebula.domain.star.repository.StarRepository;
 import com.team_nebula.nebula.domain.user.repository.neo4j.UserNodeRepository;
 import com.team_nebula.nebula.global.apipayload.code.status.ErrorStatus;
@@ -21,7 +19,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.nio.charset.StandardCharsets;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 @Service
@@ -160,8 +157,8 @@ public class StarQueryServiceImpl implements StarQueryService {
     }
 
     @Override
-    public GetStarListResponseDTO searchStars(Long userId, String title) {
-        List<Map<String, Object>> queryResult = starRepository.searchStars(userId, title);
+    public GetSearchedStarListResponseDTO searchStars(Long userId, String title) {
+        List<GetSearchedStarOneResponseDTO> queryResult = starRepository.searchStars(userId, title);
         return StarConverter.convertToStarListDto(queryResult);
     }
 
