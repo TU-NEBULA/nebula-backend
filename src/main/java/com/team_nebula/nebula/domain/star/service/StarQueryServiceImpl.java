@@ -11,7 +11,6 @@ import com.team_nebula.nebula.domain.star.dto.response.GetLinkOneResponseDTO;
 import com.team_nebula.nebula.domain.star.dto.response.GetStarListResponseDTO;
 import com.team_nebula.nebula.domain.star.dto.response.GetStarOneResponseDTO;
 import com.team_nebula.nebula.domain.star.repository.StarRepository;
-import com.team_nebula.nebula.domain.user.entity.UserNode;
 import com.team_nebula.nebula.domain.user.repository.neo4j.UserNodeRepository;
 import com.team_nebula.nebula.global.apipayload.code.status.ErrorStatus;
 import com.team_nebula.nebula.global.apipayload.exception.GeneralException;
@@ -101,8 +100,10 @@ public class StarQueryServiceImpl implements StarQueryService {
     // 단일 스타 조회
     @Override
     public GetStarOneResponseDTO getStarOne(UUID starId) {
+        starRepository.incrementViews(starId);
         GetStarOneResponseDTO data = starRepository.findStarDetailById(starId);
         if (data == null) {
+            starRepository.reduceViews(starId);
             throw new GeneralException(ErrorStatus._STAR_NOT_FOUND);
         }
 

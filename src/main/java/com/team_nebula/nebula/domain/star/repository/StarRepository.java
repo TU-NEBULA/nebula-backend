@@ -8,7 +8,6 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.UUID;
 
 public interface StarRepository extends Neo4jRepository<Star, UUID> {
@@ -31,17 +30,17 @@ public interface StarRepository extends Neo4jRepository<Star, UUID> {
 
 
     @Query("""
-        MATCH (s:Star)-[:BELONGS_TO]->(c:Category)
+        MATCH (s:Star {id: $starId})-[:BELONGS_TO]->(c:Category)
         OPTIONAL MATCH (s)-[:TAGGED]->(k:Keyword)
-        WHERE ID(s) = $starId
-        RETURN s.id AS starId, 
-               s.title AS title, 
-               s.siteUrl AS siteUrl, 
-               s.thumbnailUrl AS thumbnailUrl, 
-               s.summaryAI AS summaryAI, 
-               s.userMemo AS userMemo, 
-               s.views AS views, 
-               c.name AS categoryName, 
+    
+        RETURN s.id AS starId,
+               s.title AS title,
+               s.siteUrl AS siteUrl,
+               s.thumbnailUrl AS thumbnailUrl,
+               s.summaryAI AS summaryAI,
+               s.userMemo AS userMemo,
+               s.views AS views,
+               c.name AS categoryName,
                COLLECT(k.name) AS keywordList
     """)
     GetStarOneResponseDTO findStarDetailById(@Param("starId") UUID starId);
@@ -108,6 +107,20 @@ public interface StarRepository extends Neo4jRepository<Star, UUID> {
             sharedKeywordNum: l.sharedKeywordNum,
             similarity: l.similarityScore
         }) AS links
-""")
+    """)
     List<Map<String, Object>> searchStars(@Param("userId") Long userId, @Param("title") String title);
+
+    @Query("""
+            MATCH (s:Star)
+            WHERE s.id = $starId
+            SET s.views = s.views + 1
+            """)
+    void incrementViews(UUID starId);
+
+    @Query("""
+            MATCH (s:Star)
+            WHERE s.id = $starId
+            SET s.views = s.views - 1
+            """)
+    void reduceViews(UUID starId);
 }
