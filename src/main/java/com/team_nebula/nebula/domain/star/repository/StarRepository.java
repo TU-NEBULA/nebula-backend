@@ -63,7 +63,7 @@ public interface StarRepository extends Neo4jRepository<Star, UUID> {
 
     @Query("""
     MATCH (u:UserNode)-[:CREATED]->(s:Star)-[:TAGGED]->(k:Keyword)
-    WHERE u.userId = $userId AND k.keywordId = $keywordId
+    WHERE u.userId = $userId AND k.name = $keywordId
     OPTIONAL MATCH (s)-[:BELONGS_TO]->(c:Category)
     RETURN s.id AS starId, 
            s.title AS title, 
@@ -75,7 +75,7 @@ public interface StarRepository extends Neo4jRepository<Star, UUID> {
            c.name AS categoryName, 
            COLLECT(k.name) AS keywordList
     """)
-    List<GetStarOneResponseDTO> findStarsInKeyword(@Param("userId") Long userId, @Param("keywordId") Long keywordId);
+    List<GetStarOneResponseDTO> findStarsInKeyword(@Param("userId") Long userId, @Param("keywordId") String keywordId);
 
     @Query("""
     MATCH (u:UserNode)-[:CREATED]->(s:Star)

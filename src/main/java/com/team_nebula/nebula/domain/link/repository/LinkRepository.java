@@ -57,7 +57,7 @@ public interface LinkRepository extends Neo4jRepository<Link, UUID> {
 
     @Query("""
     MATCH (u:UserNode)-[:CREATED]->(s:Star)-[:TAGGED]->(k:Keyword)
-    WHERE u.userId = $userId AND k.keywordId = $keywordId
+    WHERE u.userId = $userId AND k.name = $keywordId
     
     MATCH (s)-[:LINKED]->(l:Link)<-[:LINKED]-(s2:Star)
     WHERE (u)-[:CREATED]->(s2)
@@ -67,5 +67,5 @@ public interface LinkRepository extends Neo4jRepository<Link, UUID> {
            l.sharedKeywordNum AS sharedKeywordNum,
            l.similarityScore AS similarity
     """)
-    List<GetLinkOneResponseDTO> findLinkInKeyword(@Param("userId") Long userId, @Param("keywordId") Long keywordId);
+    List<GetLinkOneResponseDTO> findLinkInKeyword(@Param("userId") Long userId, @Param("keywordId") String keywordId);
 }

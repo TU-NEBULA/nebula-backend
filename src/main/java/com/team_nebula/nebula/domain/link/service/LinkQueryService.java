@@ -11,6 +11,6 @@ public interface LinkQueryService {
 
     public List<GetLinkOneResponseDTO> getLinkInCategory(Long userId, UUID categoryId);
 
-    public List<GetLinkOneResponseDTO> getLinkInKeyword(Long userId, Long keywordId);
+    public List<GetLinkOneResponseDTO> getLinkInKeyword(Long userId, String keywordId);
 
 }

@@ -42,7 +42,7 @@ public class LinkQueryServiceImpl implements LinkQueryService {
 
     // 키워드별 링크 노드 조회
     @Override
-    public List<GetLinkOneResponseDTO> getLinkInKeyword(Long userId, Long keywordId){
+    public List<GetLinkOneResponseDTO> getLinkInKeyword(Long userId, String keywordId){
         List<GetLinkOneResponseDTO> linkDataList = linkRepository.findLinkInKeyword(userId, keywordId);
 
         return linkDataList.stream()

@@ -67,7 +67,8 @@ public class StarController {
 
     // 키워드별 스타 조회 API
     @GetMapping("/keywords/{keywordId}")
-    public ApiResponse<GetStarListResponseDTO> getStarListByKeyword(@AuthUser User user, @PathVariable Long keywordId){
+    public ApiResponse<GetStarListResponseDTO> getStarListByKeyword(@AuthUser User user, @PathVariable String keywordId){
+        System.out.println("KeywordId: " + keywordId);
         GetStarListResponseDTO responseDTO = starQueryService.getStarListInKeyword(user.getId(), keywordId);
 
         return ApiResponse.onSuccess(responseDTO);

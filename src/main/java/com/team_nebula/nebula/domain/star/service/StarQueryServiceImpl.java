@@ -136,7 +136,7 @@ public class StarQueryServiceImpl implements StarQueryService {
     }
 
     @Override
-    public GetStarListResponseDTO getStarListInKeyword(Long userId, Long keywordId){
+    public GetStarListResponseDTO getStarListInKeyword(Long userId, String keywordId){
 
         List<GetStarOneResponseDTO> starsInCategory = findStarInKeyword(userId, keywordId);
         List<GetLinkOneResponseDTO> linksInCategory = linkQueryService.getLinkInKeyword(userId, keywordId);
@@ -151,7 +151,7 @@ public class StarQueryServiceImpl implements StarQueryService {
     }
 
     @Override
-    public List<GetStarOneResponseDTO> findStarInKeyword(Long userId, Long keywordId) {
+    public List<GetStarOneResponseDTO> findStarInKeyword(Long userId, String keywordId) {
         List<GetStarOneResponseDTO> starDataList = starRepository.findStarsInKeyword(userId, keywordId);
 
         return starDataList.stream()

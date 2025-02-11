@@ -23,9 +23,9 @@ public interface StarQueryService {
 
     public List<GetStarOneResponseDTO> findStarInCategory(Long userId, UUID categoryId);
 
-    public GetStarListResponseDTO getStarListInKeyword(Long userId, Long keywordId);
+    public GetStarListResponseDTO getStarListInKeyword(Long userId, String keywordId);
 
-    public List<GetStarOneResponseDTO> findStarInKeyword(Long userId, Long keywordId);
+    public List<GetStarOneResponseDTO> findStarInKeyword(Long userId, String keywordId);
 
     public GetStarListResponseDTO searchStars(Long userId, String title);
 
