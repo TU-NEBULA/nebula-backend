@@ -72,15 +72,11 @@ public class StarQueryServiceImpl implements StarQueryService {
     @Override
     public GetStarListResponseDTO getStarList(Long userId){
 
-        // 유저 인증
-        UserNode userNode = userNodeRepository.findByUserId(userId)
-                .orElseThrow(() -> new GeneralException(ErrorStatus._USER_NOT_FOUND));
-
         // 스타 전체 조회
-        List<GetStarOneResponseDTO> stars = findAllStar(userNode);
+        List<GetStarOneResponseDTO> stars = findAllStar(userId);
 
         // 링크 전체 조회
-        List<GetLinkOneResponseDTO> links = linkQueryService.getAllLink(userNode);
+        List<GetLinkOneResponseDTO> links = linkQueryService.getAllLink(userId);
 
         return GetStarListResponseDTO.builder()
                 .type("ALL")
@@ -93,8 +89,9 @@ public class StarQueryServiceImpl implements StarQueryService {
 
     // 스타 노드 전체 조회
     @Override
-    public List<GetStarOneResponseDTO> findAllStar(UserNode userNode) {
-        List<Map<String, Object>> starDataList = starRepository.findStarsByUserId(userNode.getUserId());
+    public List<GetStarOneResponseDTO> findAllStar(Long userId) {
+
+        List<GetStarOneResponseDTO> starDataList = starRepository.findStarsByUserId(userId);
 
         return starDataList.stream()
                 .map(StarConverter::convertToStarOneDto)
@@ -104,8 +101,10 @@ public class StarQueryServiceImpl implements StarQueryService {
     // 단일 스타 조회
     @Override
     public GetStarOneResponseDTO getStarOne(UUID starId) {
-        Map<String, Object> data = starRepository.findStarDetailById(starId)
-                .orElseThrow(() -> new GeneralException(ErrorStatus._STAR_NOT_FOUND));
+        GetStarOneResponseDTO data = starRepository.findStarDetailById(starId);
+        if (data == null) {
+            throw new GeneralException(ErrorStatus._STAR_NOT_FOUND);
+        }
 
         return StarConverter.convertToStarOneDto(data);
     }
@@ -113,10 +112,6 @@ public class StarQueryServiceImpl implements StarQueryService {
     // 카테고리별 스타 조회
     @Override
     public GetStarListResponseDTO getStarListInCategory(Long userId, UUID categoryId){
-
-        // 유저 인증
-        UserNode userNode = userNodeRepository.findByUserId(userId)
-                .orElseThrow(() -> new GeneralException(ErrorStatus._USER_NOT_FOUND));
 
         List<GetStarOneResponseDTO> starsInCategory = findStarInCategory(userId, categoryId);
         List<GetLinkOneResponseDTO> linksInCategory = linkQueryService.getLinkInCategory(userId, categoryId);
@@ -132,7 +127,7 @@ public class StarQueryServiceImpl implements StarQueryService {
 
     @Override
     public List<GetStarOneResponseDTO> findStarInCategory(Long userId, UUID categoryId) {
-        List<Map<String, Object>> starDataList = starRepository.findStarsInCategory(userId, categoryId);
+        List<GetStarOneResponseDTO> starDataList = starRepository.findStarsInCategory(userId, categoryId);
 
         return starDataList.stream()
                 .map(StarConverter::convertToStarOneDto)
@@ -141,9 +136,6 @@ public class StarQueryServiceImpl implements StarQueryService {
 
     @Override
     public GetStarListResponseDTO getStarListInKeyword(Long userId, Long keywordId){
-        // 유저 인증
-        UserNode userNode = userNodeRepository.findByUserId(userId)
-                .orElseThrow(() -> new GeneralException(ErrorStatus._USER_NOT_FOUND));
 
         List<GetStarOneResponseDTO> starsInCategory = findStarInKeyword(userId, keywordId);
         List<GetLinkOneResponseDTO> linksInCategory = linkQueryService.getLinkInKeyword(userId, keywordId);
@@ -159,7 +151,7 @@ public class StarQueryServiceImpl implements StarQueryService {
 
     @Override
     public List<GetStarOneResponseDTO> findStarInKeyword(Long userId, Long keywordId) {
-        List<Map<String, Object>> starDataList = starRepository.findStarsInKeyword(userId, keywordId);
+        List<GetStarOneResponseDTO> starDataList = starRepository.findStarsInKeyword(userId, keywordId);
 
         return starDataList.stream()
                 .map(StarConverter::convertToStarOneDto)

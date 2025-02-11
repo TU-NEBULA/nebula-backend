@@ -1,5 +1,6 @@
 package com.team_nebula.nebula.domain.star.repository;
 
+import com.team_nebula.nebula.domain.star.dto.response.GetStarOneResponseDTO;
 import com.team_nebula.nebula.domain.star.entity.Star;
 import org.springframework.data.neo4j.repository.Neo4jRepository;
 import org.springframework.data.neo4j.repository.query.Query;
@@ -12,43 +13,70 @@ import java.util.UUID;
 
 public interface StarRepository extends Neo4jRepository<Star, UUID> {
     @Query("""
-        MATCH (u:UserNode)-[:CREATED]->(s:Star)
-        WHERE u.userId = $userId
-        OPTIONAL MATCH (s)-[:TAGGED]->(k:Keyword)
-        OPTIONAL MATCH (s)-[:BELONGS_TO]->(c:Category)
-        RETURN s, 
-               c.name AS categoryName, 
-               COLLECT(k.name) AS keywordList
-    """)
-    List<Map<String, Object>> findStarsByUserId(@Param("userId") Long userId);
+    MATCH (u:UserNode)-[:CREATED]->(s:Star)
+    WHERE u.userId = $userId
+    OPTIONAL MATCH (s)-[:TAGGED]->(k:Keyword)
+    OPTIONAL MATCH (s)-[:BELONGS_TO]->(c:Category)
+    RETURN s.id AS starId,
+           s.title AS title,
+           s.siteUrl AS siteUrl,
+           s.thumbnailUrl AS thumbnailUrl,
+           s.summaryAI AS summaryAI,
+           s.userMemo AS userMemo,
+           s.views AS views,
+           c.name AS categoryName,
+           COLLECT(k.name) AS keywordList
+""")
+    List<GetStarOneResponseDTO> findStarsByUserId(@Param("userId") Long userId);
+
 
     @Query("""
         MATCH (s:Star)-[:BELONGS_TO]->(c:Category)
         OPTIONAL MATCH (s)-[:TAGGED]->(k:Keyword)
         WHERE ID(s) = $starId
-        RETURN s AS s, c.name AS categoryName, COLLECT(k.name) AS keywordList
+        RETURN s.id AS starId, 
+               s.title AS title, 
+               s.siteUrl AS siteUrl, 
+               s.thumbnailUrl AS thumbnailUrl, 
+               s.summaryAI AS summaryAI, 
+               s.userMemo AS userMemo, 
+               s.views AS views, 
+               c.name AS categoryName, 
+               COLLECT(k.name) AS keywordList
     """)
-    Optional<Map<String, Object>> findStarDetailById(@Param("starId") UUID starId);
+    GetStarOneResponseDTO findStarDetailById(@Param("starId") UUID starId);
 
     @Query("""
     MATCH (u:UserNode)-[:CREATED]->(s:Star)-[:BELONGS_TO]->(c:Category)
     WHERE u.userId = $userId AND c.categoryId = $categoryId
     OPTIONAL MATCH (s)-[:TAGGED]->(k:Keyword)
-    RETURN s, 
+    RETURN s.id AS starId, 
+           s.title AS title, 
+           s.siteUrl AS siteUrl, 
+           s.thumbnailUrl AS thumbnailUrl, 
+           s.summaryAI AS summaryAI, 
+           s.userMemo AS userMemo, 
+           s.views AS views, 
            c.name AS categoryName, 
            COLLECT(k.name) AS keywordList
     """)
-    List<Map<String, Object>> findStarsInCategory(@Param("userId") Long userId, @Param("categoryId") UUID categoryId);
+    List<GetStarOneResponseDTO> findStarsInCategory(@Param("userId") Long userId, @Param("categoryId") UUID categoryId);
 
     @Query("""
     MATCH (u:UserNode)-[:CREATED]->(s:Star)-[:TAGGED]->(k:Keyword)
     WHERE u.userId = $userId AND k.keywordId = $keywordId
     OPTIONAL MATCH (s)-[:BELONGS_TO]->(c:Category)
-    RETURN s, 
+    RETURN s.id AS starId, 
+           s.title AS title, 
+           s.siteUrl AS siteUrl, 
+           s.thumbnailUrl AS thumbnailUrl, 
+           s.summaryAI AS summaryAI, 
+           s.userMemo AS userMemo, 
+           s.views AS views, 
            c.name AS categoryName, 
            COLLECT(k.name) AS keywordList
     """)
-    List<Map<String, Object>> findStarsInKeyword(@Param("userId") Long userId, @Param("keywordId") Long keywordId);
+    List<GetStarOneResponseDTO> findStarsInKeyword(@Param("userId") Long userId, @Param("keywordId") Long keywordId);
 
     @Query("""
     MATCH (u:UserNode)-[:CREATED]->(s:Star)

@@ -3,34 +3,24 @@ package com.team_nebula.nebula.domain.star.converter;
 import com.team_nebula.nebula.domain.star.dto.response.GetLinkOneResponseDTO;
 import com.team_nebula.nebula.domain.star.dto.response.GetStarListResponseDTO;
 import com.team_nebula.nebula.domain.star.dto.response.GetStarOneResponseDTO;
-import com.team_nebula.nebula.domain.star.entity.Star;
 
 import java.util.*;
 
+import static com.team_nebula.nebula.domain.link.converter.LinkConverter.convertToLinkOneDto;
+
 public class StarConverter {
 
-    public static GetStarOneResponseDTO convertToStarOneDto(Map<String, Object> data) {
-        Star star = (Star) data.get("s");
-
+    public static GetStarOneResponseDTO convertToStarOneDto(GetStarOneResponseDTO data) {
         return GetStarOneResponseDTO.builder()
-                .starId(star.getId())
-                .categoryName((String) data.get("categoryName"))
-                .title(star.getTitle())
-                .siteUrl(star.getSiteUrl())
-                .thumbnailUrl(star.getThumbnailUrl())
-                .summaryAI(star.getSummaryAI())
-                .userMemo(star.getUserMemo())
-                .views(star.getViews())
-                .keywordList((List<String>) data.get("keywordList"))
-                .build();
-    }
-
-    public static GetLinkOneResponseDTO convertToLinkOneDto(Map<String, Object> data) {
-        return GetLinkOneResponseDTO.builder()
-                .linkId((UUID) data.get("linkId"))
-                .sharedKeywordNum((Integer) data.get("sharedKeywordNum"))
-                .similarity((Double) data.get("similarity"))
-                .linkedNodeIdList((List<UUID>) data.get("linkedNodeIdList"))
+                .starId(data.getStarId())
+                .categoryName(data.getCategoryName())
+                .title(data.getTitle())
+                .siteUrl(data.getSiteUrl())
+                .thumbnailUrl(data.getThumbnailUrl())
+                .summaryAI(data.getSummaryAI())
+                .userMemo(data.getUserMemo())
+                .views(data.getViews())
+                .keywordList(data.getKeywordList())
                 .build();
     }
 
@@ -49,12 +39,12 @@ public class StarConverter {
         List<GetLinkOneResponseDTO> linkList = new ArrayList<>();
 
         queryResult.forEach(row -> {
-            List<Map<String, Object>> starDataList = (List<Map<String, Object>>) row.get("stars");
+            List<GetStarOneResponseDTO> starDataList = (List<GetStarOneResponseDTO>) row.get("stars");
             if (starDataList != null) {
                 starDataList.forEach(starData -> starList.add(convertToStarOneDto(starData)));
             }
 
-            List<Map<String, Object>> linkDataList = (List<Map<String, Object>>) row.get("links");
+            List<GetLinkOneResponseDTO> linkDataList = (List<GetLinkOneResponseDTO>) row.get("links");
             if (linkDataList != null) {
                 linkDataList.forEach(linkData -> linkList.add(convertToLinkOneDto(linkData)));
             }

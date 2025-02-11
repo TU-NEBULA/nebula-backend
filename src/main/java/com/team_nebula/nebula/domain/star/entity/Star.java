@@ -26,13 +26,13 @@ public class Star extends BaseEntity {
 
     private String title;
 
-    @Property("site_url")
+    @Property("siteUrl")
     private String siteUrl;
 
-    @Property("thumbnail_url")
+    @Property("thumbnailUrl")
     private String thumbnailUrl;
 
-    @Property("summary_ai")
+    @Property("summaryAI")
     private String summaryAI;
 
     @Lob
@@ -55,7 +55,7 @@ public class Star extends BaseEntity {
     private Set<Keyword> keywords = new HashSet<>();
 
     @Builder
-    public Star(String title, String siteUrl, String thumbnailUrl, String summaryAI, String userMemo, String memoUser, int views,
+    public Star(String title, String siteUrl, String thumbnailUrl, String summaryAI, String userMemo, int views,
                 String htmlFileUrl, String embedding) {
         this.id = UUID.randomUUID();
         this.title = title;
@@ -63,7 +63,6 @@ public class Star extends BaseEntity {
         this.thumbnailUrl = thumbnailUrl;
         this.summaryAI = summaryAI;
         this.userMemo = userMemo;
-        this.userMemo = memoUser;
         this.views = views;
         this.htmlFileUrl = htmlFileUrl;
         this.embedding = embedding;
