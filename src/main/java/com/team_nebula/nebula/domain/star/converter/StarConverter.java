@@ -87,7 +87,7 @@ public static GetSearchedStarListResponseDTO convertToStarListDto(List<GetSearch
     List<GetLinkOneResponseDTO> linkList = new ArrayList<>(linkSet);
 
     return GetSearchedStarListResponseDTO.builder()
-            .type("검새된 스타 - 링크 - 검색된 스타와 직접 연결된 스타")
+            .type("검색된 스타 - 링크 - 검색된 스타와 직접 연결된 스타")
             .totalStarCnt(starList.size())
             .totalLinkCnt(linkList.size())
             .searchedStarListDto(starList)
