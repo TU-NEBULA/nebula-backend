@@ -23,4 +23,21 @@ public interface CategoryRepository extends Neo4jRepository<Category, UUID> {
 
     Optional<Category> findByName(String name);
 
+    @Query("""
+    MATCH (c:Category)<-[:BELONGS_TO]-(s:Star{id: $starId})
+    RETURN c.name
+    """)
+    String findByStar(UUID starId);
+
+    @Query("""
+    MATCH (s:Star {id: $starId})-[r:BELONGS_TO]->(c:Category)
+    DELETE r
+    WITH s
+    MATCH (newCategory:Category {name: $categoryName})
+    MERGE (s)-[:BELONGS_TO]->(newCategory)
+    RETURN newCategory.name
+    """)
+    String findNameByStarAndRemoveRelation(@Param("starId") UUID starId, @Param("categoryName") String categoryName);
+
+
 }

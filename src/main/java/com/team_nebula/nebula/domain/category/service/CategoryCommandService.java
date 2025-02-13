@@ -10,4 +10,6 @@ public interface CategoryCommandService {
 
     public void linkStarToCategory(Star star, String categoryName);
 
+    public String linkStarToCategoryAndGetName(Star star, String categoryName);
+
     }

@@ -67,4 +67,16 @@ public class Star extends BaseEntity {
         this.htmlFileUrl = htmlFileUrl;
         this.embedding = embedding;
     }
+
+    public void updateTitle(String title){
+        this.title = title;
+    }
+
+    public void updateSummaryAI(String summaryAI){
+        this.summaryAI = summaryAI;
+    }
+
+    public void updateUserMemo(String userMemo){
+        this.userMemo = userMemo;
+    }
 }

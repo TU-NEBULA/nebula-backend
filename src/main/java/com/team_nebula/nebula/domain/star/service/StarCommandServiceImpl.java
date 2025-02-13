@@ -1,13 +1,18 @@
 package com.team_nebula.nebula.domain.star.service;
 
+import com.team_nebula.nebula.domain.category.repository.CategoryRepository;
 import com.team_nebula.nebula.domain.category.service.CategoryCommandService;
+import com.team_nebula.nebula.domain.category.service.CategoryQueryService;
 import com.team_nebula.nebula.domain.image.S3Service;
 import com.team_nebula.nebula.domain.keyword.entity.Keyword;
 import com.team_nebula.nebula.domain.keyword.service.KeywordCommandService;
 import com.team_nebula.nebula.domain.link.service.LinkCommandService;
+import com.team_nebula.nebula.domain.star.converter.StarConverter;
 import com.team_nebula.nebula.domain.star.dto.request.CreateStarFileDTO;
 import com.team_nebula.nebula.domain.star.dto.request.CreateStarRequestDTO;
+import com.team_nebula.nebula.domain.star.dto.request.UpdateStarOneRequestDTO;
 import com.team_nebula.nebula.domain.star.dto.response.CreateStarResponseDTO;
+import com.team_nebula.nebula.domain.star.dto.response.GetStarOneResponseDTO;
 import com.team_nebula.nebula.domain.star.entity.Star;
 import com.team_nebula.nebula.domain.star.repository.StarRepository;
 import com.team_nebula.nebula.domain.user.entity.User;
@@ -19,6 +24,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -27,8 +33,10 @@ import java.util.stream.Collectors;
 public class StarCommandServiceImpl implements StarCommandService {
 
     private final StarRepository starRepository;
+    private final CategoryRepository categoryRepository;
     private final UserNodeRepository userNodeRepository;
     private final CategoryCommandService categoryCommandService;
+    private final CategoryQueryService categoryQueryService;
     private final KeywordCommandService keywordCommandService;
     private final LinkCommandService linkCommandService;
     private final S3Service s3Service;
@@ -93,4 +101,45 @@ public class StarCommandServiceImpl implements StarCommandService {
         return savedStar;
     }
 
+    public GetStarOneResponseDTO updateStar(UUID starId, UpdateStarOneRequestDTO requestDTO){
+        Star star = starRepository.findById(starId)
+                .orElseThrow(() -> new GeneralException(ErrorStatus._STAR_NOT_FOUND));
+
+        String categoryName = "";
+
+        if(requestDTO.getTitle() != null){
+            star.updateTitle(requestDTO.getTitle());
+        }
+
+        if(requestDTO.getCategoryName() != null){
+            categoryName = categoryCommandService.linkStarToCategoryAndGetName(star, requestDTO.getCategoryName());
+        }
+        else{
+            categoryName = categoryQueryService.findCategoryNameByStar(star.getId());
+        }
+
+        if(requestDTO.getSummaryAI() != null){
+            star.updateSummaryAI(requestDTO.getSummaryAI());
+        }
+
+        if(requestDTO.getUserMemo() != null){
+            star.updateUserMemo(requestDTO.getUserMemo());
+        }
+
+        Star updateStar = starRepository.save(star);
+
+        return GetStarOneResponseDTO.builder()
+                .starId(updateStar.getId())
+                .categoryName(categoryName)
+                .title(updateStar.getTitle())
+                .siteUrl(updateStar.getSiteUrl())
+                .thumbnailUrl(updateStar.getThumbnailUrl())
+                .summaryAI(updateStar.getSummaryAI())
+                .userMemo(updateStar.getUserMemo())
+                .views(updateStar.getViews())
+                .keywordList(updateStar.getKeywords().stream()
+                        .map(Keyword::getName)
+                        .toList())
+                .build();    
+    }
 }

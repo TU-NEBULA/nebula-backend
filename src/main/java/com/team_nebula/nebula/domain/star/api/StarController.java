@@ -1,6 +1,7 @@
 package com.team_nebula.nebula.domain.star.api;
 
 import com.team_nebula.nebula.domain.star.dto.request.CreateStarFileDTO;
+import com.team_nebula.nebula.domain.star.dto.request.UpdateStarOneRequestDTO;
 import com.team_nebula.nebula.domain.star.dto.response.CreateStarResponseDTO;
 import com.team_nebula.nebula.domain.star.dto.response.GetSearchedStarListResponseDTO;
 import com.team_nebula.nebula.domain.star.dto.response.GetStarListResponseDTO;
@@ -79,6 +80,17 @@ public class StarController {
     @GetMapping("/search")
     public ApiResponse<GetSearchedStarListResponseDTO> searchStar(@RequestParam String title, @AuthUser User user){
         GetSearchedStarListResponseDTO responseDTO = starQueryService.searchStars(user.getId(), title);
+
+        return ApiResponse.onSuccess(responseDTO);
+    }
+
+    // 스타 수정 API
+    @PatchMapping("/{starId}")
+    public ApiResponse<GetStarOneResponseDTO> updateStar(
+            @PathVariable UUID starId,
+            @RequestBody UpdateStarOneRequestDTO requestDTO
+    ){
+        GetStarOneResponseDTO responseDTO = starCommandService.updateStar(starId, requestDTO);
 
         return ApiResponse.onSuccess(responseDTO);
     }
