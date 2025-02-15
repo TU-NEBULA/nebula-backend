@@ -1,6 +1,7 @@
 package com.team_nebula.nebula.domain.link.repository;
 
 import com.team_nebula.nebula.domain.link.entity.Link;
+import com.team_nebula.nebula.domain.star.dto.response.GetLinkOneResponseDTO;
 import org.springframework.data.neo4j.repository.Neo4jRepository;
 import org.springframework.data.neo4j.repository.query.Query;
 import org.springframework.data.repository.query.Param;
@@ -24,39 +25,47 @@ public interface LinkRepository extends Neo4jRepository<Link, UUID> {
     void createLinksBetweenStars(@Param("starId") UUID starId);
 
     @Query("""
-        MATCH (s:Star)-[:LINKED]->(l:Link)<-[:LINKED]-(s2:Star)
-        WHERE s.userId = $userId OR s2.userId = $userId
-        RETURN l, l.linked_two_node_Id AS linkedNodeIdList, 
-               l.sharedKeywordNum AS sharedKeywordNum, 
-               l.similarityScore AS similarity
+    MATCH (u:UserNode)-[:CREATED]->(s:Star)
+    WHERE u.userId = $userId
+
+    MATCH (s)-[:LINKED]->(l:Link)
+    WHERE EXISTS {
+        MATCH (s2:Star)-[:LINKED]->(l)
+        WHERE (u)-[:CREATED]->(s2)
+    }
+
+    RETURN DISTINCT l.id AS linkId,
+                    l.linked_two_node_Id AS linkedNodeIdList,
+                    l.sharedKeywordNum AS sharedKeywordNum,
+                    l.similarityScore AS similarity
     """)
-    List<Map<String, Object>> findLinksByUserId(@Param("userId") Long userId);
+    List<GetLinkOneResponseDTO> findLinksByUserId(@Param("userId") Long userId);
 
     @Query("""
     MATCH (u:UserNode)-[:CREATED]->(s:Star)-[:BELONGS_TO]->(c:Category)
-    WHERE u.userId = $userId AND c.categoryId = $categoryId
+    WHERE u.userId = $userId AND c.id = $categoryId
     
     MATCH (s)-[:LINKED]->(l:Link)<-[:LINKED]-(s2:Star)
     WHERE (u)-[:CREATED]->(s2)
     
-    RETURN l, 
-           l.linked_two_node_Id AS linkedNodeIdList, 
-           l.sharedKeywordNum AS sharedKeywordNum, 
+    RETURN l.id AS linkId,
+           l.linked_two_node_Id AS linkedNodeIdList,
+           l.sharedKeywordNum AS sharedKeywordNum,
            l.similarityScore AS similarity
     """)
-    List<Map<String, Object>> findLinkInCategory(@Param("userId") Long userId, @Param("categoryId") UUID categoryId);
+    List<GetLinkOneResponseDTO> findLinkInCategory(@Param("userId") Long userId, @Param("categoryId") UUID categoryId);
 
     @Query("""
     MATCH (u:UserNode)-[:CREATED]->(s:Star)-[:TAGGED]->(k:Keyword)
-    WHERE u.userId = $userId AND k.keywordId = $keywordId
+    WHERE u.userId = $userId AND k.name = $keywordId
     
     MATCH (s)-[:LINKED]->(l:Link)<-[:LINKED]-(s2:Star)
     WHERE (u)-[:CREATED]->(s2)
     
-    RETURN l, 
-           l.linked_two_node_Id AS linkedNodeIdList, 
-           l.sharedKeywordNum AS sharedKeywordNum, 
+    RETURN l,
+           l.linked_two_node_Id AS linkedNodeIdList,
+           l.sharedKeywordNum AS sharedKeywordNum,
            l.similarityScore AS similarity
     """)
-    List<Map<String, Object>> findLinkInKeyword(@Param("userId") Long userId, @Param("keywordId") Long keywordId);
+    List<GetLinkOneResponseDTO> findLinkInKeyword(@Param("userId") Long userId, @Param("keywordId") String keywordId);
 }

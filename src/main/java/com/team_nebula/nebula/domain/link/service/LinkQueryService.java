@@ -7,10 +7,10 @@ import java.util.List;
 import java.util.UUID;
 
 public interface LinkQueryService {
-    public List<GetLinkOneResponseDTO> getAllLink(UserNode userNode);
+    public List<GetLinkOneResponseDTO> getAllLink(Long userId);
 
     public List<GetLinkOneResponseDTO> getLinkInCategory(Long userId, UUID categoryId);
 
-    public List<GetLinkOneResponseDTO> getLinkInKeyword(Long userId, Long keywordId);
+    public List<GetLinkOneResponseDTO> getLinkInKeyword(Long userId, String keywordId);
 
 }

@@ -1,6 +1,7 @@
 package com.team_nebula.nebula.domain.star.service;
 
 import com.team_nebula.nebula.domain.star.dto.request.CreateStarFileDTO;
+import com.team_nebula.nebula.domain.star.dto.response.GetSearchedStarListResponseDTO;
 import com.team_nebula.nebula.domain.star.dto.response.GetStarOneResponseDTO;
 import com.team_nebula.nebula.domain.star.dto.response.GetStarListResponseDTO;
 import com.team_nebula.nebula.domain.user.entity.UserNode;
@@ -15,7 +16,7 @@ public interface StarQueryService {
 
     public GetStarListResponseDTO getStarList(Long userId);
 
-    public List<GetStarOneResponseDTO> findAllStar(UserNode userNode);
+    public List<GetStarOneResponseDTO> findAllStar(Long userId);
 
     public GetStarOneResponseDTO getStarOne(UUID starId);
 
@@ -23,10 +24,10 @@ public interface StarQueryService {
 
     public List<GetStarOneResponseDTO> findStarInCategory(Long userId, UUID categoryId);
 
-    public GetStarListResponseDTO getStarListInKeyword(Long userId, Long keywordId);
+    public GetStarListResponseDTO getStarListInKeyword(Long userId, String keywordId);
 
-    public List<GetStarOneResponseDTO> findStarInKeyword(Long userId, Long keywordId);
+    public List<GetStarOneResponseDTO> findStarInKeyword(Long userId, String keywordId);
 
-    public GetStarListResponseDTO searchStars(Long userId, String title);
+    public GetSearchedStarListResponseDTO searchStars(Long userId, String title);
 
 }

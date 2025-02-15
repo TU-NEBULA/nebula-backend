@@ -1,5 +1,6 @@
 package com.team_nebula.nebula.domain.link.service;
 
+import com.team_nebula.nebula.domain.link.converter.LinkConverter;
 import com.team_nebula.nebula.domain.link.entity.Link;
 import com.team_nebula.nebula.domain.link.repository.LinkRepository;
 import com.team_nebula.nebula.domain.star.dto.response.GetLinkOneResponseDTO;
@@ -21,47 +22,31 @@ public class LinkQueryServiceImpl implements LinkQueryService {
 
     // 링크 노드 전체 조회
     @Override
-    public List<GetLinkOneResponseDTO> getAllLink(UserNode userNode){
-        List<Map<String, Object>> linkDataList = linkRepository.findLinksByUserId(userNode.getUserId());
+    public List<GetLinkOneResponseDTO> getAllLink(Long userId){
+        List<GetLinkOneResponseDTO> linkDataList = linkRepository.findLinksByUserId(userId);
 
         return linkDataList.stream()
-                .map(data -> GetLinkOneResponseDTO.builder()
-                        .linkId(((Link) data.get("l")).getId())
-                        .sharedKeywordNum((int) data.get("sharedKeywordNum"))
-                        .similarity((double) data.get("similarity"))
-                        .linkedNodeIdList((List<UUID>) data.get("linkedNodeIdList"))
-                        .build())
+                .map(LinkConverter::convertToLinkOneDto)
                 .toList();
-
     }
 
     // 카테고리별 링크 노드 조회
     @Override
     public List<GetLinkOneResponseDTO> getLinkInCategory(Long userId, UUID categoryId){
-        List<Map<String, Object>> linkDataList = linkRepository.findLinkInCategory(userId, categoryId);
+        List<GetLinkOneResponseDTO> linkDataList = linkRepository.findLinkInCategory(userId, categoryId);
 
         return linkDataList.stream()
-                .map(data -> GetLinkOneResponseDTO.builder()
-                        .linkId(((Link) data.get("l")).getId())
-                        .sharedKeywordNum((int) data.get("sharedKeywordNum"))
-                        .similarity((double) data.get("similarity"))
-                        .linkedNodeIdList((List<UUID>) data.get("linkedNodeIdList"))
-                        .build())
+                .map(LinkConverter::convertToLinkOneDto)
                 .toList();
     }
 
     // 키워드별 링크 노드 조회
     @Override
-    public List<GetLinkOneResponseDTO> getLinkInKeyword(Long userId, Long keywordId){
-        List<Map<String, Object>> linkDataList = linkRepository.findLinkInKeyword(userId, keywordId);
+    public List<GetLinkOneResponseDTO> getLinkInKeyword(Long userId, String keywordId){
+        List<GetLinkOneResponseDTO> linkDataList = linkRepository.findLinkInKeyword(userId, keywordId);
 
         return linkDataList.stream()
-                .map(data -> GetLinkOneResponseDTO.builder()
-                        .linkId(((Link) data.get("l")).getId())
-                        .sharedKeywordNum((int) data.get("sharedKeywordNum"))
-                        .similarity((double) data.get("similarity"))
-                        .linkedNodeIdList((List<UUID>) data.get("linkedNodeIdList"))
-                        .build())
+                .map(LinkConverter::convertToLinkOneDto)
                 .toList();
     }
 
