@@ -1,6 +1,5 @@
 package com.team_nebula.nebula.domain.star.service;
 
-import com.team_nebula.nebula.domain.star.dto.request.CreateStarFileDTO;
 import com.team_nebula.nebula.domain.star.dto.request.CreateStarRequestDTO;
 import com.team_nebula.nebula.domain.star.dto.request.UpdateStarOneRequestDTO;
 import com.team_nebula.nebula.domain.star.dto.response.CreateStarResponseDTO;
@@ -18,7 +17,7 @@ public interface StarCommandService {
 
 //    public CreateStarResponseDTO createStar(User user, CreateStarFileDTO requestDTO);
 
-    public PutStarResponseDTO putStar(UUID starId, CreateStarRequestDTO requestDTO);
+    public PutStarResponseDTO updateStar(UUID starId, CreateStarRequestDTO requestDTO);
 
     public GetStarOneResponseDTO updateStar(UUID starId, UpdateStarOneRequestDTO requestDTO);
 

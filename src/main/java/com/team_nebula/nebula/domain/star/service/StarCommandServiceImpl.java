@@ -105,7 +105,7 @@ public class StarCommandServiceImpl implements StarCommandService {
 //    }
 
     @Override
-    public PutStarResponseDTO putStar(UUID starId, CreateStarRequestDTO requestDTO){
+    public PutStarResponseDTO updateStar(UUID starId, CreateStarRequestDTO requestDTO){
 
         Star star = starRepository.findById(starId)
                 .orElseThrow(() -> new GeneralException(ErrorStatus._STAR_NOT_FOUND));
