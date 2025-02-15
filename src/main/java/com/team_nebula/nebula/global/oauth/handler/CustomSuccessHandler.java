@@ -9,17 +9,15 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.team_nebula.nebula.domain.user.entity.User;
 import com.team_nebula.nebula.domain.user.repository.mysql.UserRepository;
-import com.team_nebula.nebula.global.apipayload.ApiResponse;
 import com.team_nebula.nebula.global.apipayload.code.status.ErrorStatus;
 import com.team_nebula.nebula.global.apipayload.exception.GeneralException;
 import com.team_nebula.nebula.global.oauth.dto.CustomOAuth2User;
-import com.team_nebula.nebula.global.oauth.dto.TokenResponseDTO;
 import com.team_nebula.nebula.global.util.JWTUtil;
 
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
@@ -59,22 +57,18 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 		user.updateRefreshToken(refreshToken);
 		userRepository.save(user);
 
-		response.setContentType("application/json");
-		response.setCharacterEncoding("UTF-8");
+		response.addCookie(createCookie("Authorization", authorization));
+		response.addCookie(createCookie("refreshToken", refreshToken));
+		response.sendRedirect("http://localhost:3000/redirect");
+	}
 
-		TokenResponseDTO tokenResponse = TokenResponseDTO.builder()
-			.authorization(authorization)
-			.refreshToken(refreshToken)
-			.build();
+	private Cookie createCookie(String key, String value) {
+		Cookie cookie = new Cookie(key, value);
+		cookie.setMaxAge(60 * 60 * 60);
+		//cookie.setSecure(true);
+		cookie.setPath("/");
+		cookie.setHttpOnly(true);
 
-		ApiResponse<TokenResponseDTO> apiResponse = ApiResponse.onSuccess(tokenResponse);
-
-		ObjectMapper objectMapper = new ObjectMapper();
-		String jsonResponse = objectMapper.writeValueAsString(apiResponse);
-
-		response.getWriter().write(jsonResponse);
-		response.getWriter().flush();
-
-		// response.sendRedirect("http://localhost:3000/");
+		return cookie;
 	}
 }
