@@ -9,5 +9,7 @@ import org.springframework.web.multipart.MultipartFile;
 public class CreateStarFileDTO {
     private MultipartFile thumbnailImage;
     private MultipartFile htmlFile;
-    private CreateStarRequestDTO starRequestDTO;
+//    private CreateStarRequestDTO starRequestDTO;
+    private String title;
+    private String siteUrl;
 }

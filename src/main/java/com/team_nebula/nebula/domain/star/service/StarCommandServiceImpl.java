@@ -12,6 +12,7 @@ import com.team_nebula.nebula.domain.star.dto.request.CreateStarFileDTO;
 import com.team_nebula.nebula.domain.star.dto.request.CreateStarRequestDTO;
 import com.team_nebula.nebula.domain.star.dto.request.UpdateStarOneRequestDTO;
 import com.team_nebula.nebula.domain.star.dto.response.CreateStarResponseDTO;
+import com.team_nebula.nebula.domain.star.dto.response.DeleteStarResponseDTO;
 import com.team_nebula.nebula.domain.star.dto.response.GetStarOneResponseDTO;
 import com.team_nebula.nebula.domain.star.entity.Star;
 import com.team_nebula.nebula.domain.star.repository.StarRepository;
@@ -23,6 +24,7 @@ import com.team_nebula.nebula.global.apipayload.exception.GeneralException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -40,6 +42,33 @@ public class StarCommandServiceImpl implements StarCommandService {
     private final KeywordCommandService keywordCommandService;
     private final LinkCommandService linkCommandService;
     private final S3Service s3Service;
+
+    @Override
+    public CreateStarResponseDTO createFirstStar(User user, MultipartFile htmlFile, MultipartFile thumbnailFile, String title, String siteUrl){
+        UserNode userNode = userNodeRepository.findById(user.getId())
+                .orElseThrow(() -> new GeneralException(ErrorStatus._USER_NOT_FOUND));
+
+        Star star = Star.builder()
+                .title(title)
+                .siteUrl(siteUrl)
+                .thumbnailUrl(s3Service.saveThumbnail(thumbnailFile, title))
+                .htmlFileUrl(s3Service.saveHtmlFile(htmlFile, title))
+                .build();
+
+        Star savedStar = starRepository.save(star);
+        if (savedStar.getId() == null) {
+            throw new GeneralException(ErrorStatus._STAR_CREATION_FAILED);
+        }
+
+        // 유저 노드와 관계 설정 후 저장
+        userNode.getStars().add(savedStar);
+        userNodeRepository.save(userNode);
+
+        return CreateStarResponseDTO.builder()
+                .starId(savedStar.getId())
+                .title(savedStar.getTitle())
+                .build();
+    }
 
     @Override
     public CreateStarResponseDTO createStar(User user, CreateStarFileDTO requestDTO){
@@ -142,4 +171,20 @@ public class StarCommandServiceImpl implements StarCommandService {
                         .toList())
                 .build();    
     }
+
+    @Override
+    public DeleteStarResponseDTO deleteStar(UUID starId){
+        Star star = starRepository.findById(starId)
+                .orElseThrow(() -> new GeneralException(ErrorStatus._STAR_NOT_FOUND));
+
+        star.updateIsDeletedStatus();
+        starRepository.save(star);
+
+        String deleteMessage = "Star with ID : " + starId + " was deleted";
+        return DeleteStarResponseDTO.builder()
+                .starId(starId)
+                .deleteStatus(deleteMessage)
+                .build();
+    }
+
 }
