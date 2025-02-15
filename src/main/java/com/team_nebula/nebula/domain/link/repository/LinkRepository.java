@@ -7,20 +7,21 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
-public interface LinkRepository extends Neo4jRepository<Link, Long> {
+public interface LinkRepository extends Neo4jRepository<Link, UUID> {
 
     @Query("""
-        MATCH (s1:Star)-[:HAS_KEYWORD]->(k:Keyword)<-[:HAS_KEYWORD]-(s2:Star)
+        MATCH (s1:Star)-[:TAGGED]->(k:Keyword)<-[:TAGGED]-(s2:Star)
         WHERE s1.id = $starId AND s1 <> s2
         WITH s1, s2, COUNT(k) AS sharedKeywordNum
         WHERE sharedKeywordNum > 0
         MERGE (l:Link {linked_two_node_Id: [s1.id, s2.id]})
-        ON CREATE SET l.sharedKeywordNum = sharedKeywordNum, l.similarityScore = 0.5
+        ON CREATE SET l.sharedKeywordNum = sharedKeywordNum, l.similarityScore = 0.5, l.id = randomUUID()
         MERGE (s1)-[:LINKED]->(l)
         MERGE (s2)-[:LINKED]->(l)
     """)
-    void createLinksBetweenStars(@Param("starId") Long starId);
+    void createLinksBetweenStars(@Param("starId") UUID starId);
 
     @Query("""
         MATCH (s:Star)-[:LINKED]->(l:Link)<-[:LINKED]-(s2:Star)
@@ -43,7 +44,7 @@ public interface LinkRepository extends Neo4jRepository<Link, Long> {
            l.sharedKeywordNum AS sharedKeywordNum, 
            l.similarityScore AS similarity
     """)
-    List<Map<String, Object>> findLinkInCategory(@Param("userId") Long userId, @Param("categoryId") Long categoryId);
+    List<Map<String, Object>> findLinkInCategory(@Param("userId") Long userId, @Param("categoryId") UUID categoryId);
 
     @Query("""
     MATCH (u:UserNode)-[:CREATED]->(s:Star)-[:TAGGED]->(k:Keyword)

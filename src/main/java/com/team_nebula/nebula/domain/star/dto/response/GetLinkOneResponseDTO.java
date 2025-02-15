@@ -6,14 +6,15 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
+import java.util.UUID;
 
 @Getter
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
 public class GetLinkOneResponseDTO {
-    private Long linkId;
+    private UUID linkId;
     private int sharedKeywordNum;
     private double similarity;
-    private List<Long> linkedNodeIdList;
+    private List<UUID> linkedNodeIdList;
 }

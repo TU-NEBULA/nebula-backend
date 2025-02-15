@@ -5,10 +5,7 @@ import com.team_nebula.nebula.domain.star.dto.response.GetStarListResponseDTO;
 import com.team_nebula.nebula.domain.star.dto.response.GetStarOneResponseDTO;
 import com.team_nebula.nebula.domain.star.entity.Star;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class StarConverter {
 
@@ -30,10 +27,10 @@ public class StarConverter {
 
     public static GetLinkOneResponseDTO convertToLinkOneDto(Map<String, Object> data) {
         return GetLinkOneResponseDTO.builder()
-                .linkId((Long) data.get("linkId"))
+                .linkId((UUID) data.get("linkId"))
                 .sharedKeywordNum((Integer) data.get("sharedKeywordNum"))
                 .similarity((Double) data.get("similarity"))
-                .linkedNodeIdList((List<Long>) data.get("linkedNodeIdList"))
+                .linkedNodeIdList((List<UUID>) data.get("linkedNodeIdList"))
                 .build();
     }
 

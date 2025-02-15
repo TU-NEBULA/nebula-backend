@@ -6,14 +6,15 @@ import org.springframework.data.neo4j.repository.query.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.UUID;
 
-public interface KeywordRepository extends Neo4jRepository<Keyword, Long> {
+public interface KeywordRepository extends Neo4jRepository<Keyword, String> {
     @Query("""
-        UNWIND $keywordNames AS keywordName
-        MERGE (k:Keyword {name: keywordName})
-        WITH k
+        UNWIND apoc.coll.toSet($keywordNames) AS keywordName
         MATCH (s:Star {id: $starId})
-        MERGE (s)-[:TAGGED]->(k)
+        MERGE (k:Keyword {name: keywordName})
+        WITH s, k
+        MERGE (s)-[:TAGGED]->(k);
     """)
-    void linkStarToKeywords(@Param("starId") Long starId, @Param("keywordNames") List<String> keywordNames);
+    void linkStarToKeywords(@Param("starId") UUID starId, @Param("keywordNames") List<String> keywordNames);
 }

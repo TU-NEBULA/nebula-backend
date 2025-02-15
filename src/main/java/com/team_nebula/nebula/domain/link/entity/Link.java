@@ -10,24 +10,27 @@ import org.springframework.data.neo4j.core.schema.Node;
 import org.springframework.data.neo4j.core.schema.Property;
 
 import java.util.List;
+import java.util.UUID;
 
 @Node
 @Getter
 @NoArgsConstructor
 public class Link extends BaseEntity {
     @Id
-    @GeneratedValue
-    private long id;
+    private UUID id;
 
+    @Property("sharedKeywordNum")
     private int sharedKeywordNum;
 
+    @Property("similarityScore")
     private double similarityScore;
 
     @Property("linked_two_node_Id")
-    private List<Long> linkedNode;
+    private List<UUID> linkedNode;
 
     @Builder
-    public Link(int sharedKeywordNum, double similarityScore, List<Long> linkedNode) {
+    public Link(int sharedKeywordNum, double similarityScore, List<UUID> linkedNode) {
+        this.id = UUID.randomUUID();
         this.sharedKeywordNum = sharedKeywordNum;
         this.similarityScore = similarityScore;
         this.linkedNode = linkedNode;

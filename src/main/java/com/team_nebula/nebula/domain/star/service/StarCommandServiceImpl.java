@@ -10,6 +10,7 @@ import com.team_nebula.nebula.domain.star.dto.request.CreateStarRequestDTO;
 import com.team_nebula.nebula.domain.star.dto.response.CreateStarResponseDTO;
 import com.team_nebula.nebula.domain.star.entity.Star;
 import com.team_nebula.nebula.domain.star.repository.StarRepository;
+import com.team_nebula.nebula.domain.user.entity.User;
 import com.team_nebula.nebula.domain.user.entity.UserNode;
 import com.team_nebula.nebula.domain.user.repository.neo4j.UserNodeRepository;
 import com.team_nebula.nebula.global.apipayload.code.status.ErrorStatus;
@@ -17,6 +18,8 @@ import com.team_nebula.nebula.global.apipayload.exception.GeneralException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -31,11 +34,10 @@ public class StarCommandServiceImpl implements StarCommandService {
     private final S3Service s3Service;
 
     @Override
-    public CreateStarResponseDTO createStar(CreateStarFileDTO requestDTO){
+    public CreateStarResponseDTO createStar(User user, CreateStarFileDTO requestDTO){
         CreateStarRequestDTO starRequestDTO = requestDTO.getStarRequestDTO();
 
-        // 유저 인증
-        UserNode userNode = userNodeRepository.findByUserId(starRequestDTO.getUserId())
+        UserNode userNode = userNodeRepository.findById(user.getId())
                 .orElseThrow(() -> new GeneralException(ErrorStatus._USER_NOT_FOUND));
 
         // 스타 생성 및 유저와 관계 설정
@@ -47,16 +49,20 @@ public class StarCommandServiceImpl implements StarCommandService {
         // 키워드 생성 및 관계 설정
         keywordCommandService.linkStarToKeywords(star, starRequestDTO.getKeywordList());
 
+        // 키워드+ 카테고리 포함된 스타를 다시 조회
+        Star savedStar = starRepository.findById(star.getId())
+                .orElseThrow(() -> new GeneralException(ErrorStatus._STAR_NOT_FOUND));
+
         // 스타 간 Link 노드 생성
-        linkCommandService.createLinksForStar(star);
+        linkCommandService.createLinksForStar(savedStar);
 
         return CreateStarResponseDTO.builder()
                 .starId(star.getId())
                 .title(star.getTitle())
                 .categoryName(starRequestDTO.getCategoryName())
-                .keywordList(star.getKeywords().stream()
+                .keywordList(savedStar.getKeywords().stream()
                         .map(Keyword::getName)
-                        .toList())
+                        .collect(Collectors.toList()))
                 .build();
 
     }

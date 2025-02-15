@@ -1,14 +1,18 @@
 package com.team_nebula.nebula.domain.star.dto.request;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
+
 import java.util.List;
 
 @Getter
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class CreateStarRequestDTO {
 
-    private Long userId;
     private String title;
     private String siteUrl;
     private String summaryAI;

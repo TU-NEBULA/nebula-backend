@@ -8,8 +8,9 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 
-public interface StarRepository extends Neo4jRepository<Star, Long> {
+public interface StarRepository extends Neo4jRepository<Star, UUID> {
     @Query("""
         MATCH (u:UserNode)-[:CREATED]->(s:Star)
         WHERE u.userId = $userId
@@ -27,7 +28,7 @@ public interface StarRepository extends Neo4jRepository<Star, Long> {
         WHERE ID(s) = $starId
         RETURN s AS s, c.name AS categoryName, COLLECT(k.name) AS keywordList
     """)
-    Optional<Map<String, Object>> findStarDetailById(@Param("starId") Long starId);
+    Optional<Map<String, Object>> findStarDetailById(@Param("starId") UUID starId);
 
     @Query("""
     MATCH (u:UserNode)-[:CREATED]->(s:Star)-[:BELONGS_TO]->(c:Category)
@@ -37,7 +38,7 @@ public interface StarRepository extends Neo4jRepository<Star, Long> {
            c.name AS categoryName, 
            COLLECT(k.name) AS keywordList
     """)
-    List<Map<String, Object>> findStarsInCategory(@Param("userId") Long userId, @Param("categoryId") Long categoryId);
+    List<Map<String, Object>> findStarsInCategory(@Param("userId") Long userId, @Param("categoryId") UUID categoryId);
 
     @Query("""
     MATCH (u:UserNode)-[:CREATED]->(s:Star)-[:TAGGED]->(k:Keyword)

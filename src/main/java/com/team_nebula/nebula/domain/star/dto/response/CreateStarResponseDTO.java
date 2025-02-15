@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
+import java.util.UUID;
 
 @Getter
 @Builder
@@ -13,7 +14,7 @@ import java.util.List;
 @NoArgsConstructor
 public class CreateStarResponseDTO {
 
-    private Long starId;
+    private UUID starId;
     private String title;
     private String categoryName;
     private List<String> keywordList;
