@@ -21,6 +21,7 @@ public interface CategoryRepository extends Neo4jRepository<Category, UUID> {
     """)
     List<GetCategoryOneResponseDTO> findUserCategoriesWithStarCount(@Param("userId") Long userId);
 
+    @Query("MATCH (c:Category) WHERE c.name = $name RETURN c")
     Optional<Category> findByName(String name);
 
     @Query("""

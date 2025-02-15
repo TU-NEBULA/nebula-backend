@@ -14,6 +14,7 @@ import com.team_nebula.nebula.domain.star.dto.request.UpdateStarOneRequestDTO;
 import com.team_nebula.nebula.domain.star.dto.response.CreateStarResponseDTO;
 import com.team_nebula.nebula.domain.star.dto.response.DeleteStarResponseDTO;
 import com.team_nebula.nebula.domain.star.dto.response.GetStarOneResponseDTO;
+import com.team_nebula.nebula.domain.star.dto.response.PutStarResponseDTO;
 import com.team_nebula.nebula.domain.star.entity.Star;
 import com.team_nebula.nebula.domain.star.repository.StarRepository;
 import com.team_nebula.nebula.domain.user.entity.User;
@@ -44,14 +45,13 @@ public class StarCommandServiceImpl implements StarCommandService {
     private final S3Service s3Service;
 
     @Override
-    public CreateStarResponseDTO createFirstStar(User user, MultipartFile htmlFile, MultipartFile thumbnailFile, String title, String siteUrl){
+    public CreateStarResponseDTO createFirstStar(User user, MultipartFile htmlFile, String title, String siteUrl){
         UserNode userNode = userNodeRepository.findById(user.getId())
                 .orElseThrow(() -> new GeneralException(ErrorStatus._USER_NOT_FOUND));
 
         Star star = Star.builder()
                 .title(title)
                 .siteUrl(siteUrl)
-                .thumbnailUrl(s3Service.saveThumbnail(thumbnailFile, title))
                 .htmlFileUrl(s3Service.saveHtmlFile(htmlFile, title))
                 .build();
 
@@ -70,21 +70,52 @@ public class StarCommandServiceImpl implements StarCommandService {
                 .build();
     }
 
+//    @Override
+//    public CreateStarResponseDTO createStar(User user, CreateStarFileDTO requestDTO){
+//        CreateStarRequestDTO starRequestDTO = requestDTO.getStarRequestDTO();
+//
+//        UserNode userNode = userNodeRepository.findById(user.getId())
+//                .orElseThrow(() -> new GeneralException(ErrorStatus._USER_NOT_FOUND));
+//
+//        // 스타 생성 및 유저와 관계 설정
+//        Star star = createStarEntity(requestDTO, userNode);
+//
+//        // 카테고리 관계 설정
+//        categoryCommandService.linkStarToCategory(star, starRequestDTO.getCategoryName());
+//
+//        // 키워드 생성 및 관계 설정
+//        keywordCommandService.linkStarToKeywords(star, starRequestDTO.getKeywordList());
+//
+//        // 키워드+ 카테고리 포함된 스타를 다시 조회
+//        Star savedStar = starRepository.findById(star.getId())
+//                .orElseThrow(() -> new GeneralException(ErrorStatus._STAR_NOT_FOUND));
+//
+//        // 스타 간 Link 노드 생성
+//        linkCommandService.createLinksForStar(savedStar);
+//
+//        return CreateStarResponseDTO.builder()
+//                .starId(star.getId())
+//                .title(star.getTitle())
+//                .categoryName(starRequestDTO.getCategoryName())
+//                .keywordList(savedStar.getKeywords().stream()
+//                        .map(Keyword::getName)
+//                        .collect(Collectors.toList()))
+//                .build();
+//
+//    }
+
     @Override
-    public CreateStarResponseDTO createStar(User user, CreateStarFileDTO requestDTO){
-        CreateStarRequestDTO starRequestDTO = requestDTO.getStarRequestDTO();
+    public PutStarResponseDTO putStar(UUID starId, CreateStarRequestDTO requestDTO){
 
-        UserNode userNode = userNodeRepository.findById(user.getId())
-                .orElseThrow(() -> new GeneralException(ErrorStatus._USER_NOT_FOUND));
+        Star star = starRepository.findById(starId)
+                .orElseThrow(() -> new GeneralException(ErrorStatus._STAR_NOT_FOUND));
 
-        // 스타 생성 및 유저와 관계 설정
-        Star star = createStarEntity(requestDTO, userNode);
-
+        System.out.println("카테고리 이름" + requestDTO.getCategoryName());
         // 카테고리 관계 설정
-        categoryCommandService.linkStarToCategory(star, starRequestDTO.getCategoryName());
+        categoryCommandService.linkStarToCategory(star, requestDTO.getCategoryName());
 
         // 키워드 생성 및 관계 설정
-        keywordCommandService.linkStarToKeywords(star, starRequestDTO.getKeywordList());
+        keywordCommandService.linkStarToKeywords(star, requestDTO.getKeywordList());
 
         // 키워드+ 카테고리 포함된 스타를 다시 조회
         Star savedStar = starRepository.findById(star.getId())
@@ -93,42 +124,42 @@ public class StarCommandServiceImpl implements StarCommandService {
         // 스타 간 Link 노드 생성
         linkCommandService.createLinksForStar(savedStar);
 
-        return CreateStarResponseDTO.builder()
+        savedStar.updateStar(requestDTO.getThumbnailUrl(), requestDTO.getSummaryAI(), requestDTO.getUserMemo(), requestDTO.getEmbedding());
+
+        return PutStarResponseDTO.builder()
                 .starId(star.getId())
                 .title(star.getTitle())
-                .categoryName(starRequestDTO.getCategoryName())
+                .categoryName(requestDTO.getCategoryName())
                 .keywordList(savedStar.getKeywords().stream()
                         .map(Keyword::getName)
                         .collect(Collectors.toList()))
                 .build();
-
     }
 
-    public Star createStarEntity(CreateStarFileDTO requestDTO, UserNode userNode){
-        CreateStarRequestDTO starRequestDTO = requestDTO.getStarRequestDTO();
 
-        Star star = Star.builder()
-                .title(starRequestDTO.getTitle())
-                .siteUrl(starRequestDTO.getSiteUrl())
-                .thumbnailUrl(s3Service.saveThumbnail(requestDTO.getThumbnailImage(), starRequestDTO.getTitle()))
-                .htmlFileUrl(s3Service.saveHtmlFile(requestDTO.getHtmlFile(), starRequestDTO.getTitle()))
-                .summaryAI(starRequestDTO.getSummaryAI())
-                .userMemo(starRequestDTO.getUserMemo())
-                .views(0)
-                .embedding(starRequestDTO.getEmbedding())
-                .build();
-
-        Star savedStar = starRepository.save(star);
-        if (savedStar.getId() == null) {
-            throw new GeneralException(ErrorStatus._STAR_CREATION_FAILED);
-        }
-
-        // 유저 노드와 관계 설정 후 저장
-        userNode.getStars().add(savedStar);
-        userNodeRepository.save(userNode);
-
-        return savedStar;
-    }
+//    public Star createStarEntity(CreateStarFileDTO requestDTO, UserNode userNode){
+//        CreateStarRequestDTO starRequestDTO = requestDTO.getStarRequestDTO();
+//
+//        Star star = Star.builder()
+//                .thumbnailUrl(s3Service.saveThumbnail(requestDTO.getThumbnailImage(), starRequestDTO.getTitle()))
+//                .htmlFileUrl(s3Service.saveHtmlFile(requestDTO.getHtmlFile(), starRequestDTO.getTitle()))
+//                .summaryAI(starRequestDTO.getSummaryAI())
+//                .userMemo(starRequestDTO.getUserMemo())
+//                .views(0)
+//                .embedding(starRequestDTO.getEmbedding())
+//                .build();
+//
+//        Star savedStar = starRepository.save(star);
+//        if (savedStar.getId() == null) {
+//            throw new GeneralException(ErrorStatus._STAR_CREATION_FAILED);
+//        }
+//
+//        // 유저 노드와 관계 설정 후 저장
+//        userNode.getStars().add(savedStar);
+//        userNodeRepository.save(userNode);
+//
+//        return savedStar;
+//    }
 
     public GetStarOneResponseDTO updateStar(UUID starId, UpdateStarOneRequestDTO requestDTO){
         Star star = starRepository.findById(starId)

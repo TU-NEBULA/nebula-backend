@@ -1,6 +1,7 @@
 package com.team_nebula.nebula.domain.star.api;
 
 import com.team_nebula.nebula.domain.star.dto.request.CreateStarFileDTO;
+import com.team_nebula.nebula.domain.star.dto.request.CreateStarRequestDTO;
 import com.team_nebula.nebula.domain.star.dto.request.UpdateStarOneRequestDTO;
 import com.team_nebula.nebula.domain.star.dto.response.*;
 import com.team_nebula.nebula.domain.star.service.StarCommandService;
@@ -29,17 +30,21 @@ public class StarController {
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ApiResponse<CreateStarResponseDTO> createStar(
             @AuthUser User user,
-            @RequestPart(value = "thumbnailImage",required = false) MultipartFile thumbnailImage,
             @RequestPart(value = "htmlFile",required = false) MultipartFile htmlFile,
             @RequestPart(value = "사이트 제목") String title,
             @RequestPart(value = "사이트 주소") String siteUrl
 
     ){
-//        CreateStarFileDTO requestDTO = starQueryService.starDataParsing(thumbnailImage, htmlFile, starJsonData);
-
-        CreateStarResponseDTO responseDTO = starCommandService.createFirstStar(user, thumbnailImage, htmlFile, title, siteUrl);
+        CreateStarResponseDTO responseDTO = starCommandService.createFirstStar(user, htmlFile, title, siteUrl);
 
         return ApiResponse.onSuccessCreated(responseDTO);
+    }
+
+    @PatchMapping("/complete/{starId}")
+    public ApiResponse<PutStarResponseDTO> putStar(@PathVariable UUID starId, @RequestBody CreateStarRequestDTO requestDTO){
+        PutStarResponseDTO responseDTO = starCommandService.putStar(starId, requestDTO);
+
+        return ApiResponse.onSuccess(responseDTO);
     }
 
     // 스타 전체 조회 API

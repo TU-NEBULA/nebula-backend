@@ -7,7 +7,6 @@ import org.springframework.web.multipart.MultipartFile;
 @Getter
 @Builder
 public class CreateStarFileDTO {
-    private MultipartFile thumbnailImage;
     private MultipartFile htmlFile;
 //    private CreateStarRequestDTO starRequestDTO;
     private String title;

@@ -72,6 +72,14 @@ public class Star extends BaseEntity {
         this.isDeletedStatus = false;
     }
 
+    public void updateStar(String thumbnailUrl, String summaryAI, String userMemo, String embedding) {
+        this.thumbnailUrl = thumbnailUrl;
+        this.summaryAI = summaryAI;
+        this.userMemo = userMemo;
+        this.embedding = embedding;
+        this.isDeletedStatus = false;
+    }
+
     public void updateTitle(String title){
         this.title = title;
     }
