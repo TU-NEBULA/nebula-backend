@@ -33,24 +33,40 @@ public class S3Service {
     private static final String HTML_FILE_DIR = "html_files/";
 
     public String saveThumbnail(MultipartFile thumbnailImage, String dataInfo) {
-        return uploadToS3(thumbnailImage, THUMBNAIL_DIR, dataInfo);
+        return uploadThumbnailToS3(thumbnailImage, THUMBNAIL_DIR, dataInfo);
     }
 
     public String saveHtmlFile(MultipartFile htmlFile, String dataInfo) {
-        return uploadToS3(htmlFile, HTML_FILE_DIR, dataInfo);
+        return uploadHtmlToS3(htmlFile, HTML_FILE_DIR, dataInfo);
     }
 
-    private String uploadToS3(MultipartFile file, String dirName, String dataInfo)  {
+    private String uploadHtmlToS3(MultipartFile file, String dirName, String dataInfo)  {
         File uploadFile = convert(file)
                 .orElseThrow(() -> new GeneralException(ErrorStatus._MULTIPARTFILE_CONVERT_FAIL));
 
         String fileName = dirName + dataInfo + "/" + UUID.randomUUID() + "_" + file.getOriginalFilename();
-        String fileUrl = putS3(uploadFile, fileName);
+
+        putHtmlS3(uploadFile, fileName);
+        removeNewFile(uploadFile);
+        return fileName;
+    }
+
+    private String uploadThumbnailToS3(MultipartFile file, String dirName, String dataInfo)  {
+        File uploadFile = convert(file)
+                .orElseThrow(() -> new GeneralException(ErrorStatus._MULTIPARTFILE_CONVERT_FAIL));
+
+        String fileName = dirName + dataInfo + "/" + UUID.randomUUID() + "_" + file.getOriginalFilename();
+
+        String fileUrl = putThumbnailS3(uploadFile, fileName);
         removeNewFile(uploadFile);
         return fileUrl;
     }
 
-    private String putS3(File uploadFile, String fileName) {
+    private void putHtmlS3(File uploadFile, String fileName) {
+        amazonS3Client.putObject(new PutObjectRequest(bucket, fileName, uploadFile));
+    }
+
+    private String putThumbnailS3(File uploadFile, String fileName) {
         amazonS3Client.putObject(new PutObjectRequest(bucket, fileName, uploadFile));
 
         return amazonS3Client.getUrl(bucket, fileName).toString();

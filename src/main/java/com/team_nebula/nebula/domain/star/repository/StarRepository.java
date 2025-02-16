@@ -90,7 +90,7 @@ public interface StarRepository extends Neo4jRepository<Star, UUID> {
     OPTIONAL MATCH (s2)-[:BELONGS_TO]->(c2:Category)
     OPTIONAL MATCH (s2)-[:TAGGED]->(k2:Keyword)
 
-    WITH 
+    WITH
         s, c, COLLECT(DISTINCT k.name) AS keywordList,
         s2, c2, COLLECT(DISTINCT k2.name) AS linkedKeywordList,
         COLLECT(DISTINCT {
@@ -99,7 +99,7 @@ public interface StarRepository extends Neo4jRepository<Star, UUID> {
             similarity: l.similarityScore
         }) AS links
 
-    RETURN 
+    RETURN
         COLLECT(DISTINCT {
             searchedStar: {
                 starId: s.id,
