@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.Iterator;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
@@ -23,6 +24,9 @@ import jakarta.servlet.http.HttpServletResponse;
 
 @Component
 public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
+
+	@Value("${app.redirect-url}")
+	private String redirectUrl;
 
 	private final UserRepository userRepository;
 	private final JWTUtil jwtUtil;
@@ -59,7 +63,7 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 
 		response.addCookie(createCookie("Authorization", authorization));
 		response.addCookie(createCookie("refreshToken", refreshToken));
-		response.sendRedirect("http://localhost:3000/redirect");
+		response.sendRedirect(redirectUrl);
 	}
 
 	private Cookie createCookie(String key, String value) {
