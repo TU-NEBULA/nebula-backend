@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -25,5 +26,11 @@ public class CategoryQueryServiceImpl implements CategoryQueryService {
                 .totalCount(categoryList.size())
                 .categoryList(categoryList)
                 .build();
+    }
+
+    public String findCategoryNameByStar(UUID starId){
+        String name = categoryRepository.findByStar(starId);
+
+        return name;
     }
 }

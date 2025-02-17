@@ -48,6 +48,9 @@ public class Star extends BaseEntity {
 
     private String embedding;
 
+    @Property("Deleted status")
+    private Boolean isDeletedStatus;
+
     @Relationship(type = "LINKED", direction = Relationship.Direction.OUTGOING)
     private Set<Link> links = new HashSet<>();
 
@@ -66,5 +69,30 @@ public class Star extends BaseEntity {
         this.views = views;
         this.htmlFileUrl = htmlFileUrl;
         this.embedding = embedding;
+        this.isDeletedStatus = false;
+    }
+
+    public void updateStar(String thumbnailUrl, String summaryAI, String userMemo, String embedding) {
+        this.thumbnailUrl = thumbnailUrl;
+        this.summaryAI = summaryAI;
+        this.userMemo = userMemo;
+        this.embedding = embedding;
+        this.isDeletedStatus = false;
+    }
+
+    public void updateTitle(String title){
+        this.title = title;
+    }
+
+    public void updateSummaryAI(String summaryAI){
+        this.summaryAI = summaryAI;
+    }
+
+    public void updateUserMemo(String userMemo){
+        this.userMemo = userMemo;
+    }
+
+    public void updateIsDeletedStatus(){
+        this.isDeletedStatus = true;
     }
 }

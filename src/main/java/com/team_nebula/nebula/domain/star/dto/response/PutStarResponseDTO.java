@@ -12,8 +12,9 @@ import java.util.UUID;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class CreateStarResponseDTO {
-
+public class PutStarResponseDTO {
     private UUID starId;
     private String title;
+    private String categoryName;
+    private List<String> keywordList;
 }

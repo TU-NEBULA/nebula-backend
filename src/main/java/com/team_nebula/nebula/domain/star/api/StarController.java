@@ -1,10 +1,8 @@
 package com.team_nebula.nebula.domain.star.api;
 
-import com.team_nebula.nebula.domain.star.dto.request.CreateStarFileDTO;
-import com.team_nebula.nebula.domain.star.dto.response.CreateStarResponseDTO;
-import com.team_nebula.nebula.domain.star.dto.response.GetSearchedStarListResponseDTO;
-import com.team_nebula.nebula.domain.star.dto.response.GetStarListResponseDTO;
-import com.team_nebula.nebula.domain.star.dto.response.GetStarOneResponseDTO;
+import com.team_nebula.nebula.domain.star.dto.request.CreateStarRequestDTO;
+import com.team_nebula.nebula.domain.star.dto.request.UpdateStarOneRequestDTO;
+import com.team_nebula.nebula.domain.star.dto.response.*;
 import com.team_nebula.nebula.domain.star.service.StarCommandService;
 import com.team_nebula.nebula.domain.star.service.StarQueryService;
 import com.team_nebula.nebula.domain.user.entity.User;
@@ -27,19 +25,25 @@ public class StarController {
     private final StarCommandService starCommandService;
     private final StarQueryService starQueryService;
 
-    // 스타 생성 API
+    // 스타 생성 API(크롬 익스텐션에서 추가하는 경우)
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ApiResponse<CreateStarResponseDTO> createStar(
             @AuthUser User user,
-            @RequestPart(value = "thumbnailImage",required = false) MultipartFile thumbnailImage,
             @RequestPart(value = "htmlFile",required = false) MultipartFile htmlFile,
-            @RequestPart(value = "star JSON data") String starJsonData
+            @RequestParam(value = "title") String title,
+            @RequestParam(value = "siteUrl") String siteUrl
     ){
-        CreateStarFileDTO requestDTO = starQueryService.starDataParsing(thumbnailImage, htmlFile, starJsonData);
-
-        CreateStarResponseDTO responseDTO = starCommandService.createStar(user, requestDTO);
+        CreateStarResponseDTO responseDTO = starCommandService.createFirstStar(user, htmlFile, title, siteUrl);
 
         return ApiResponse.onSuccessCreated(responseDTO);
+    }
+
+    // 스타 수정 API(데이터 입력 후 나머지 노드 생성)
+    @PatchMapping("/complete/{starId}")
+    public ApiResponse<PutStarResponseDTO> updateStar(@PathVariable UUID starId, @RequestBody CreateStarRequestDTO requestDTO){
+        PutStarResponseDTO responseDTO = starCommandService.updateStar(starId, requestDTO);
+
+        return ApiResponse.onSuccess(responseDTO);
     }
 
     // 스타 전체 조회 API
@@ -79,6 +83,25 @@ public class StarController {
     @GetMapping("/search")
     public ApiResponse<GetSearchedStarListResponseDTO> searchStar(@RequestParam String title, @AuthUser User user){
         GetSearchedStarListResponseDTO responseDTO = starQueryService.searchStars(user.getId(), title);
+
+        return ApiResponse.onSuccess(responseDTO);
+    }
+
+    // 스타 수정 API
+    @PatchMapping("/{starId}")
+    public ApiResponse<GetStarOneResponseDTO> updateStar(
+            @PathVariable UUID starId,
+            @RequestBody UpdateStarOneRequestDTO requestDTO
+    ){
+        GetStarOneResponseDTO responseDTO = starCommandService.updateStar(starId, requestDTO);
+
+        return ApiResponse.onSuccess(responseDTO);
+    }
+
+    // 스타 삭제 API
+    @PatchMapping("/delete/{starId}")
+    public ApiResponse<DeleteStarResponseDTO> deleteStar(@AuthUser User user, @PathVariable UUID starId){
+        DeleteStarResponseDTO responseDTO = starCommandService.deleteStar(starId);
 
         return ApiResponse.onSuccess(responseDTO);
     }

@@ -61,6 +61,14 @@ public class CategoryCommandServiceImpl implements CategoryCommandService {
         categoryRepository.save(category);
     }
 
+    @Override
+    public String linkStarToCategoryAndGetName(Star star, String categoryName){
+
+        String cname = categoryRepository.findNameByStarAndRemoveRelation(star.getId(), categoryName);
+
+        return cname;
+    }
+
 }
 
 

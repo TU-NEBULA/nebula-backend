@@ -13,8 +13,7 @@ import java.util.List;
 @AllArgsConstructor
 public class CreateStarRequestDTO {
 
-    private String title;
-    private String siteUrl;
+    private String thumbnailUrl;
     private String summaryAI;
     private String userMemo;
     private String embedding;
