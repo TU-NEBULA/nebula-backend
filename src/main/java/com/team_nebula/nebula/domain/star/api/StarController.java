@@ -38,10 +38,10 @@ public class StarController {
         return ApiResponse.onSuccessCreated(responseDTO);
     }
 
-    // 스타 수정 API(데이터 입력 후 나머지 노드 생성)
+    // 스타 입력 완료 API(데이터 입력 후 나머지 노드 생성)
     @PatchMapping("/complete/{starId}")
-    public ApiResponse<PutStarResponseDTO> updateStar(@PathVariable UUID starId, @RequestBody CreateStarRequestDTO requestDTO){
-        PutStarResponseDTO responseDTO = starCommandService.updateStar(starId, requestDTO);
+    public ApiResponse<PutStarResponseDTO> createCompleteStar(@PathVariable UUID starId, @RequestBody CreateStarRequestDTO requestDTO){
+        PutStarResponseDTO responseDTO = starCommandService.createCompleteStar(starId, requestDTO);
 
         return ApiResponse.onSuccess(responseDTO);
     }
@@ -89,7 +89,7 @@ public class StarController {
 
     // 스타 수정 API
     @PatchMapping("/{starId}")
-    public ApiResponse<GetStarOneResponseDTO> updateStar(
+    public ApiResponse<GetStarOneResponseDTO> createCompleteStar(
             @PathVariable UUID starId,
             @RequestBody UpdateStarOneRequestDTO requestDTO
     ){
