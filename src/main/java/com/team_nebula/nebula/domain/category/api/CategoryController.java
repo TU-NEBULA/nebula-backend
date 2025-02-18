@@ -1,8 +1,11 @@
 package com.team_nebula.nebula.domain.category.api;
 
 import com.team_nebula.nebula.domain.category.dto.request.CreateCategoryRequestDTO;
+import com.team_nebula.nebula.domain.category.dto.request.UpdateCategoryOneRequestDTO;
 import com.team_nebula.nebula.domain.category.dto.response.CreateCategoryResponseDTO;
+import com.team_nebula.nebula.domain.category.dto.response.DeleteCategoryResponseDTO;
 import com.team_nebula.nebula.domain.category.dto.response.GetCategoryListResponseDTO;
+import com.team_nebula.nebula.domain.category.dto.response.UpdateCategoryOneResponseDTO;
 import com.team_nebula.nebula.domain.category.service.CategoryCommandService;
 import com.team_nebula.nebula.domain.category.service.CategoryQueryService;
 import com.team_nebula.nebula.domain.user.entity.User;
@@ -12,6 +15,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
@@ -35,6 +40,19 @@ public class CategoryController {
     public ApiResponse<GetCategoryListResponseDTO> getCategoryList(@AuthUser User user) {
         GetCategoryListResponseDTO responseDto = categoryQueryService.getCategoryList(user.getId());
         return ApiResponse.onSuccess(responseDto);
+    }
+
+    // 카테고리 이름 수정 API
+    @PatchMapping("{categoryId}")
+    public ApiResponse<UpdateCategoryOneResponseDTO> updateCategory(@RequestBody UpdateCategoryOneRequestDTO requestDTO, @PathVariable UUID categoryId) {
+        UpdateCategoryOneResponseDTO responseDTO = categoryCommandService.updateCategory(requestDTO, categoryId);
+        return ApiResponse.onSuccess(responseDTO);
+    }
+
+    @PatchMapping("/{categoryId}/deactivate")
+    public ApiResponse<DeleteCategoryResponseDTO> deleteCategory(@AuthUser User user, @PathVariable UUID categoryId){
+        DeleteCategoryResponseDTO responseDTO = categoryCommandService.deleteCategory(user.getId(), categoryId);
+        return ApiResponse.onSuccess(responseDTO);
     }
 }
 

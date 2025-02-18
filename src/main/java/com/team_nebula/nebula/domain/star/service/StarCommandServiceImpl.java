@@ -7,8 +7,6 @@ import com.team_nebula.nebula.domain.image.S3Service;
 import com.team_nebula.nebula.domain.keyword.entity.Keyword;
 import com.team_nebula.nebula.domain.keyword.service.KeywordCommandService;
 import com.team_nebula.nebula.domain.link.service.LinkCommandService;
-import com.team_nebula.nebula.domain.star.converter.StarConverter;
-import com.team_nebula.nebula.domain.star.dto.request.CreateStarFileDTO;
 import com.team_nebula.nebula.domain.star.dto.request.CreateStarRequestDTO;
 import com.team_nebula.nebula.domain.star.dto.request.UpdateStarOneRequestDTO;
 import com.team_nebula.nebula.domain.star.dto.response.CreateStarResponseDTO;
@@ -36,7 +34,6 @@ import java.util.stream.Collectors;
 public class StarCommandServiceImpl implements StarCommandService {
 
     private final StarRepository starRepository;
-    private final CategoryRepository categoryRepository;
     private final UserNodeRepository userNodeRepository;
     private final CategoryCommandService categoryCommandService;
     private final CategoryQueryService categoryQueryService;
@@ -105,12 +102,11 @@ public class StarCommandServiceImpl implements StarCommandService {
 //    }
 
     @Override
-    public PutStarResponseDTO updateStar(UUID starId, CreateStarRequestDTO requestDTO){
+    public PutStarResponseDTO createCompleteStar(UUID starId, CreateStarRequestDTO requestDTO){
 
         Star star = starRepository.findById(starId)
                 .orElseThrow(() -> new GeneralException(ErrorStatus._STAR_NOT_FOUND));
 
-        System.out.println("카테고리 이름" + requestDTO.getCategoryName());
         // 카테고리 관계 설정
         categoryCommandService.linkStarToCategory(star, requestDTO.getCategoryName());
 
