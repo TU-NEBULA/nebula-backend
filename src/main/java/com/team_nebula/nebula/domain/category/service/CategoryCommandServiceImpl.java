@@ -1,7 +1,9 @@
 package com.team_nebula.nebula.domain.category.service;
 
 import com.team_nebula.nebula.domain.category.dto.request.CreateCategoryRequestDTO;
+import com.team_nebula.nebula.domain.category.dto.request.UpdateCategoryOneRequestDTO;
 import com.team_nebula.nebula.domain.category.dto.response.CreateCategoryResponseDTO;
+import com.team_nebula.nebula.domain.category.dto.response.UpdateCategoryOneResponseDTO;
 import com.team_nebula.nebula.domain.category.entity.Category;
 import com.team_nebula.nebula.domain.category.repository.CategoryRepository;
 import com.team_nebula.nebula.domain.star.entity.Star;
@@ -12,6 +14,8 @@ import com.team_nebula.nebula.global.apipayload.exception.GeneralException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.UUID;
 
 
 @Service
@@ -67,6 +71,21 @@ public class CategoryCommandServiceImpl implements CategoryCommandService {
         String cname = categoryRepository.findNameByStarAndRemoveRelation(star.getId(), categoryName);
 
         return cname;
+    }
+
+    @Override
+    public UpdateCategoryOneResponseDTO updateCategory(UpdateCategoryOneRequestDTO requestDTO, UUID categoryId){
+        Category category = categoryRepository.findById(categoryId)
+                .orElseThrow(() -> new GeneralException(ErrorStatus._CATEGORY_NOT_FOUND));
+
+        String newName = requestDTO.getNewName();
+
+        category.updateName(newName);
+        categoryRepository.save(category);
+
+        return UpdateCategoryOneResponseDTO.builder()
+                .newName(category.getName())
+                .build();
     }
 
 }

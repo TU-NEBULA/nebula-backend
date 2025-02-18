@@ -30,4 +30,6 @@ public class Category extends BaseEntity {
         this.id = UUID.randomUUID();
         this.name = name;
     }
+
+    public void updateName(String name) {this.name = name;}
 }
