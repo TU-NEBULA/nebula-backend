@@ -59,9 +59,17 @@ public class SecurityConfig {
 				}
 			}));
 
-		//csrf disable
+		//H2 CSRF 해제
 		http
-			.csrf((auth) -> auth.disable());
+			.csrf(csrf -> csrf
+				.ignoringRequestMatchers("/h2-console/**")
+				.disable()
+			);
+
+		http
+			.headers(headers -> headers
+				.frameOptions(frameOptions -> frameOptions.disable())
+			);
 
 		//From 로그인 방식 disable
 		http
