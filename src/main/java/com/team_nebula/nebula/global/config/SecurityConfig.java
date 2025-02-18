@@ -47,8 +47,12 @@ public class SecurityConfig {
 
 					CorsConfiguration configuration = new CorsConfiguration();
 
-					configuration.setAllowedOrigins(Collections.singletonList("http://localhost:3000"));
-					configuration.setAllowedMethods(Collections.singletonList("*"));
+					configuration.setAllowedOrigins(Arrays.asList(
+						"http://localhost:3000",
+						"http://localhost:8080"
+					));
+
+					configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
 					configuration.setAllowCredentials(true);
 					configuration.setAllowedHeaders(Collections.singletonList("*"));
 					configuration.setMaxAge(3600L);
@@ -59,17 +63,9 @@ public class SecurityConfig {
 				}
 			}));
 
-		//H2 CSRF 해제
+		//csrf disable
 		http
-			.csrf(csrf -> csrf
-				.ignoringRequestMatchers("/h2-console/**")
-				.disable()
-			);
-
-		http
-			.headers(headers -> headers
-				.frameOptions(frameOptions -> frameOptions.disable())
-			);
+			.csrf((auth) -> auth.disable());
 
 		//From 로그인 방식 disable
 		http
