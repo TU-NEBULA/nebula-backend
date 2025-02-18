@@ -16,6 +16,7 @@ public interface CategoryRepository extends Neo4jRepository<Category, UUID> {
 
     @Query("""
     MATCH (u:UserNode {userId: $userId})-[:GENERATED]->(c:Category)
+    WHERE c.isDeletedStatus = false OR c.isDeletedStatus IS NULL
     OPTIONAL MATCH (c)<-[:BELONGS_TO]-(s:Star)
     RETURN c.id AS id, c.name AS name, COUNT(s) AS includedStarCnt
     """)
