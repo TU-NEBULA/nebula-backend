@@ -22,6 +22,9 @@ public class Category extends BaseEntity {
     @Property(name = "name")
     private String name;
 
+    @Property("Deleted status")
+    private Boolean isDeletedStatus;
+
     @Relationship(type = "BELONGS_TO", direction = Relationship.Direction.INCOMING)
     private Set<Star> stars = new HashSet<>();
 
@@ -29,7 +32,10 @@ public class Category extends BaseEntity {
     public Category(String name) {
         this.id = UUID.randomUUID();
         this.name = name;
+        this.isDeletedStatus = false;
     }
 
     public void updateName(String name) {this.name = name;}
+
+    public void updateIsDeletedStatus() {this.isDeletedStatus = true;}
 }

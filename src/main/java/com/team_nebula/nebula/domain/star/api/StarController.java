@@ -99,7 +99,7 @@ public class StarController {
     }
 
     // 스타 삭제 API
-    @PatchMapping("/delete/{starId}")
+    @PatchMapping("/{starId}/deactivate")
     public ApiResponse<DeleteStarResponseDTO> deleteStar(@AuthUser User user, @PathVariable UUID starId){
         DeleteStarResponseDTO responseDTO = starCommandService.deleteStar(starId);
 

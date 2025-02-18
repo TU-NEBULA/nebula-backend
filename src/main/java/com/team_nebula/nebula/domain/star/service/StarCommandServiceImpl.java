@@ -7,7 +7,6 @@ import com.team_nebula.nebula.domain.image.S3Service;
 import com.team_nebula.nebula.domain.keyword.entity.Keyword;
 import com.team_nebula.nebula.domain.keyword.service.KeywordCommandService;
 import com.team_nebula.nebula.domain.link.service.LinkCommandService;
-import com.team_nebula.nebula.domain.star.converter.StarConverter;
 import com.team_nebula.nebula.domain.star.dto.request.CreateStarRequestDTO;
 import com.team_nebula.nebula.domain.star.dto.request.UpdateStarOneRequestDTO;
 import com.team_nebula.nebula.domain.star.dto.response.CreateStarResponseDTO;
@@ -35,7 +34,6 @@ import java.util.stream.Collectors;
 public class StarCommandServiceImpl implements StarCommandService {
 
     private final StarRepository starRepository;
-    private final CategoryRepository categoryRepository;
     private final UserNodeRepository userNodeRepository;
     private final CategoryCommandService categoryCommandService;
     private final CategoryQueryService categoryQueryService;

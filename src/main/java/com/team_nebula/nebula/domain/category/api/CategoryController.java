@@ -3,6 +3,7 @@ package com.team_nebula.nebula.domain.category.api;
 import com.team_nebula.nebula.domain.category.dto.request.CreateCategoryRequestDTO;
 import com.team_nebula.nebula.domain.category.dto.request.UpdateCategoryOneRequestDTO;
 import com.team_nebula.nebula.domain.category.dto.response.CreateCategoryResponseDTO;
+import com.team_nebula.nebula.domain.category.dto.response.DeleteCategoryResponseDTO;
 import com.team_nebula.nebula.domain.category.dto.response.GetCategoryListResponseDTO;
 import com.team_nebula.nebula.domain.category.dto.response.UpdateCategoryOneResponseDTO;
 import com.team_nebula.nebula.domain.category.service.CategoryCommandService;
@@ -45,6 +46,12 @@ public class CategoryController {
     @PatchMapping("{categoryId}")
     public ApiResponse<UpdateCategoryOneResponseDTO> updateCategory(@RequestBody UpdateCategoryOneRequestDTO requestDTO, @PathVariable UUID categoryId) {
         UpdateCategoryOneResponseDTO responseDTO = categoryCommandService.updateCategory(requestDTO, categoryId);
+        return ApiResponse.onSuccess(responseDTO);
+    }
+
+    @PatchMapping("/{categoryId}/deactivate")
+    public ApiResponse<DeleteCategoryResponseDTO> deleteCategory(@AuthUser User user, @PathVariable UUID categoryId){
+        DeleteCategoryResponseDTO responseDTO = categoryCommandService.deleteCategory(user.getId(), categoryId);
         return ApiResponse.onSuccess(responseDTO);
     }
 }

@@ -3,6 +3,7 @@ package com.team_nebula.nebula.domain.category.service;
 import com.team_nebula.nebula.domain.category.dto.request.CreateCategoryRequestDTO;
 import com.team_nebula.nebula.domain.category.dto.request.UpdateCategoryOneRequestDTO;
 import com.team_nebula.nebula.domain.category.dto.response.CreateCategoryResponseDTO;
+import com.team_nebula.nebula.domain.category.dto.response.DeleteCategoryResponseDTO;
 import com.team_nebula.nebula.domain.category.dto.response.UpdateCategoryOneResponseDTO;
 import com.team_nebula.nebula.domain.star.entity.Star;
 
@@ -18,4 +19,6 @@ public interface CategoryCommandService {
 
     public UpdateCategoryOneResponseDTO updateCategory(UpdateCategoryOneRequestDTO requestDTO, UUID categoryId);
 
-    }
+    public DeleteCategoryResponseDTO deleteCategory(Long userId, UUID categoryId);
+
+}
