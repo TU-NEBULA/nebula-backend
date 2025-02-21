@@ -27,7 +27,10 @@ public enum ErrorStatus implements BaseErrorCode {
 	_KEYWORD_NOT_FOUND(HttpStatus.NOT_FOUND, "KEYWORD4001", "해당 스타안에 키워드를 찾지 못했습니다."),
 	_KEYWORD_NOT_INPUT(HttpStatus.NOT_ACCEPTABLE, "KEYWORD4002", "키워드가 입력되지 않았습니다."),
 
-	_MULTIPARTFILE_CONVERT_FAIL(HttpStatus.INTERNAL_SERVER_ERROR,"MULTIPARTFILE5000","MultipartFile -> File로 변환이 실패하였습니다.");
+	_MULTIPARTFILE_CONVERT_FAIL(HttpStatus.INTERNAL_SERVER_ERROR,"MULTIPARTFILE5000","MultipartFile -> File로 변환이 실패하였습니다."),
+
+	_AI_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "AI5000","AI 서버에서 문제가 발생했습니다."),
+	_AI_EXTRACT_DATA_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "AI5001","AI에서 썸네일과 추천 키워드을 가져오지 못했습니다.");
 
 	private HttpStatus httpStatus;
 	private String code;
