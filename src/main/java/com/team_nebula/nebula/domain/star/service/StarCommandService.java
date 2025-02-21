@@ -22,4 +22,6 @@ public interface StarCommandService {
     public GetStarOneResponseDTO updateStar(UUID starId, UpdateStarOneRequestDTO requestDTO);
 
     public DeleteStarResponseDTO deleteStar(UUID starId);
+
+    public DeleteStarResponseDTO cancelStar(UUID starId);
 }

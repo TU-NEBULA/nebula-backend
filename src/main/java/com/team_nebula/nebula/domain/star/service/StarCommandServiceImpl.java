@@ -229,4 +229,19 @@ public class StarCommandServiceImpl implements StarCommandService {
                 .build();
     }
 
+    @Override
+    public DeleteStarResponseDTO cancelStar(UUID starId){
+        Star star = starRepository.findById(starId)
+                .orElseThrow(() -> new GeneralException(ErrorStatus._STAR_NOT_FOUND));
+
+        s3Service.deleteHtmlFileInS3(star.getHtmlFileUrl());
+        starRepository.delete(star);
+
+        String canceledMessage = "Star with ID : " + starId + " was completely deleted";
+        return DeleteStarResponseDTO.builder()
+                .starId(starId)
+                .deleteStatus(canceledMessage)
+                .build();
+    }
+
 }
