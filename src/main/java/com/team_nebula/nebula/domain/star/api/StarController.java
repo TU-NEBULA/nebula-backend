@@ -105,4 +105,12 @@ public class StarController {
 
         return ApiResponse.onSuccess(responseDTO);
     }
+
+    // 스타화 취소 API
+    @DeleteMapping("/{starId}/cancel")
+    public ApiResponse<DeleteStarResponseDTO> cancelStar(@PathVariable UUID starId, @AuthUser User user){
+        DeleteStarResponseDTO responseDTO = starCommandService.cancelStar(starId);
+
+        return ApiResponse.onSuccess(responseDTO);
+    }
 }

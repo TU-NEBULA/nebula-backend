@@ -1,7 +1,9 @@
 package com.team_nebula.nebula.domain.image;
 
+import com.amazonaws.AmazonServiceException;
 import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.model.CannedAccessControlList;
+import com.amazonaws.services.s3.model.DeleteObjectRequest;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.team_nebula.nebula.global.apipayload.code.status.ErrorStatus;
 import com.team_nebula.nebula.global.apipayload.exception.GeneralException;
@@ -31,6 +33,7 @@ public class S3Service {
 
     private static final String THUMBNAIL_DIR = "thumbnails/";
     private static final String HTML_FILE_DIR = "html_files/";
+
 
     public String saveThumbnail(MultipartFile thumbnailImage, String dataInfo) {
         return uploadThumbnailToS3(thumbnailImage, THUMBNAIL_DIR, dataInfo);
@@ -100,6 +103,17 @@ public class S3Service {
             log.error("File conversion failed: {}", e.getMessage());
         }
         return Optional.empty();
+    }
+
+    public void deleteHtmlFileInS3(String fileKey){
+        try{
+            amazonS3Client.deleteObject(new DeleteObjectRequest(bucket, fileKey));
+            log.info("Deleted HTML file from S3: {}", fileKey);
+        }
+        catch(AmazonServiceException e){
+            log.error("Failed to delete HTML file from S3: {}", fileKey, e);
+            throw new GeneralException(ErrorStatus._S3_HTML_FILE_DELETE_FAIL);
+        }
     }
 }
 
