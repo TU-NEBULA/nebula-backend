@@ -15,6 +15,8 @@ public interface LinkRepository extends Neo4jRepository<Link, UUID> {
     @Query("""
         MATCH (s1:Star)-[:TAGGED]->(k:Keyword)<-[:TAGGED]-(s2:Star)
         WHERE s1.id = $starId AND s1 <> s2
+        AND (s1.isDeletedStatus = false OR s1.isDeletedStatus IS NULL)
+        AND (s2.isDeletedStatus = false OR s2.isDeletedStatus IS NULL)
         WITH s1, s2, COUNT(k) AS sharedKeywordNum
         WHERE sharedKeywordNum > 0
         MERGE (l:Link {linked_two_node_Id: [s1.id, s2.id]})
@@ -26,7 +28,7 @@ public interface LinkRepository extends Neo4jRepository<Link, UUID> {
 
     @Query("""
     MATCH (u:UserNode)-[:CREATED]->(s:Star)
-    WHERE u.userId = $userId
+    WHERE u.userId = $userId AND (s.isDeletedStatus = false OR s.isDeletedStatus IS NULL)
 
     MATCH (s)-[:LINKED]->(l:Link)
     WHERE EXISTS {
@@ -43,7 +45,7 @@ public interface LinkRepository extends Neo4jRepository<Link, UUID> {
 
     @Query("""
     MATCH (u:UserNode)-[:CREATED]->(s:Star)-[:BELONGS_TO]->(c:Category)
-    WHERE u.userId = $userId AND c.id = $categoryId
+    WHERE u.userId = $userId AND c.id = $categoryId AND (s.isDeletedStatus = false OR s.isDeletedStatus IS NULL)
     
     MATCH (s)-[:LINKED]->(l:Link)<-[:LINKED]-(s2:Star)
     WHERE (u)-[:CREATED]->(s2)
@@ -57,7 +59,7 @@ public interface LinkRepository extends Neo4jRepository<Link, UUID> {
 
     @Query("""
     MATCH (u:UserNode)-[:CREATED]->(s:Star)-[:TAGGED]->(k:Keyword)
-    WHERE u.userId = $userId AND k.name = $keywordId
+    WHERE u.userId = $userId AND k.name = $keywordId AND (s.isDeletedStatus = false OR s.isDeletedStatus IS NULL)
     
     MATCH (s)-[:LINKED]->(l:Link)<-[:LINKED]-(s2:Star)
     WHERE (u)-[:CREATED]->(s2)
