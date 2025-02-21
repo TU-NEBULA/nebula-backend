@@ -13,7 +13,7 @@ import java.util.UUID;
 public interface StarRepository extends Neo4jRepository<Star, UUID> {
     @Query("""
     MATCH (u:UserNode)-[:CREATED]->(s:Star)
-    WHERE u.userId = $userId
+    WHERE u.userId = $userId AND (s.isDeletedStatus = false OR s.isDeletedStatus IS NULL)
     OPTIONAL MATCH (s)-[:TAGGED]->(k:Keyword)
     OPTIONAL MATCH (s)-[:BELONGS_TO]->(c:Category)
     RETURN s.id AS starId,
@@ -32,6 +32,7 @@ public interface StarRepository extends Neo4jRepository<Star, UUID> {
     @Query("""
         MATCH (s:Star {id: $starId})-[:BELONGS_TO]->(c:Category)
         OPTIONAL MATCH (s)-[:TAGGED]->(k:Keyword)
+        WHERE s.isDeletedStatus = false OR s.isDeletedStatus IS NULL
     
         RETURN s.id AS starId,
                s.title AS title,
@@ -47,23 +48,23 @@ public interface StarRepository extends Neo4jRepository<Star, UUID> {
 
     @Query("""
     MATCH (u:UserNode)-[:CREATED]->(s:Star)-[:BELONGS_TO]->(c:Category)
-    WHERE u.userId = $userId AND c.id = $categoryId
+    WHERE u.userId = $userId AND c.id = $categoryId AND (isDeletedStatus = false OR s.isDeletedStatus IS NULL)
     OPTIONAL MATCH (s)-[:TAGGED]->(k:Keyword)
-    RETURN s.id AS starId, 
-           s.title AS title, 
-           s.siteUrl AS siteUrl, 
-           s.thumbnailUrl AS thumbnailUrl, 
-           s.summaryAI AS summaryAI, 
-           s.userMemo AS userMemo, 
-           s.views AS views, 
-           c.name AS categoryName, 
+    RETURN s.id AS starId,
+           s.title AS title,
+           s.siteUrl AS siteUrl,
+           s.thumbnailUrl AS thumbnailUrl,
+           s.summaryAI AS summaryAI,
+           s.userMemo AS userMemo,
+           s.views AS views,
+           c.name AS categoryName,
            COLLECT(k.name) AS keywordList
     """)
     List<GetStarOneResponseDTO> findStarsInCategory(@Param("userId") Long userId, @Param("categoryId") UUID categoryId);
 
     @Query("""
     MATCH (u:UserNode)-[:CREATED]->(s:Star)-[:TAGGED]->(k:Keyword)
-    WHERE u.userId = $userId AND k.name = $keywordId
+    WHERE u.userId = $userId AND k.name = $keywordId AND (isDeletedStatus = false OR s.isDeletedStatus IS NULL)
     OPTIONAL MATCH (s)-[:BELONGS_TO]->(c:Category)
     RETURN s.id AS starId,
            s.title AS title,
@@ -81,6 +82,7 @@ public interface StarRepository extends Neo4jRepository<Star, UUID> {
     MATCH (u:UserNode)-[:CREATED]->(s:Star)
     WHERE u.userId = $userId
       AND ($title IS NULL OR toLower(s.title) CONTAINS toLower($title))
+      AND (isDeletedStatus = false OR s.isDeletedStatus IS NULL)
 
     OPTIONAL MATCH (s)-[:TAGGED]->(k:Keyword)
     OPTIONAL MATCH (s)-[:BELONGS_TO]->(c:Category)
