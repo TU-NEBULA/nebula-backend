@@ -13,7 +13,7 @@ import java.util.UUID;
 public interface StarRepository extends Neo4jRepository<Star, UUID> {
     @Query("""
     MATCH (u:UserNode)-[:CREATED]->(s:Star)
-    WHERE u.userId = $userId AND (s.isDeletedStatus = false OR s.isDeletedStatus IS NULL)
+    WHERE u.userId = $userId AND (s.isDeletedStatus = false OR s.isDeletedStatus IS NULL
     OPTIONAL MATCH (s)-[:TAGGED]->(k:Keyword)
     OPTIONAL MATCH (s)-[:BELONGS_TO]->(c:Category)
     RETURN s.id AS starId,
