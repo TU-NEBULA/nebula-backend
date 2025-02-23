@@ -1,6 +1,7 @@
 package com.team_nebula.nebula.domain.star.service;
 
-import com.team_nebula.nebula.domain.category.repository.CategoryRepository;
+import com.team_nebula.nebula.domain.AI.dto.GetThumbnailAndKeywordsResponseDTO;
+import com.team_nebula.nebula.domain.AI.service.AiService;
 import com.team_nebula.nebula.domain.category.service.CategoryCommandService;
 import com.team_nebula.nebula.domain.category.service.CategoryQueryService;
 import com.team_nebula.nebula.domain.image.S3Service;
@@ -40,16 +41,19 @@ public class StarCommandServiceImpl implements StarCommandService {
     private final KeywordCommandService keywordCommandService;
     private final LinkCommandService linkCommandService;
     private final S3Service s3Service;
+    private final AiService aiService;
 
     @Override
     public CreateStarResponseDTO createFirstStar(User user, MultipartFile htmlFile, String title, String siteUrl){
         UserNode userNode = userNodeRepository.findById(user.getId())
                 .orElseThrow(() -> new GeneralException(ErrorStatus._USER_NOT_FOUND));
 
+        String htmlFileKey = s3Service.saveHtmlFile(htmlFile, title);
+
         Star star = Star.builder()
                 .title(title)
                 .siteUrl(siteUrl)
-                .htmlFileUrl(s3Service.saveHtmlFile(htmlFile, title))
+                .htmlFileUrl(htmlFileKey)
                 .build();
 
         Star savedStar = starRepository.save(star);
@@ -57,14 +61,25 @@ public class StarCommandServiceImpl implements StarCommandService {
             throw new GeneralException(ErrorStatus._STAR_CREATION_FAILED);
         }
 
-        // 유저 노드와 관계 설정 후 저장
-        userNode.getStars().add(savedStar);
-        userNodeRepository.save(userNode);
+        try {
+            // AI 기능 호출 (썸네일 및 추천 키워드 생성)
+            GetThumbnailAndKeywordsResponseDTO responseDTO = aiService.analyzeHtmlFile(savedStar.getId(), user.getId(), htmlFileKey);
 
-        return CreateStarResponseDTO.builder()
-                .starId(savedStar.getId())
-                .title(savedStar.getTitle())
-                .build();
+            // 유저 노드와 관계 설정 후 저장
+            userNode.getStars().add(savedStar);
+            userNodeRepository.save(userNode);
+
+            return CreateStarResponseDTO.builder()
+                    .starId(savedStar.getId())
+                    .title(savedStar.getTitle())
+                    .siteUrl(savedStar.getSiteUrl())
+                    .thumbnailUrl(responseDTO.getImage_url())
+                    .keywords(responseDTO.getKeywords())
+                    .build();
+        } catch (Exception e) {
+            starRepository.delete(savedStar);
+            throw new GeneralException(ErrorStatus._AI_SERVER_ERROR);
+        }
     }
 
 //    @Override
