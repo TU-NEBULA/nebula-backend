@@ -57,7 +57,7 @@ public class StarConverter {
 public static GetSearchedStarListResponseDTO convertToStarListDto(List<GetSearchedStarOneResponseDTO> queryResult) {
     if (queryResult == null || queryResult.isEmpty()) {
         return GetSearchedStarListResponseDTO.builder()
-                .type("검새된 스타 - 링크 - 검색된 스타와 직접 연결된 스타")
+                .type("검색된 스타 - 링크 - 검색된 스타와 직접 연결된 스타")
                 .totalStarCnt(0)
                 .totalLinkCnt(0)
                 .searchedStarListDto(Collections.emptyList())

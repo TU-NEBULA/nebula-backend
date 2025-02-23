@@ -135,7 +135,7 @@ public class StarCommandServiceImpl implements StarCommandService {
         // 스타 간 Link 노드 생성
         linkCommandService.createLinksForStar(savedStar);
 
-        savedStar.updateStar(requestDTO.getThumbnailUrl(), requestDTO.getSummaryAI(), requestDTO.getUserMemo(), requestDTO.getEmbedding());
+        savedStar.updateStar(requestDTO.getThumbnailUrl(), requestDTO.getSummaryAI(), requestDTO.getUserMemo());
 
         return PutStarResponseDTO.builder()
                 .starId(star.getId())

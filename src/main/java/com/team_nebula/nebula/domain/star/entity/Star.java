@@ -46,9 +46,7 @@ public class Star extends BaseEntity {
     @Property("html_file_url")
     private String htmlFileUrl;
 
-    private String embedding;
-
-    @Property("Deleted status")
+    @Property("isDeletedStatus")
     private Boolean isDeletedStatus;
 
     @Relationship(type = "LINKED", direction = Relationship.Direction.OUTGOING)
@@ -59,7 +57,7 @@ public class Star extends BaseEntity {
 
     @Builder
     public Star(String title, String siteUrl, String thumbnailUrl, String summaryAI, String userMemo, int views,
-                String htmlFileUrl, String embedding) {
+                String htmlFileUrl) {
         this.id = UUID.randomUUID();
         this.title = title;
         this.siteUrl = siteUrl;
@@ -68,15 +66,13 @@ public class Star extends BaseEntity {
         this.userMemo = userMemo;
         this.views = views;
         this.htmlFileUrl = htmlFileUrl;
-        this.embedding = embedding;
         this.isDeletedStatus = false;
     }
 
-    public void updateStar(String thumbnailUrl, String summaryAI, String userMemo, String embedding) {
+    public void updateStar(String thumbnailUrl, String summaryAI, String userMemo) {
         this.thumbnailUrl = thumbnailUrl;
         this.summaryAI = summaryAI;
         this.userMemo = userMemo;
-        this.embedding = embedding;
         this.isDeletedStatus = false;
     }
 
