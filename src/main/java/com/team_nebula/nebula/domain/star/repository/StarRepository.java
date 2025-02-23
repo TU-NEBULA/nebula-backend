@@ -13,7 +13,7 @@ import java.util.UUID;
 public interface StarRepository extends Neo4jRepository<Star, UUID> {
     @Query("""
     MATCH (u:UserNode)-[:CREATED]->(s:Star)
-    WHERE u.userId = $userId AND (s.isDeletedStatus = false OR s.isDeletedStatus IS NULL
+    WHERE u.userId = $userId AND s.isDeletedStatus = false
     OPTIONAL MATCH (s)-[:TAGGED]->(k:Keyword)
     OPTIONAL MATCH (s)-[:BELONGS_TO]->(c:Category)
     RETURN s.id AS starId,
@@ -32,7 +32,7 @@ public interface StarRepository extends Neo4jRepository<Star, UUID> {
     @Query("""
         MATCH (s:Star {id: $starId})-[:BELONGS_TO]->(c:Category)
         OPTIONAL MATCH (s)-[:TAGGED]->(k:Keyword)
-        WHERE s.isDeletedStatus = false OR s.isDeletedStatus IS NULL
+        WHERE s.isDeletedStatus = false
     
         RETURN s.id AS starId,
                s.title AS title,
@@ -48,7 +48,7 @@ public interface StarRepository extends Neo4jRepository<Star, UUID> {
 
     @Query("""
     MATCH (u:UserNode)-[:CREATED]->(s:Star)-[:BELONGS_TO]->(c:Category)
-    WHERE u.userId = $userId AND c.id = $categoryId AND (s.isDeletedStatus = false OR s.isDeletedStatus IS NULL)
+    WHERE u.userId = $userId AND c.id = $categoryId AND s.isDeletedStatus = false
     OPTIONAL MATCH (s)-[:TAGGED]->(k:Keyword)
     RETURN s.id AS starId,
            s.title AS title,
@@ -64,7 +64,7 @@ public interface StarRepository extends Neo4jRepository<Star, UUID> {
 
     @Query("""
     MATCH (u:UserNode)-[:CREATED]->(s:Star)-[:TAGGED]->(k:Keyword)
-    WHERE u.userId = $userId AND k.name = $keywordId AND (s.isDeletedStatus = false OR s.isDeletedStatus IS NULL)
+    WHERE u.userId = $userId AND k.name = $keywordId AND s.isDeletedStatus = false
     OPTIONAL MATCH (s)-[:BELONGS_TO]->(c:Category)
     RETURN s.id AS starId,
            s.title AS title,
@@ -82,7 +82,7 @@ public interface StarRepository extends Neo4jRepository<Star, UUID> {
     MATCH (u:UserNode)-[:CREATED]->(s:Star)
     WHERE u.userId = $userId
       AND ($title IS NULL OR toLower(s.title) CONTAINS toLower($title))
-      AND (s.isDeletedStatus = false OR s.isDeletedStatus IS NULL)
+      AND s.isDeletedStatus = false
 
     OPTIONAL MATCH (s)-[:TAGGED]->(k:Keyword)
     OPTIONAL MATCH (s)-[:BELONGS_TO]->(c:Category)

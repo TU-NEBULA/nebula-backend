@@ -16,7 +16,6 @@ public class CreateStarRequestDTO {
     private String thumbnailUrl;
     private String summaryAI;
     private String userMemo;
-    private String embedding;
     private String categoryName;
     private List<String> keywordList;
 
