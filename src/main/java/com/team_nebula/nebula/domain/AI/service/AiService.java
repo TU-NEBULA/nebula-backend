@@ -5,6 +5,7 @@ import com.team_nebula.nebula.global.apipayload.code.status.ErrorStatus;
 import com.team_nebula.nebula.global.apipayload.exception.GeneralException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -18,7 +19,8 @@ import java.util.UUID;
 @Slf4j
 public class AiService {
 
-    private static final String AI_EXTRACT_DATA_URL = "https://s38vz6acbrpf.share.zrok.io/api/extract_data";
+    @Value("${ai.url.extract-data}")
+    private String aiExtractDataUrl;
     private final RestTemplate restTemplate = new RestTemplate();
 
     public GetThumbnailAndKeywordsResponseDTO analyzeHtmlFile(UUID starId, Long userId, String htmlFileKey) {
@@ -35,7 +37,7 @@ public class AiService {
 
             // AI 서버 요청 및 응답 받기
             ResponseEntity<GetThumbnailAndKeywordsResponseDTO> responseEntity = restTemplate.exchange(
-                    AI_EXTRACT_DATA_URL,
+                    aiExtractDataUrl,
                     HttpMethod.POST,
                     requestEntity,
                     GetThumbnailAndKeywordsResponseDTO.class
