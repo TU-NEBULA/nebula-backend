@@ -1,7 +1,10 @@
 package com.team_nebula.nebula.domain.category.service;
 
 import com.team_nebula.nebula.domain.category.dto.request.CreateCategoryRequestDTO;
+import com.team_nebula.nebula.domain.category.dto.request.UpdateCategoryOneRequestDTO;
 import com.team_nebula.nebula.domain.category.dto.response.CreateCategoryResponseDTO;
+import com.team_nebula.nebula.domain.category.dto.response.DeleteCategoryResponseDTO;
+import com.team_nebula.nebula.domain.category.dto.response.UpdateCategoryOneResponseDTO;
 import com.team_nebula.nebula.domain.category.entity.Category;
 import com.team_nebula.nebula.domain.category.repository.CategoryRepository;
 import com.team_nebula.nebula.domain.star.entity.Star;
@@ -12,6 +15,8 @@ import com.team_nebula.nebula.global.apipayload.exception.GeneralException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.UUID;
 
 
 @Service
@@ -59,6 +64,53 @@ public class CategoryCommandServiceImpl implements CategoryCommandService {
 
         category.getStars().add(star);
         categoryRepository.save(category);
+    }
+
+    @Override
+    public String linkStarToCategoryAndGetName(Star star, String categoryName){
+
+        String cname = categoryRepository.findNameByStarAndRemoveRelation(star.getId(), categoryName);
+
+        return cname;
+    }
+
+    @Override
+    public UpdateCategoryOneResponseDTO updateCategory(UpdateCategoryOneRequestDTO requestDTO, UUID categoryId){
+        Category category = categoryRepository.findById(categoryId)
+                .orElseThrow(() -> new GeneralException(ErrorStatus._CATEGORY_NOT_FOUND));
+
+        // 카테고리 중복 여부 체크
+        boolean categoryExists = categoryRepository.existsByName(requestDTO.getNewName());
+        if (categoryExists) {
+            throw new GeneralException(ErrorStatus._CATEGORY_ALREADY_EXIST);
+        }
+
+        String newName = requestDTO.getNewName();
+
+        category.updateName(newName);
+        categoryRepository.save(category);
+
+        return UpdateCategoryOneResponseDTO.builder()
+                .newName(category.getName())
+                .build();
+    }
+
+    @Override
+    public DeleteCategoryResponseDTO deleteCategory(Long userId, UUID categoryId){
+        UserNode userNode = userNodeRepository.findByUserId(userId)
+                .orElseThrow(() -> new GeneralException(ErrorStatus._USER_NOT_FOUND));
+
+        Category category = categoryRepository.findById(categoryId)
+                .orElseThrow(() -> new GeneralException(ErrorStatus._CATEGORY_NOT_FOUND));
+
+        category.updateIsDeletedStatus();
+        categoryRepository.save(category);
+
+        String deleteMessage = "Category : " + category.getName() + " was deleted";
+        return DeleteCategoryResponseDTO.builder()
+                .categoryId(categoryId)
+                .deleteStatus(deleteMessage)
+                .build();
     }
 
 }

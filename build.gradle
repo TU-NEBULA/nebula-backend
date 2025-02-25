@@ -120,6 +120,6 @@ jib {
 		}
 	}
 	to {
-		image = 'zmflspa123/nubula:latest'
+		image = 'zmflspa123/nebula:latest'
 	}
 }

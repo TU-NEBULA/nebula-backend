@@ -12,7 +12,7 @@ import java.util.UUID;
 
 public interface StarQueryService {
 
-    public CreateStarFileDTO starDataParsing(MultipartFile thumbnailImage, MultipartFile htmlFile, String starJsonData);
+//    public CreateStarFileDTO starDataParsing(MultipartFile thumbnailImage, MultipartFile htmlFile, String starJsonData);
 
     public GetStarListResponseDTO getStarList(Long userId);
 
