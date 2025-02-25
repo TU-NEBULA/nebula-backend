@@ -135,7 +135,7 @@ public class StarCommandServiceImpl implements StarCommandService {
         // 스타 간 Link 노드 생성
         linkCommandService.createLinksForStar(savedStar);
 
-        savedStar.updateStar(requestDTO.getThumbnailUrl(), requestDTO.getSummaryAI(), requestDTO.getUserMemo(), requestDTO.getEmbedding());
+        savedStar.updateStar(requestDTO.getThumbnailUrl(), requestDTO.getSummaryAI(), requestDTO.getUserMemo());
 
         return PutStarResponseDTO.builder()
                 .starId(star.getId())
@@ -226,6 +226,21 @@ public class StarCommandServiceImpl implements StarCommandService {
         return DeleteStarResponseDTO.builder()
                 .starId(starId)
                 .deleteStatus(deleteMessage)
+                .build();
+    }
+
+    @Override
+    public DeleteStarResponseDTO cancelStar(UUID starId){
+        Star star = starRepository.findById(starId)
+                .orElseThrow(() -> new GeneralException(ErrorStatus._STAR_NOT_FOUND));
+
+        s3Service.deleteHtmlFileInS3(star.getHtmlFileUrl());
+        starRepository.delete(star);
+
+        String canceledMessage = "Star with ID : " + starId + " was completely deleted";
+        return DeleteStarResponseDTO.builder()
+                .starId(starId)
+                .deleteStatus(canceledMessage)
                 .build();
     }
 
