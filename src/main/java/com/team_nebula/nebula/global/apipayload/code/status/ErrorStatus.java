@@ -26,6 +26,8 @@ public enum ErrorStatus implements BaseErrorCode {
 
 	_KEYWORD_NOT_FOUND(HttpStatus.NOT_FOUND, "KEYWORD4001", "해당 스타안에 키워드를 찾지 못했습니다."),
 	_KEYWORD_NOT_INPUT(HttpStatus.NOT_ACCEPTABLE, "KEYWORD4002", "키워드가 입력되지 않았습니다."),
+	_ORPHAN_KEYWORD_NOT_EXIST(HttpStatus.NOT_FOUND, "KEYWORD4003", "고립된 키워드가 존재하지 않습니다."),
+
 
 	_MULTIPARTFILE_CONVERT_FAIL(HttpStatus.INTERNAL_SERVER_ERROR,"MULTIPARTFILE5000","MultipartFile -> File로 변환이 실패하였습니다."),
 
