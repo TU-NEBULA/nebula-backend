@@ -6,4 +6,8 @@ import java.util.List;
 
 public interface KeywordCommandService {
     public void linkStarToKeywords(Star star, List<String> keywordNames);
-}
+
+    public void updateKeywordsForStar(Star star, List<String> newKeywordNames);
+
+    public String deleteKeywords();
+    }
