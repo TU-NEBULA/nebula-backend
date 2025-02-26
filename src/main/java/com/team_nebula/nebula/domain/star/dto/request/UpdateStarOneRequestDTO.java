@@ -5,6 +5,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Getter
 @Builder
 @AllArgsConstructor
@@ -14,4 +16,5 @@ public class UpdateStarOneRequestDTO {
     String categoryName;
     String summaryAI;
     String userMemo;
+    List<String> keywords;
 }

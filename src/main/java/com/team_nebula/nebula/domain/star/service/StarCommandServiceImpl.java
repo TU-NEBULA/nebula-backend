@@ -197,6 +197,10 @@ public class StarCommandServiceImpl implements StarCommandService {
             star.updateUserMemo(requestDTO.getUserMemo());
         }
 
+        if (requestDTO.getKeywords() != null) {
+            keywordCommandService.updateKeywordsForStar(star, requestDTO.getKeywords());
+        }
+
         Star updateStar = starRepository.save(star);
 
         return GetStarOneResponseDTO.builder()
