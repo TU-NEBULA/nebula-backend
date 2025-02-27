@@ -17,4 +17,21 @@ public interface KeywordRepository extends Neo4jRepository<Keyword, String> {
         MERGE (s)-[:TAGGED]->(k);
     """)
     void linkStarToKeywords(@Param("starId") UUID starId, @Param("keywordNames") List<String> keywordNames);
+
+    @Query("""
+    MATCH (s:Star {id: $starId})-[t:TAGGED]->(k:Keyword)
+    DELETE t
+    """)
+    void removeKeywordRelations(@Param("starId") UUID starId);
+
+    @Query("""
+    MATCH (k:Keyword)
+    WHERE NOT (k)<-[:TAGGED]-(:Star)
+    WITH COLLECT(k.name) AS orphanKeywordNames, k
+    DELETE k
+    RETURN orphanKeywordNames
+    """)
+    List<String> removeOrphanKeywords();
+
+
 }

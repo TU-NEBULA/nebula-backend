@@ -26,6 +26,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -176,26 +177,16 @@ public class StarCommandServiceImpl implements StarCommandService {
         Star star = starRepository.findById(starId)
                 .orElseThrow(() -> new GeneralException(ErrorStatus._STAR_NOT_FOUND));
 
-        String categoryName = "";
+        Optional.ofNullable(requestDTO.getTitle()).ifPresent(star::updateTitle);
+        Optional.ofNullable(requestDTO.getSummaryAI()).ifPresent(star::updateSummaryAI);
+        Optional.ofNullable(requestDTO.getUserMemo()).ifPresent(star::updateUserMemo);
+        Optional.ofNullable(requestDTO.getKeywords()).ifPresent(keywords ->
+                keywordCommandService.updateKeywordsForStar(star, keywords));
 
-        if(requestDTO.getTitle() != null){
-            star.updateTitle(requestDTO.getTitle());
-        }
+        String categoryName = Optional.ofNullable(requestDTO.getCategoryName())
+                .map(category -> categoryCommandService.linkStarToCategoryAndGetName(star, category))
+                .orElseGet(() -> categoryQueryService.findCategoryNameByStar(star.getId()));
 
-        if(requestDTO.getCategoryName() != null){
-            categoryName = categoryCommandService.linkStarToCategoryAndGetName(star, requestDTO.getCategoryName());
-        }
-        else{
-            categoryName = categoryQueryService.findCategoryNameByStar(star.getId());
-        }
-
-        if(requestDTO.getSummaryAI() != null){
-            star.updateSummaryAI(requestDTO.getSummaryAI());
-        }
-
-        if(requestDTO.getUserMemo() != null){
-            star.updateUserMemo(requestDTO.getUserMemo());
-        }
 
         Star updateStar = starRepository.save(star);
 
