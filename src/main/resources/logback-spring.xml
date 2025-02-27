@@ -19,23 +19,12 @@
             <pattern>${FILE_LOG_PATTERN}</pattern>
         </encoder>
         <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
-            <fileNamePattern>./log/%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <fileNamePattern>./logs/%d{yyyy-MM-dd}.%i.log</fileNamePattern>
             <maxFileSize>100MB</maxFileSize>
             <maxHistory>30</maxHistory>
         </rollingPolicy>
     </appender>
 
-    <!-- JSON 로그 파일 저장 -->
-    <appender name="FILE_JSON" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <encoder class="net.logstash.logback.encoder.LogstashEncoder">
-            <customFields>{"app_name":"MyApplication", "environment":"prod"}</customFields>
-        </encoder>
-        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
-            <fileNamePattern>./log/%d{yyyy-MM-dd}.%i.json</fileNamePattern>
-            <maxFileSize>100MB</maxFileSize>
-            <maxHistory>30</maxHistory>
-        </rollingPolicy>
-    </appender>
 
     <!-- 로깅 설정 -->
     <logger name="com.feelcoding.logbackdemo" level="DEBUG" />
@@ -43,6 +32,5 @@
     <root level="INFO">
         <appender-ref ref="CONSOLE" />  <!-- 콘솔 출력 -->
         <appender-ref ref="FILE" />     <!-- 일반 로그 파일 저장 -->
-        <appender-ref ref="FILE_JSON" /> <!-- JSON 로그 파일 저장 -->
     </root>
 </configuration>
