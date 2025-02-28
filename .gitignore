@@ -38,3 +38,4 @@ out/
 
 /src/main/resources/application.*
 /logs/**
+/elk/.env

@@ -38,4 +38,12 @@ public class OAuthController {
 		TokenResponseDTO dto = customOAuth2UserService.reissue(user.getId(), refreshToken);
 		return ApiResponse.onSuccess(dto);
 	}
+
+	/*
+	 * 임시 토큰 인증용 API
+	 */
+	@PostMapping("/generate")
+	public ApiResponse<?> generate() {
+		return ApiResponse.onSuccess(customOAuth2UserService.generate());
+	}
 }
