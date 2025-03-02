@@ -25,6 +25,7 @@ public class SwaggerConfig {
 	static {
 		SpringDocUtils.getConfig().addAnnotationsToIgnore(AuthUser.class);
 	}
+
 	@Bean
 	public OpenAPI openAPI() {
 
