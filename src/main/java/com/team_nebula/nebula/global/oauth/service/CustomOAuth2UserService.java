@@ -136,14 +136,18 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
 	public TokenResponseDTO generate() {
 
-		User user = User.builder()
-			.username("temp")
-			.name("temp")
-			.email("temp")
-			.role("ROLE_USER")
-			.build();
+		User user = userRepository.findByUsername("temp").orElse(null);
 
-		userRepository.save(user);
+		if (user == null) {
+			user = User.builder()
+				.username("temp")
+				.name("temp")
+				.email("temp")
+				.role("ROLE_USER")
+				.build();
+
+			userRepository.save(user);
+		}
 
 		String authorization = jwtUtil.createJwt(user.getUsername(), user.getRole(), 60 * 60 * 24L);
 
