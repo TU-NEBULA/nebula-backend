@@ -23,6 +23,9 @@ jobs:
       - name: Ensure resource directory exists
         run: mkdir -p ./src/main/resources
 
+      - name: injection-elk-env
+        run: echo -E "${{ secrets.ELK_ENV }}" > ./elk/.env
+
       - name: injection-application.yml
         run: echo -E "${{ secrets.APPLICATION_YML }}" > ./src/main/resources/application.yml
 
