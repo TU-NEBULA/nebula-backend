@@ -1,6 +1,6 @@
-package com.team_nebula.nebula.domain.AI.service;
+package com.team_nebula.nebula.global.AI.service;
 
-import com.team_nebula.nebula.domain.AI.dto.GetThumbnailAndKeywordsResponseDTO;
+import com.team_nebula.nebula.global.AI.dto.GetThumbnailAndKeywordsResponseDTO;
 import com.team_nebula.nebula.global.apipayload.code.status.ErrorStatus;
 import com.team_nebula.nebula.global.apipayload.exception.GeneralException;
 import lombok.RequiredArgsConstructor;
