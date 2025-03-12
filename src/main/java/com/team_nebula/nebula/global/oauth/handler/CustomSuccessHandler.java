@@ -22,12 +22,17 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Component
 public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 
 	@Value("${app.redirect-url}")
-	private String redirectUrl;
+	private String webRedirectUrl;
+
+	@Value("${app.extension-redirect-url")
+	private String extensionRedirectUrl;
 
 	private final UserRepository userRepository;
 	private final JWTUtil jwtUtil;
@@ -64,7 +69,13 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 		response.addCookie(createCookie("accessToken", tokenResponseDTO.getAccessToken()));
 		response.addCookie(createCookie("refreshToken", tokenResponseDTO.getRefreshToken()));
 
-		response.sendRedirect(redirectUrl);
+		String userAgent = request.getHeader("User-Agent");
+
+		if (userAgent != null && userAgent.contains("Chrome") && userAgent.contains("Extension")) {
+			response.sendRedirect(extensionRedirectUrl);
+		} else {
+			response.sendRedirect(webRedirectUrl);
+		}
 	}
 
 	private Cookie createCookie(String key, String value) {
