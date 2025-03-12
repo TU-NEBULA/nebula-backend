@@ -15,6 +15,7 @@ import com.team_nebula.nebula.domain.user.repository.mysql.UserRepository;
 import com.team_nebula.nebula.global.apipayload.code.status.ErrorStatus;
 import com.team_nebula.nebula.global.apipayload.exception.GeneralException;
 import com.team_nebula.nebula.global.oauth.dto.CustomOAuth2User;
+import com.team_nebula.nebula.global.oauth.dto.TokenResponseDTO;
 import com.team_nebula.nebula.global.util.JWTUtil;
 
 import jakarta.servlet.ServletException;
@@ -52,17 +53,17 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 		GrantedAuthority auth = iterator.next();
 		String role = auth.getAuthority();
 
-		String authorization = jwtUtil.createJwt(username, role, 60 * 60 * 24L);
-		String refreshToken = jwtUtil.createJwt(username, role, 60 * 60 * 24L * 7);
+		TokenResponseDTO tokenResponseDTO = jwtUtil.generateTokens(username);
 
 		User user = userRepository.findByUsername(username)
 			.orElseThrow(() -> new GeneralException(ErrorStatus._USER_NOT_FOUND));
 
-		user.updateRefreshToken(refreshToken);
+		user.updateRefreshToken(tokenResponseDTO.getRefreshToken());
 		userRepository.save(user);
 
-		response.addCookie(createCookie("Authorization", authorization));
-		response.addCookie(createCookie("refreshToken", refreshToken));
+		response.addCookie(createCookie("accessToken", tokenResponseDTO.getAccessToken()));
+		response.addCookie(createCookie("refreshToken", tokenResponseDTO.getRefreshToken()));
+
 		response.sendRedirect(redirectUrl);
 	}
 
