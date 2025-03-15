@@ -43,7 +43,7 @@ public class SwaggerConfig {
 
 		Server zrokServer = new Server()
 			.url(ec2Url)
-			.description("Zrok shared tunnel");
+			.description("EC2 shared tunnel");
 
 		return new OpenAPI()
 			.info(new Info().title("Nebula API").version("1.0"))
