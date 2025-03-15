@@ -12,7 +12,6 @@ import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Mono;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -82,24 +81,43 @@ public class AiService {
 //                .onErrorMap(e -> new GeneralException(ErrorStatus._AI_EXTRACT_DATA_ERROR));
 //    }
 
-    public Mono<Void> checkUpdatedNum(UserNode userNode) {
-        userNode.updateUpdatedCnt();
+    public void checkUpdatedNum(UserNode userNode) {
 
-        // 50단위로 호출, 증가할때는 피보나치 수열
-        if (userNode.getUpdatedCnt() >= 50) {
-            Map<String, Object> requestBody = new HashMap<>();
-            requestBody.put("user_id", String.valueOf(userNode.getUserId()));
+        try {
+            userNode.updateUpdatedCnt();
 
-            return webClient.post()
-                    .uri(aiKeywordSyncUrl)
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .bodyValue(requestBody)
-                    .retrieve()
-                    .bodyToMono(Void.class)
-                    .doOnSuccess(response -> log.info("Keyword sync 성공: userId={}", userNode.getUserId()))
-                    .doOnError(e -> log.error("Keyword sync 실패: {}", e.getMessage()))
-                    .onErrorMap(e -> new GeneralException(ErrorStatus._AI_KEYWORD_SYNC_ERROR));
+            int updatedCnt = userNode.getUpdatedCnt();
+            // 50단위로 초기화
+            int dividedCnt = (updatedCnt % 50);
+
+            if (isFibonacciNumber(dividedCnt)) {
+                Map<String, Object> requestBody = new HashMap<>();
+                requestBody.put("user_id", String.valueOf(userNode.getUserId()));
+
+                webClient.post()
+                        .uri(aiKeywordSyncUrl)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .bodyValue(requestBody)
+                        .retrieve()
+                        .bodyToMono(Void.class)
+                        .doOnSuccess(response -> log.info("Keyword sync 성공: userId={}", userNode.getUserId()))
+                        .doOnError(e -> log.error("Keyword sync 실패: {}", e.getMessage()));
+            }
+        }catch(Exception e) {
+            throw new GeneralException(ErrorStatus._AI_KEYWORD_SYNC_ERROR);
         }
-        return Mono.empty();
+    }
+
+    // updatedCnt가 피보나치 수열에 해당되 true
+    private boolean isFibonacciNumber(int num) {
+        if (num < 0) return false;
+
+        int a = 0, b = 1;
+        while (b < num) {
+            int temp = a + b;
+            a = b;
+            b = temp;
+        }
+        return b == num;
     }
 }
