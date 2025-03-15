@@ -11,64 +11,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
     
-      - name: Connect to EC2 and install docker 
-        env:
-          EC2_HOST: ${{ secrets.LOCAL_EC2_HOST }}
-          EC2_USER: ${{ secrets.LOCAL_EC2_USERNAME }}
-          EC2_SSH_KEY: ${{ secrets.LOCAL_SSH_PRIVATE_KEY }}
-          EC2_PORT: ${{ secrets.LOCAL_EC2_PORT }}
-        run: |
-          echo "$EC2_SSH_KEY" > ec2_key.pem
-          chmod 400 ec2_key.pem
-          ssh -p $EC2_PORT -i ec2_key.pem -o StrictHostKeyChecking=no $EC2_USER@$EC2_HOST '
-            # sudo 설치
-            if ! command -v sudo &> /dev/null; then
-              apt update && apt install -y sudo
-            fi
-            
-            # Docker 설치
-            sudo apt-get update
-            sudo apt-get install ca-certificates curl
-            sudo install -m 0755 -d /etc/apt/keyrings
-            sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
-            sudo chmod a+r /etc/apt/keyrings/docker.asc
-            
-            # Add the repository to Apt sources:
-            echo \
-              "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu \
-              $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | \
-              sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-            sudo apt-get update
-            
-            sudo DEBIAN_FRONTEND=noninteractive apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
-  
-            # Docker 서비스 시작 및 활성화
-            sudo systemctl start docker
-            sudo systemctl enable docker
-    
-            # Docker 버전 확인
-            docker --version
-            docker compose version
-          '
-            
-      - name: pull docker and run server
-        env:
-          EC2_HOST: ${{ secrets.LOCAL_EC2_HOST }}
-          EC2_USER: ${{ secrets.LOCAL_EC2_USERNAME }}
-          EC2_SSH_KEY: ${{ secrets.LOCAL_SSH_PRIVATE_KEY }}
-          EC2_PORT: ${{ secrets.LOCAL_EC2_PORT }}
-        run: |
-          ssh -p $EC2_PORT -i ec2_key.pem -o StrictHostKeyChecking=no $EC2_USER@$EC2_HOST '
-            # 명령어 실행
-            sudo docker pull ${{ secrets.DOCKER_REPO }}
-            container_id=$(docker ps -aq --filter "name=nebula")
-            if [ -n "$container_id" ]; then
-              echo "컨테이너 존재, 중지"
-              sudo docker stop $container_id
-              sudo docker rm $container_id
-            else
-              echo "컨테이너 없음"
-            fi
-              docker run -d -p 8080:8080 --name nebula ${{ secrets.DOCKER_REPO }}
-          '
-          
+      - name: Run scripts in server
+        uses: appleboy/ssh-action@master
+        with:
+          key: ${{ secrets.PRIVATE_KEY }}
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          script: ${{ secrets.DEPLOY_SCRIPT }}
