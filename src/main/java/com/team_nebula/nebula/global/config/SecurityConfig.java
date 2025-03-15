@@ -13,6 +13,9 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 
+import com.team_nebula.nebula.domain.user.repository.mysql.UserRepository;
+import com.team_nebula.nebula.global.constants.Constants;
+import com.team_nebula.nebula.global.oauth.handler.CustomFailureHandler;
 import com.team_nebula.nebula.global.oauth.handler.CustomSuccessHandler;
 import com.team_nebula.nebula.global.oauth.service.CustomOAuth2UserService;
 import com.team_nebula.nebula.global.util.JWTFilter;
@@ -26,14 +29,19 @@ public class SecurityConfig {
 
 	private final CustomOAuth2UserService customOAuth2UserService;
 	private final CustomSuccessHandler customSuccessHandler;
+	private final CustomFailureHandler customFailureHandler;
 	private final JWTUtil jwtUtil;
+	private final UserRepository userRepository;
 
 	public SecurityConfig(CustomOAuth2UserService customOAuth2UserService, CustomSuccessHandler customSuccessHandler,
-		JWTUtil jwtUtil) {
+		CustomFailureHandler customFailureHandler,
+		JWTUtil jwtUtil, UserRepository userRepository) {
 
 		this.customOAuth2UserService = customOAuth2UserService;
 		this.customSuccessHandler = customSuccessHandler;
+		this.customFailureHandler = customFailureHandler;
 		this.jwtUtil = jwtUtil;
+		this.userRepository = userRepository;
 	}
 
 	@Bean
@@ -72,7 +80,7 @@ public class SecurityConfig {
 
 		//JWTFilter 추가
 		http
-			.addFilterBefore(new JWTFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class);
+			.addFilterBefore(new JWTFilter(jwtUtil, userRepository), UsernamePasswordAuthenticationFilter.class);
 
 		//oauth2
 		http
@@ -80,13 +88,16 @@ public class SecurityConfig {
 				.userInfoEndpoint((userInfoEndpointConfig) -> userInfoEndpointConfig
 					.userService(customOAuth2UserService))
 				.successHandler(customSuccessHandler)
+				.failureHandler(customFailureHandler)
 			);
 
 		//경로별 인가 작업
 		http
-			.authorizeHttpRequests((auth) -> auth
-				.requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html", "/h2-console/**", "/api/v1/oauth/generate").permitAll()
-				.anyRequest().authenticated());
+			.authorizeHttpRequests(registry ->
+				registry
+					.requestMatchers(Constants.NO_NEED_FILTER_URLS.toArray(String[]::new)).permitAll()
+					.anyRequest().authenticated()
+			);
 
 		//세션 설정 : STATELESS
 		http

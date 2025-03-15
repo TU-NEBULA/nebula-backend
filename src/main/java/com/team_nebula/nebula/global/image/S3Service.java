@@ -1,4 +1,4 @@
-package com.team_nebula.nebula.domain.image;
+package com.team_nebula.nebula.global.image;
 
 import com.amazonaws.AmazonServiceException;
 import com.amazonaws.services.s3.AmazonS3Client;

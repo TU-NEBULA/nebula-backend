@@ -2,11 +2,13 @@ package com.team_nebula.nebula.global.oauth.service;
 
 import java.util.Optional;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.team_nebula.nebula.domain.user.dto.request.UserDTO;
 import com.team_nebula.nebula.domain.user.entity.User;
@@ -28,13 +30,16 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 	private final UserRepository userRepository;
 	private final UserNodeRepository userNodeRepository;
 	private final JWTUtil jwtUtil;
+	private final long refreshExpiration;
 
 	public CustomOAuth2UserService(UserRepository userRepository,
-		UserNodeRepository userNodeRepository, JWTUtil jwtUtil) {
+		UserNodeRepository userNodeRepository, JWTUtil jwtUtil,
+		@Value("${spring.jwt.refresh-token-expiration}") long refreshExpiration) {
 
 		this.userRepository = userRepository;
 		this.userNodeRepository = userNodeRepository;
 		this.jwtUtil = jwtUtil;
+		this.refreshExpiration = refreshExpiration;
 	}
 
 	@Override
@@ -61,7 +66,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
 		Optional<User> existData = userRepository.findByUsername(username);
 
-		String refreshToken = jwtUtil.createJwt(username, "ROLE_USER", 60 * 60 * 24L * 7);
+		String refreshToken = jwtUtil.createJwt(username, "ROLE_USER", "refreshToken", refreshExpiration);
 
 		// 초기 로그인 시
 		if (existData.isEmpty()) {
@@ -83,6 +88,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 			userNodeRepository.save(userNode);
 
 			UserDTO userDTO = UserDTO.builder()
+				.id(userEntity.getId())
 				.username(username)
 				.name(oAuth2Response.getName())
 				.role("ROLE_USER")
@@ -100,6 +106,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 			userRepository.save(user);
 
 			UserDTO userDTO = UserDTO.builder()
+				.id(user.getId())
 				.username(user.getUsername())
 				.name(oAuth2Response.getName())
 				.role(user.getRole())
@@ -115,23 +122,13 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 			.orElseThrow(() -> new GeneralException(ErrorStatus._USER_NOT_FOUND));
 	}
 
-	public TokenResponseDTO reissue(Long userId, String refreshToken) {
+	@Transactional
+	public TokenResponseDTO reissue(Long userId) {
 
-		boolean existsUser = userRepository.existsByIdAndRefreshToken(userId, refreshToken);
+		User user = userRepository.findById(userId)
+			.orElseThrow(() -> new GeneralException(ErrorStatus._USER_NOT_FOUND));
 
-		if (!existsUser) {
-			throw new GeneralException(ErrorStatus._USER_NOT_FOUND);
-		}
-
-		String username = jwtUtil.getUsername(refreshToken);
-		String role = jwtUtil.getRole(refreshToken);
-
-		String authorization = jwtUtil.createJwt(username, role, 60 * 60 * 24L);
-
-		return TokenResponseDTO
-			.builder()
-			.authorization(authorization)
-			.refreshToken(refreshToken).build();
+		return jwtUtil.generateTokens(user.getUsername());
 	}
 
 	public TokenResponseDTO generate() {
@@ -149,12 +146,13 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 			userRepository.save(user);
 		}
 
-		String authorization = jwtUtil.createJwt(user.getUsername(), user.getRole(), 60 * 60 * 24L);
+		String accessToken = jwtUtil.createJwt(user.getUsername(), user.getRole(), "accessToken", 60 * 60 * 24L * 30);
+		String refreshToken = jwtUtil.createJwt(user.getUsername(), user.getRole(), "refreshToken", 60 * 60 * 24L * 30);
 
 		return TokenResponseDTO
 			.builder()
-			.authorization(authorization)
-			.refreshToken(null)
+			.accessToken(accessToken)
+			.refreshToken(refreshToken)
 			.build();
 	}
 }

@@ -14,6 +14,7 @@ public enum ErrorStatus implements BaseErrorCode {
 
 	_INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "COMMON5000", "서버 에러. 관리자에게 문의하세요."),
 	_BAD_REQUEST(HttpStatus.BAD_REQUEST, "COMMON4000", "잘못된 요청"),
+	_INVALID_HEADER_ERROR(HttpStatus.BAD_REQUEST, "COMMON4001", "헤더 정보가 잘못되었습니다."),
 
 	_UNAUTHORIZED_USER(HttpStatus.UNAUTHORIZED,"USER4000","인증되지 않은 사용자입니다."),
 	_USER_NOT_FOUND(HttpStatus.NOT_FOUND, "USER4001", "사용자가 없습니다."),
@@ -28,13 +29,16 @@ public enum ErrorStatus implements BaseErrorCode {
 	_KEYWORD_NOT_INPUT(HttpStatus.NOT_ACCEPTABLE, "KEYWORD4002", "키워드가 입력되지 않았습니다."),
 	_ORPHAN_KEYWORD_NOT_EXIST(HttpStatus.NOT_FOUND, "KEYWORD4003", "고립된 키워드가 존재하지 않습니다."),
 
-
 	_MULTIPARTFILE_CONVERT_FAIL(HttpStatus.INTERNAL_SERVER_ERROR,"MULTIPARTFILE5000","MultipartFile -> File로 변환이 실패하였습니다."),
 
 	_AI_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "AI5000","AI 서버에서 문제가 발생했습니다."),
 	_AI_EXTRACT_DATA_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "AI5001","AI에서 썸네일과 추천 키워드을 가져오지 못했습니다."),
 
-	_S3_HTML_FILE_DELETE_FAIL(HttpStatus.INTERNAL_SERVER_ERROR, "S35001", "S3에 저장된 html 파일을 삭제하는데 실패했습니다.");
+	_S3_HTML_FILE_DELETE_FAIL(HttpStatus.INTERNAL_SERVER_ERROR, "S35001", "S3에 저장된 html 파일을 삭제하는데 실패했습니다."),
+
+	_TOKEN_EXPIRED(HttpStatus.BAD_REQUEST, "TOKEN4001", "토큰이 만료되었습니다."),
+	_TOKEN_TYPE_ERROR(HttpStatus.BAD_REQUEST, "TOKEN4002", "토큰 타입이 잘못되었습니다.");
+
 
 	private HttpStatus httpStatus;
 	private String code;

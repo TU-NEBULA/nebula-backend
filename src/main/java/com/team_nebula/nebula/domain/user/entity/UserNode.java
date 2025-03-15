@@ -8,7 +8,7 @@ import org.springframework.data.neo4j.core.schema.Node;
 import org.springframework.data.neo4j.core.schema.Relationship;
 
 import com.team_nebula.nebula.domain.category.entity.Category;
-import com.team_nebula.nebula.domain.common.BaseEntity;
+import com.team_nebula.nebula.global.common.BaseEntity;
 import com.team_nebula.nebula.domain.star.entity.Star;
 
 import lombok.AccessLevel;

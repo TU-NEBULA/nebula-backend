@@ -6,6 +6,13 @@ import lombok.Getter;
 @Getter
 @Builder
 public class TokenResponseDTO {
-	private String authorization;
+	private String accessToken;
 	private String refreshToken;
+
+	public static TokenResponseDTO of(String accessToken, String refreshToken) {
+		return TokenResponseDTO.builder()
+			.accessToken(accessToken)
+			.refreshToken(refreshToken)
+			.build();
+	}
 }

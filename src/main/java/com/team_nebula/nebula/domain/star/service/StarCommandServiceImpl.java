@@ -1,10 +1,10 @@
 package com.team_nebula.nebula.domain.star.service;
 
-import com.team_nebula.nebula.domain.AI.dto.GetThumbnailAndKeywordsResponseDTO;
-import com.team_nebula.nebula.domain.AI.service.AiService;
+import com.team_nebula.nebula.global.AI.dto.GetThumbnailAndKeywordsResponseDTO;
+import com.team_nebula.nebula.global.AI.service.AiService;
 import com.team_nebula.nebula.domain.category.service.CategoryCommandService;
 import com.team_nebula.nebula.domain.category.service.CategoryQueryService;
-import com.team_nebula.nebula.domain.image.S3Service;
+import com.team_nebula.nebula.global.image.S3Service;
 import com.team_nebula.nebula.domain.keyword.entity.Keyword;
 import com.team_nebula.nebula.domain.keyword.service.KeywordCommandService;
 import com.team_nebula.nebula.domain.link.service.LinkCommandService;

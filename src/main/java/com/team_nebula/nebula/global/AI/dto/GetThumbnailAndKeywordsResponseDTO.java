@@ -1,4 +1,4 @@
-package com.team_nebula.nebula.domain.AI.dto;
+package com.team_nebula.nebula.global.AI.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
