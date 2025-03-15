@@ -69,13 +69,7 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 		response.addCookie(createCookie("accessToken", tokenResponseDTO.getAccessToken()));
 		response.addCookie(createCookie("refreshToken", tokenResponseDTO.getRefreshToken()));
 
-		String userAgent = request.getHeader("User-Agent");
-
-		if (userAgent != null && userAgent.contains("Chrome") && userAgent.contains("Extension")) {
-			response.sendRedirect(extensionRedirectUrl);
-		} else {
-			response.sendRedirect(webRedirectUrl);
-		}
+		response.sendRedirect(webRedirectUrl);
 	}
 
 	private Cookie createCookie(String key, String value) {
