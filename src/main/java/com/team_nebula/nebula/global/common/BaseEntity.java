@@ -1,4 +1,4 @@
-package com.team_nebula.nebula.domain.common;
+package com.team_nebula.nebula.global.common;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Getter;

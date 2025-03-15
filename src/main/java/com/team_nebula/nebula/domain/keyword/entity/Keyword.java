@@ -1,6 +1,6 @@
 package com.team_nebula.nebula.domain.keyword.entity;
 
-import com.team_nebula.nebula.domain.common.BaseEntity;
+import com.team_nebula.nebula.global.common.BaseEntity;
 import lombok.*;
 import org.springframework.data.neo4j.core.schema.Id;
 import org.springframework.data.neo4j.core.schema.Node;

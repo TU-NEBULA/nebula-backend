@@ -1,7 +1,7 @@
 package com.team_nebula.nebula.domain.link.entity;
 
-import com.team_nebula.nebula.domain.common.BaseEntity;
-import jakarta.persistence.GeneratedValue;
+import com.team_nebula.nebula.global.common.BaseEntity;
+
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

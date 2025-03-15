@@ -1,6 +1,6 @@
 package com.team_nebula.nebula.domain.star.entity;
 
-import com.team_nebula.nebula.domain.common.BaseEntity;
+import com.team_nebula.nebula.global.common.BaseEntity;
 import com.team_nebula.nebula.domain.keyword.entity.Keyword;
 import com.team_nebula.nebula.domain.link.entity.Link;
 import jakarta.persistence.Lob;

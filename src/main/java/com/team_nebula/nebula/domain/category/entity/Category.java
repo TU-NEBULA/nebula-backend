@@ -1,6 +1,6 @@
 package com.team_nebula.nebula.domain.category.entity;
 
-import com.team_nebula.nebula.domain.common.BaseEntity;
+import com.team_nebula.nebula.global.common.BaseEntity;
 import com.team_nebula.nebula.domain.star.entity.Star;
 import lombok.*;
 import org.springframework.data.annotation.Id;

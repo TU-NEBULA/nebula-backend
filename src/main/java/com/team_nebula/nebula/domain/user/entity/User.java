@@ -1,6 +1,6 @@
 package com.team_nebula.nebula.domain.user.entity;
 
-import com.team_nebula.nebula.domain.common.BaseEntity;
+import com.team_nebula.nebula.global.common.BaseEntity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
