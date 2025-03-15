@@ -49,6 +49,8 @@ public class AiService {
 
             HttpEntity<Map<String, Object>> requestEntity = new HttpEntity<>(requestBody, headers);
 
+            System.out.println("--------3.1-----------");
+
             // AI 서버 요청 및 응답 받기
             ResponseEntity<GetThumbnailAndKeywordsResponseDTO> responseEntity = restTemplate.exchange(
                     aiExtractDataUrl,
@@ -56,6 +58,8 @@ public class AiService {
                     requestEntity,
                     GetThumbnailAndKeywordsResponseDTO.class
             );
+            System.out.println("--------3.2-----------");
+
 
             return responseEntity.getBody();
         } catch (Exception e) {
