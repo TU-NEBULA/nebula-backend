@@ -76,7 +76,7 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 		Cookie cookie = new Cookie(key, value);
 		cookie.setMaxAge(60 * 60 * 60);
 		//cookie.setSecure(true);
-		cookie.setDomain(".nebula-ai.kr");
+		cookie.setDomain("nebula-ai.kr");
 		cookie.setPath("/");
 		cookie.setHttpOnly(true);
 
