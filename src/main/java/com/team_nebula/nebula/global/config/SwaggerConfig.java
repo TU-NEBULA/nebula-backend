@@ -19,8 +19,8 @@ public class SwaggerConfig {
 	@Value("${app.local-url}")
 	private String localUrl;
 
-	@Value("${app.zrok-url}")
-	private String zrokUrl;
+	@Value("${app.ec2-url}")
+	private String ec2Url;
 
 	static {
 		SpringDocUtils.getConfig().addAnnotationsToIgnore(AuthUser.class);
@@ -42,7 +42,7 @@ public class SwaggerConfig {
 			.description("Local development server");
 
 		Server zrokServer = new Server()
-			.url(zrokUrl)
+			.url(ec2Url)
 			.description("Zrok shared tunnel");
 
 		return new OpenAPI()
