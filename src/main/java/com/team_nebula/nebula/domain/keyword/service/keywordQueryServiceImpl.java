@@ -10,7 +10,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-@Transactional
+@Transactional(readOnly = true)
 public class keywordQueryServiceImpl implements  KeywordQueryService {
 
     private final KeywordRepository keywordRepository;
