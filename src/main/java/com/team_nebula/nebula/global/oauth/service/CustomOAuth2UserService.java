@@ -146,8 +146,8 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 			userRepository.save(user);
 		}
 
-		String accessToken = jwtUtil.createJwt(user.getUsername(), user.getRole(), "accessToken", 60 * 60 * 24L * 30);
-		String refreshToken = jwtUtil.createJwt(user.getUsername(), user.getRole(), "refreshToken", 60 * 60 * 24L * 30);
+		String accessToken = jwtUtil.createJwt(user.getUsername(), user.getRole(), "access", 60 * 60 * 24L * 30);
+		String refreshToken = jwtUtil.createJwt(user.getUsername(), user.getRole(), "refresh", 60 * 60 * 24L * 30);
 
 		return TokenResponseDTO
 			.builder()
