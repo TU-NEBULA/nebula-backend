@@ -10,8 +10,10 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.team_nebula.nebula.domain.user.entity.User;
 import com.team_nebula.nebula.domain.user.repository.mysql.UserRepository;
+import com.team_nebula.nebula.global.apipayload.ApiResponse;
 import com.team_nebula.nebula.global.apipayload.code.status.ErrorStatus;
 import com.team_nebula.nebula.global.apipayload.exception.GeneralException;
 import com.team_nebula.nebula.global.oauth.dto.CustomOAuth2User;
@@ -69,19 +71,14 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 		response.addCookie(createCookie("accessToken", tokenResponseDTO.getAccessToken()));
 		response.addCookie(createCookie("refreshToken", tokenResponseDTO.getRefreshToken()));
 
+		ApiResponse<String> apiResponse = ApiResponse.onSuccess("로그인 성공");
 
-		String requestURL = request.getRequestURL().toString();
+		response.setContentType("application/json");
+		response.setCharacterEncoding("UTF-8");
 
-		log.info(request.getRequestURI());
-		log.info(request.getQueryString());
+		ObjectMapper objectMapper = new ObjectMapper();
+		response.getWriter().write(objectMapper.writeValueAsString(apiResponse));
 
-		if (requestURL != null) {
-			log.info(requestURL);
-			response.sendRedirect(webRedirectUrl);
-		}else{
-			log.info(requestURL);
-			response.sendRedirect(extensionRedirectUrl);
-		}
 	}
 
 	private Cookie createCookie(String key, String value) {
