@@ -74,6 +74,10 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 		String redirectType = (String)session.getAttribute("redirectType");
 
 		String redirectUrl = "web".equals(redirectType) ? webRedirectUrl : extensionRedirectUrl;
+
+		redirectUrl = String.format("%s?accessToken=%s&refreshToken=%s", redirectUrl,
+			tokenResponseDTO.getAccessToken(), tokenResponseDTO.getRefreshToken());
+
 		response.sendRedirect(redirectUrl);
 
 	}
@@ -81,7 +85,7 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 	private Cookie createCookie(String key, String value) {
 		Cookie cookie = new Cookie(key, value);
 		cookie.setMaxAge(60 * 60 * 60);
-		//cookie.setSecure(true);
+		cookie.setSecure(true);
 		cookie.setDomain("nebula-ai.kr");
 		cookie.setPath("/");
 		cookie.setHttpOnly(true);
