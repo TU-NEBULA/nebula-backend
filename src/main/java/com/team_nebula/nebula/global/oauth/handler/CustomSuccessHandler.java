@@ -73,8 +73,8 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 		HttpSession session = request.getSession(false);
 		String redirectType = (String)session.getAttribute("redirectType");
 
-		String targetUrl = "web".equals(redirectType) ? webRedirectUrl : extensionRedirectUrl;
-		response.sendRedirect(targetUrl);
+		String redirectUrl = "web".equals(redirectType) ? webRedirectUrl : extensionRedirectUrl;
+		response.sendRedirect(redirectUrl);
 
 	}
 
