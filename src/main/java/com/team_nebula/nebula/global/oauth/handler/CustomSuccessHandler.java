@@ -10,10 +10,8 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.team_nebula.nebula.domain.user.entity.User;
 import com.team_nebula.nebula.domain.user.repository.mysql.UserRepository;
-import com.team_nebula.nebula.global.apipayload.ApiResponse;
 import com.team_nebula.nebula.global.apipayload.code.status.ErrorStatus;
 import com.team_nebula.nebula.global.apipayload.exception.GeneralException;
 import com.team_nebula.nebula.global.oauth.dto.CustomOAuth2User;
@@ -24,6 +22,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -33,7 +32,7 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 	@Value("${app.redirect-url}")
 	private String webRedirectUrl;
 
-	@Value("${app.extension-redirect-url")
+	@Value("${app.extension-redirect-url}")
 	private String extensionRedirectUrl;
 
 	private final UserRepository userRepository;
@@ -71,13 +70,11 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 		response.addCookie(createCookie("accessToken", tokenResponseDTO.getAccessToken()));
 		response.addCookie(createCookie("refreshToken", tokenResponseDTO.getRefreshToken()));
 
-		ApiResponse<String> apiResponse = ApiResponse.onSuccess("로그인 성공");
+		HttpSession session = request.getSession(false);
+		String redirectType = (String)session.getAttribute("redirectType");
 
-		response.setContentType("application/json");
-		response.setCharacterEncoding("UTF-8");
-
-		ObjectMapper objectMapper = new ObjectMapper();
-		response.getWriter().write(objectMapper.writeValueAsString(apiResponse));
+		String targetUrl = "web".equals(redirectType) ? webRedirectUrl : extensionRedirectUrl;
+		response.sendRedirect(targetUrl);
 
 	}
 

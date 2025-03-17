@@ -13,6 +13,7 @@ public final class Constants {
 		"/v3/api-docs/**",
 		"/swagger-ui/**",
 		"/h2-console/**",
-		"/api/v1/oauth/generate"
+		"/api/v1/oauth/generate",
+		"/api/v1/oauth/{provider}"
 	);
 }
