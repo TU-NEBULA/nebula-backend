@@ -41,14 +41,14 @@ public class SwaggerConfig {
 			.url(localUrl)
 			.description("Local development server");
 
-		Server zrokServer = new Server()
+		Server ec2Server = new Server()
 			.url(ec2Url)
-			.description("EC2 shared tunnel");
+			.description("EC2 development server");
 
 		return new OpenAPI()
 			.info(new Info().title("Nebula API").version("1.0"))
 			.addServersItem(localServer)
-			.addServersItem(zrokServer)
+			.addServersItem(ec2Server)
 			.addSecurityItem(securityRequirement)
 			.schemaRequirement("bearerAuth", securityScheme);
 	}

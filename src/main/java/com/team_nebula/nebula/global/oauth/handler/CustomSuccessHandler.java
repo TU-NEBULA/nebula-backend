@@ -22,6 +22,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -31,7 +32,7 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 	@Value("${app.redirect-url}")
 	private String webRedirectUrl;
 
-	@Value("${app.extension-redirect-url")
+	@Value("${app.extension-redirect-url}")
 	private String extensionRedirectUrl;
 
 	private final UserRepository userRepository;
@@ -69,19 +70,12 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 		response.addCookie(createCookie("accessToken", tokenResponseDTO.getAccessToken()));
 		response.addCookie(createCookie("refreshToken", tokenResponseDTO.getRefreshToken()));
 
+		HttpSession session = request.getSession(false);
+		String redirectType = (String)session.getAttribute("redirectType");
 
-		String requestURL = request.getRequestURL().toString();
+		String redirectUrl = "web".equals(redirectType) ? webRedirectUrl : extensionRedirectUrl;
+		response.sendRedirect(redirectUrl);
 
-		log.info(request.getRequestURI());
-		log.info(request.getQueryString());
-
-		if (requestURL != null) {
-			log.info(requestURL);
-			response.sendRedirect(webRedirectUrl);
-		}else{
-			log.info(requestURL);
-			response.sendRedirect(extensionRedirectUrl);
-		}
 	}
 
 	private Cookie createCookie(String key, String value) {

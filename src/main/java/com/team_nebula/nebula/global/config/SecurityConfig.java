@@ -15,6 +15,7 @@ import org.springframework.web.cors.CorsConfigurationSource;
 
 import com.team_nebula.nebula.domain.user.repository.mysql.UserRepository;
 import com.team_nebula.nebula.global.constants.Constants;
+import com.team_nebula.nebula.global.oauth.handler.CustomAuthenticationEntryPoint;
 import com.team_nebula.nebula.global.oauth.handler.CustomFailureHandler;
 import com.team_nebula.nebula.global.oauth.handler.CustomSuccessHandler;
 import com.team_nebula.nebula.global.oauth.service.CustomOAuth2UserService;
@@ -86,10 +87,14 @@ public class SecurityConfig {
 		http
 			.oauth2Login((oauth2) -> oauth2
 				.userInfoEndpoint((userInfoEndpointConfig) -> userInfoEndpointConfig
-					.userService(customOAuth2UserService))
+				.userService(customOAuth2UserService))
 				.successHandler(customSuccessHandler)
 				.failureHandler(customFailureHandler)
-			);
+			)
+
+			.exceptionHandling(exception -> exception
+				.authenticationEntryPoint(new CustomAuthenticationEntryPoint())
+		);
 
 		//경로별 인가 작업
 		http
