@@ -127,7 +127,7 @@ public class StarController {
     @Operation(summary = "스타 삭제", description = "스타를 비활성화하는 API/ 완전 삭제가 아닌 Soft Delete하는 것")
     @PatchMapping("/{starId}/deactivate")
     public ApiResponse<DeleteStarResponseDTO> deleteStar(@AuthUser Long userId, @PathVariable UUID starId){
-        DeleteStarResponseDTO responseDTO = starCommandService.deleteStar(starId);
+        DeleteStarResponseDTO responseDTO = starCommandService.deleteStar(userId, starId);
 
         return ApiResponse.onSuccess(responseDTO);
     }

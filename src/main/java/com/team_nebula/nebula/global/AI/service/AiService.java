@@ -1,6 +1,7 @@
 package com.team_nebula.nebula.global.AI.service;
 
 import com.team_nebula.nebula.domain.user.entity.UserNode;
+import com.team_nebula.nebula.domain.user.repository.neo4j.UserNodeRepository;
 import com.team_nebula.nebula.global.AI.dto.GetThumbnailAndKeywordsResponseDTO;
 import com.team_nebula.nebula.global.apipayload.code.status.ErrorStatus;
 import com.team_nebula.nebula.global.apipayload.exception.GeneralException;
@@ -34,10 +35,7 @@ public class AiService {
 
     private final WebClient webClient;
 
-    @Autowired
-    public AiService(WebClient.Builder webClientBuilder) {
-        this.webClient = webClientBuilder.build();
-    }
+    private final UserNodeRepository userNodeRepository;
 
     public GetThumbnailAndKeywordsResponseDTO analyzeHtmlFile(UUID starId, Long userId, String htmlFileKey) {
         try {
@@ -84,7 +82,10 @@ public class AiService {
 //    }
 
     @Async
-    public void checkUpdatedCnt(UserNode userNode) {
+    public void checkUpdatedCnt(Long userId) {
+
+        UserNode userNode = userNodeRepository.findById(userId)
+                .orElseThrow(() -> new GeneralException(ErrorStatus._STAR_NOT_FOUND));
 
         try {
             userNode.updateUpdatedCnt();
@@ -112,8 +113,8 @@ public class AiService {
                         .doOnError(e -> log.error("Keyword sync 실패: {}", e.getMessage()))
                         .subscribe();
             }
-
             System.out.println("------- Keyword Sync AI 호출 끝----------");
+            userNodeRepository.save(userNode);
         }catch(Exception e) {
             throw new GeneralException(ErrorStatus._AI_KEYWORD_SYNC_ERROR);
         }

@@ -71,7 +71,7 @@ public class StarCommandServiceImpl implements StarCommandService {
             userNodeRepository.save(userNode);
 
             // 유저 스타 수정 횟수 증가
-            aiService.checkUpdatedNum(userNode);
+            aiService.checkUpdatedCnt(userId);
 
             return CreateStarResponseDTO.builder()
                     .starId(savedStar.getId())
@@ -121,7 +121,7 @@ public class StarCommandServiceImpl implements StarCommandService {
 
 
     @Override
-    public GetStarOneResponseDTO updateStar(UUID starId, UpdateStarOneRequestDTO requestDTO){
+    public GetStarOneResponseDTO updateStar(Long userId, UUID starId, UpdateStarOneRequestDTO requestDTO){
         Star star = starRepository.findById(starId)
                 .orElseThrow(() -> new GeneralException(ErrorStatus._STAR_NOT_FOUND));
 
@@ -135,8 +135,10 @@ public class StarCommandServiceImpl implements StarCommandService {
                 .map(category -> categoryCommandService.linkStarToCategoryAndGetName(star, category))
                 .orElseGet(() -> categoryQueryService.findCategoryNameByStar(star.getId()));
 
-
         Star updateStar = starRepository.save(star);
+
+        // 유저 스타 작업 횟수 증가
+        aiService.checkUpdatedCnt(userId);
 
         return GetStarOneResponseDTO.builder()
                 .starId(updateStar.getId())
@@ -154,12 +156,15 @@ public class StarCommandServiceImpl implements StarCommandService {
     }
 
     @Override
-    public DeleteStarResponseDTO deleteStar(UUID starId){
+    public DeleteStarResponseDTO deleteStar(Long userId, UUID starId){
         Star star = starRepository.findById(starId)
                 .orElseThrow(() -> new GeneralException(ErrorStatus._STAR_NOT_FOUND));
 
         star.updateIsDeletedStatus();
         starRepository.save(star);
+
+        // 유저 스타 작업 횟수 증가
+        aiService.checkUpdatedCnt(userId);
 
         String deleteMessage = "Star with ID : " + starId + " was deleted";
         return DeleteStarResponseDTO.builder()
