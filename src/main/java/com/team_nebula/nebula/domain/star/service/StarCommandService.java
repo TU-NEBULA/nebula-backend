@@ -13,7 +13,7 @@ import java.util.UUID;
 
 public interface StarCommandService {
 
-    public CreateStarResponseDTO createFirstStar(User user, MultipartFile htmlFile, String title, String siteUrl);
+    public CreateStarResponseDTO createFirstStar(Long userId, MultipartFile htmlFile, String title, String siteUrl);
 
 //    public CreateStarResponseDTO createStar(User user, CreateStarFileDTO requestDTO);
 

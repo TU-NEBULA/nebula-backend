@@ -16,7 +16,7 @@ public class keywordQueryServiceImpl implements  KeywordQueryService {
     private final KeywordRepository keywordRepository;
 
     @Override
-    public List<String> getKeywords(User user){
-        return keywordRepository.getAllKeywordNames(user.getId());
+    public List<String> getKeywords(Long userId){
+        return keywordRepository.getAllKeywordNames(userId);
     }
 }
