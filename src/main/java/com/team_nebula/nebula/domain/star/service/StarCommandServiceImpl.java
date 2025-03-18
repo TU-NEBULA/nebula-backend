@@ -45,8 +45,8 @@ public class StarCommandServiceImpl implements StarCommandService {
     private final AiService aiService;
 
     @Override
-    public CreateStarResponseDTO createFirstStar(User user, MultipartFile htmlFile, String title, String siteUrl){
-        UserNode userNode = userNodeRepository.findById(user.getId())
+    public CreateStarResponseDTO createFirstStar(Long userId, MultipartFile htmlFile, String title, String siteUrl){
+        UserNode userNode = userNodeRepository.findById(userId)
                 .orElseThrow(() -> new GeneralException(ErrorStatus._USER_NOT_FOUND));
 
         String htmlFileKey = s3Service.saveHtmlFile(htmlFile, title);
@@ -64,7 +64,7 @@ public class StarCommandServiceImpl implements StarCommandService {
 
         try {
             // AI 기능 호출 (썸네일 및 추천 키워드 생성)
-            GetThumbnailAndKeywordsResponseDTO responseDTO = aiService.analyzeHtmlFile(savedStar.getId(), user.getId(), htmlFileKey);
+            GetThumbnailAndKeywordsResponseDTO responseDTO = aiService.analyzeHtmlFile(savedStar.getId(), userId, htmlFileKey);
 
             // 유저 노드와 관계 설정 후 저장
             userNode.getStars().add(savedStar);
