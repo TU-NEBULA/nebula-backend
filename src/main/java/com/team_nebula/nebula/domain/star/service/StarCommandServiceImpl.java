@@ -16,7 +16,6 @@ import com.team_nebula.nebula.domain.star.dto.response.GetStarOneResponseDTO;
 import com.team_nebula.nebula.domain.star.dto.response.PutStarResponseDTO;
 import com.team_nebula.nebula.domain.star.entity.Star;
 import com.team_nebula.nebula.domain.star.repository.StarRepository;
-import com.team_nebula.nebula.domain.user.entity.User;
 import com.team_nebula.nebula.domain.user.entity.UserNode;
 import com.team_nebula.nebula.domain.user.repository.neo4j.UserNodeRepository;
 import com.team_nebula.nebula.global.apipayload.code.status.ErrorStatus;
@@ -46,16 +45,11 @@ public class StarCommandServiceImpl implements StarCommandService {
 
     @Override
     public CreateStarResponseDTO createFirstStar(Long userId, MultipartFile htmlFile, String title, String siteUrl){
-        System.out.println("--------1-----------"+ userId);
 
         UserNode userNode = userNodeRepository.findById(userId)
                 .orElseThrow(() -> new GeneralException(ErrorStatus._USER_NOT_FOUND));
 
-        System.out.println("--------1.5-----------");
-
         String htmlFileKey = s3Service.saveHtmlFile(htmlFile, title);
-
-        System.out.println("--------2-----------");
 
         Star star = Star.builder()
                 .title(title)
@@ -68,13 +62,9 @@ public class StarCommandServiceImpl implements StarCommandService {
             throw new GeneralException(ErrorStatus._STAR_CREATION_FAILED);
         }
 
-        System.out.println("--------3-----------");
-
         try {
             // AI 기능 호출 (썸네일 및 추천 키워드 생성)
             GetThumbnailAndKeywordsResponseDTO responseDTO = aiService.analyzeHtmlFile(savedStar.getId(), userId, htmlFileKey);
-
-            System.out.println("--------4-----------");
 
             // 유저 노드와 관계 설정 후 저장
             userNode.getStars().add(savedStar);
@@ -82,8 +72,6 @@ public class StarCommandServiceImpl implements StarCommandService {
 
             // 유저 스타 수정 횟수 증가
             aiService.checkUpdatedNum(userNode);
-
-            System.out.println("--------5-----------");
 
             return CreateStarResponseDTO.builder()
                     .starId(savedStar.getId())
@@ -132,30 +120,7 @@ public class StarCommandServiceImpl implements StarCommandService {
     }
 
 
-//    public Star createStarEntity(CreateStarFileDTO requestDTO, UserNode userNode){
-//        CreateStarRequestDTO starRequestDTO = requestDTO.getStarRequestDTO();
-//
-//        Star star = Star.builder()
-//                .thumbnailUrl(s3Service.saveThumbnail(requestDTO.getThumbnailImage(), starRequestDTO.getTitle()))
-//                .htmlFileUrl(s3Service.saveHtmlFile(requestDTO.getHtmlFile(), starRequestDTO.getTitle()))
-//                .summaryAI(starRequestDTO.getSummaryAI())
-//                .userMemo(starRequestDTO.getUserMemo())
-//                .views(0)
-//                .embedding(starRequestDTO.getEmbedding())
-//                .build();
-//
-//        Star savedStar = starRepository.save(star);
-//        if (savedStar.getId() == null) {
-//            throw new GeneralException(ErrorStatus._STAR_CREATION_FAILED);
-//        }
-//
-//        // 유저 노드와 관계 설정 후 저장
-//        userNode.getStars().add(savedStar);
-//        userNodeRepository.save(userNode);
-//
-//        return savedStar;
-//    }
-
+    @Override
     public GetStarOneResponseDTO updateStar(UUID starId, UpdateStarOneRequestDTO requestDTO){
         Star star = starRepository.findById(starId)
                 .orElseThrow(() -> new GeneralException(ErrorStatus._STAR_NOT_FOUND));

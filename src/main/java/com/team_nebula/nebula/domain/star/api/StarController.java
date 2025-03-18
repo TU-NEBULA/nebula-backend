@@ -114,10 +114,11 @@ public class StarController {
     @Operation(summary = "스타 정보 수정", description = "특정 스타 정보를 수정하는 API / title(제목), categoryName(카테고리), summaryAI(AI요약), userMemo(사용자메모)를 각각 수정할 수 있음")
     @PatchMapping("/{starId}")
     public ApiResponse<GetStarOneResponseDTO> createCompleteStar(
+            @AuthUser Long userId,
             @PathVariable UUID starId,
             @RequestBody UpdateStarOneRequestDTO requestDTO
     ){
-        GetStarOneResponseDTO responseDTO = starCommandService.updateStar(starId, requestDTO);
+        GetStarOneResponseDTO responseDTO = starCommandService.updateStar(userId, starId, requestDTO);
 
         return ApiResponse.onSuccess(responseDTO);
     }

@@ -9,9 +9,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Mono;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -81,18 +83,24 @@ public class AiService {
 //                .onErrorMap(e -> new GeneralException(ErrorStatus._AI_EXTRACT_DATA_ERROR));
 //    }
 
-    public void checkUpdatedNum(UserNode userNode) {
+    @Async
+    public void checkUpdatedCnt(UserNode userNode) {
 
         try {
             userNode.updateUpdatedCnt();
 
             int updatedCnt = userNode.getUpdatedCnt();
+
             // 50단위로 초기화
             int dividedCnt = (updatedCnt % 50);
+
+            System.out.println("------- Keyword Sync AI 호출 전----------");
 
             if (isFibonacciNumber(dividedCnt)) {
                 Map<String, Object> requestBody = new HashMap<>();
                 requestBody.put("user_id", String.valueOf(userNode.getUserId()));
+
+                System.out.println("------- Keyword Sync AI 호출 시작----------");
 
                 webClient.post()
                         .uri(aiKeywordSyncUrl)
@@ -101,8 +109,11 @@ public class AiService {
                         .retrieve()
                         .bodyToMono(Void.class)
                         .doOnSuccess(response -> log.info("Keyword sync 성공: userId={}", userNode.getUserId()))
-                        .doOnError(e -> log.error("Keyword sync 실패: {}", e.getMessage()));
+                        .doOnError(e -> log.error("Keyword sync 실패: {}", e.getMessage()))
+                        .subscribe();
             }
+
+            System.out.println("------- Keyword Sync AI 호출 끝----------");
         }catch(Exception e) {
             throw new GeneralException(ErrorStatus._AI_KEYWORD_SYNC_ERROR);
         }
