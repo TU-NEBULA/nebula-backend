@@ -14,8 +14,6 @@ public interface StarCommandService {
 
     public CreateStarResponseDTO createFirstStar(Long userId, MultipartFile htmlFile, String title, String siteUrl);
 
-//    public CreateStarResponseDTO createStar(User user, CreateStarFileDTO requestDTO);
-
     public PutStarResponseDTO createCompleteStar(UUID starId, CreateStarRequestDTO requestDTO);
 
     public GetStarOneResponseDTO updateStar(UUID starId, UpdateStarOneRequestDTO requestDTO);
