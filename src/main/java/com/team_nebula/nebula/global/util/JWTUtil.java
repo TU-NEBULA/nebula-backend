@@ -61,6 +61,15 @@ public class JWTUtil {
 			.get("tokenType", String.class);
 	}
 
+	public Date getExpiration(String token) {
+		return Jwts.parser()
+			.setSigningKey(secretKey)
+			.build()
+			.parseClaimsJws(token)
+			.getBody()
+			.getExpiration();
+	}
+
 	public Boolean isExpired(String token) {
 		return Jwts.parser()
 			.verifyWith(secretKey)
