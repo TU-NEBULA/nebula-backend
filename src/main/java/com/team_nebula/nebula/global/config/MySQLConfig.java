@@ -1,5 +1,8 @@
 package com.team_nebula.nebula.global.config;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import jakarta.persistence.EntityManagerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -17,7 +20,10 @@ import javax.sql.DataSource;
 
 @Configuration
 @EnableJpaRepositories(
-        basePackages = "com.team_nebula.nebula.domain.user.repository.mysql", // MySQL 관련 Repository 위치
+        basePackages = {
+            "com.team_nebula.nebula.domain.user.repository.mysql",
+            "com.team_nebula.nebula.domain.term.repository"
+        }, // MySQL 관련 Repository 위치
         entityManagerFactoryRef = "mysqlEntityManager",
         transactionManagerRef = "mysqlTransactionManager"
 )
@@ -35,10 +41,18 @@ public class MySQLConfig {
     public LocalContainerEntityManagerFactoryBean mysqlEntityManager(
             EntityManagerFactoryBuilder builder,
             @Qualifier("mysqlDataSource") DataSource dataSource) {
+
+        Map<String, Object> properties = new HashMap<>();
+        properties.put("hibernate.hbm2ddl.auto", "update");
+
         return builder
                 .dataSource(dataSource)
-                .packages("com.team_nebula.nebula.domain") // MySQL Entity 경로
+                .packages(
+                    "com.team_nebula.nebula.domain.user.entity",
+                    "com.team_nebula.nebula.domain.term.entity"
+                )
                 .persistenceUnit("mysql")
+                .properties(properties)
                 .build();
     }
 
