@@ -4,6 +4,8 @@ import com.team_nebula.nebula.global.common.BaseEntity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -29,12 +31,12 @@ public class Term extends BaseEntity {
 	@Column(name = "content", nullable = false)
 	private String content;
 
-	@Column(name = "termType", nullable = false)
+	@Column(name = "term_type", nullable = false)
+	@Enumerated(EnumType.STRING)
 	private TermType termType;
 
 	@Builder
-	public Term(Long id, String name, String content, TermType termType) {
-		this.id = id;
+	public Term(String name, String content, TermType termType) {
 		this.name = name;
 		this.content = content;
 		this.termType = termType;
