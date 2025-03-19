@@ -38,7 +38,9 @@ public enum ErrorStatus implements BaseErrorCode {
 	_S3_HTML_FILE_DELETE_FAIL(HttpStatus.INTERNAL_SERVER_ERROR, "S35001", "S3에 저장된 html 파일을 삭제하는데 실패했습니다."),
 
 	_TOKEN_EXPIRED(HttpStatus.BAD_REQUEST, "TOKEN4001", "토큰이 만료되었습니다."),
-	_TOKEN_TYPE_ERROR(HttpStatus.BAD_REQUEST, "TOKEN4002", "토큰 타입이 잘못되었습니다.");
+	_TOKEN_TYPE_ERROR(HttpStatus.BAD_REQUEST, "TOKEN4002", "토큰 타입이 잘못되었습니다."),
+
+	_TERM_NOT_FOUND(HttpStatus.BAD_REQUEST, "TERM4001", "이용약관을 찾을 수 없습니다.");
 
 
 	private HttpStatus httpStatus;

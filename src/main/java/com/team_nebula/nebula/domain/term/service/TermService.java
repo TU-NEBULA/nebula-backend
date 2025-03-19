@@ -11,4 +11,6 @@ public interface TermService {
 	Term createTerm(TermRequestDTO request);
 
 	List<TermResponseDTO> getTerms();
+
+	void deleteTerm(Long termId);
 }

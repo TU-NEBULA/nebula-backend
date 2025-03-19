@@ -10,6 +10,8 @@ import com.team_nebula.nebula.domain.term.dto.request.TermRequestDTO;
 import com.team_nebula.nebula.domain.term.dto.response.TermResponseDTO;
 import com.team_nebula.nebula.domain.term.entity.Term;
 import com.team_nebula.nebula.domain.term.repository.TermRepository;
+import com.team_nebula.nebula.global.apipayload.code.status.ErrorStatus;
+import com.team_nebula.nebula.global.apipayload.exception.GeneralException;
 
 import lombok.RequiredArgsConstructor;
 
@@ -23,7 +25,11 @@ public class TermServiceImpl implements TermService {
 	@Transactional
 	public Term createTerm(TermRequestDTO request) {
 
-		return TermConverter.of(request);
+		Term term = TermConverter.of(request);
+
+		termRepository.save(term);
+
+		return term;
 	}
 
 	@Override
@@ -34,5 +40,15 @@ public class TermServiceImpl implements TermService {
 		return terms.stream()
 			.map(TermConverter::toTermResponseDTO)
 			.toList();
+	}
+
+	@Override
+	@Transactional
+	public void deleteTerm(Long termId) {
+
+		Term term = termRepository.findById(termId)
+			.orElseThrow(() -> new GeneralException(ErrorStatus._TERM_NOT_FOUND));
+
+		termRepository.delete(term);
 	}
 }
