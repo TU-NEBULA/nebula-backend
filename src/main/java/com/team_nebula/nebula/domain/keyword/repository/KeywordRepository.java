@@ -1,6 +1,7 @@
 package com.team_nebula.nebula.domain.keyword.repository;
 
 import com.team_nebula.nebula.domain.keyword.entity.Keyword;
+import com.team_nebula.nebula.domain.star.entity.Star;
 import org.springframework.data.neo4j.repository.Neo4jRepository;
 import org.springframework.data.neo4j.repository.query.Query;
 import org.springframework.data.repository.query.Param;
@@ -19,10 +20,16 @@ public interface KeywordRepository extends Neo4jRepository<Keyword, String> {
     void linkStarToKeywords(@Param("starId") UUID starId, @Param("keywordNames") List<String> keywordNames);
 
     @Query("""
-        MATCH (s:Star {id: $starId})-[t:TAGGED]->(k:Keyword)
+        MATCH (s:Star {id: $starId})-[t:TAGGED]->(:Keyword)
         DELETE t
+    
+        WITH s
+        UNWIND apoc.coll.toSet($keywordNames) AS keywordName
+        MERGE (k:Keyword {name: keywordName})
+        MERGE (s)-[:TAGGED]->(k)
+        RETURN s;
     """)
-    void removeKeywordRelations(@Param("starId") UUID starId);
+    Star removeLinkAndReconnect(@Param("starId") UUID starId, @Param("keywordNames") List<String> keywordNames);
 
     @Query("""
         MATCH (k:Keyword)

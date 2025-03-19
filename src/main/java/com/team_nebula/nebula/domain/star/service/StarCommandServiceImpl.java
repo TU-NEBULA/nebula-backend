@@ -108,6 +108,7 @@ public class StarCommandServiceImpl implements StarCommandService {
         linkCommandService.createLinksForStar(savedStar);
 
         savedStar.updateStar(requestDTO.getThumbnailUrl(), requestDTO.getSummaryAI(), requestDTO.getUserMemo());
+        starRepository.save(savedStar);
 
         return PutStarResponseDTO.builder()
                 .starId(star.getId())
@@ -135,7 +136,8 @@ public class StarCommandServiceImpl implements StarCommandService {
                 .map(category -> categoryCommandService.linkStarToCategoryAndGetName(star, category))
                 .orElseGet(() -> categoryQueryService.findCategoryNameByStar(star.getId()));
 
-        Star updateStar = starRepository.save(star);
+        Star updateStar = starRepository.findById(starId)
+                .orElseThrow(() -> new GeneralException(ErrorStatus._STAR_NOT_FOUND));
 
         // 유저 스타 작업 횟수 증가
         aiService.checkUpdatedCnt(userId);

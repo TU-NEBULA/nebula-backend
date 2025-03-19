@@ -70,4 +70,28 @@ public interface LinkRepository extends Neo4jRepository<Link, UUID> {
            l.similarityScore AS similarity
     """)
     List<GetLinkOneResponseDTO> findLinkInKeyword(@Param("userId") Long userId, @Param("keywordId") String keywordId);
+
+    @Query("""
+    MATCH (s1:Star)-[r1:LINKED]->(l:Link)<-[r2:LINKED]-(s2)
+    WHERE s1.id = $starId
+    DELETE r1, r2
+    WITH s1,l
+    WHERE l IS NOT NULL
+    DETACH DELETE l
+    
+    WITH s1
+    MATCH (s1)-[:TAGGED]->(k:Keyword)<-[:TAGGED]-(s2:Star)
+    WHERE s1 <> s2
+    AND (s1.isDeletedStatus = false OR s1.isDeletedStatus IS NULL)
+    AND (s2.isDeletedStatus = false OR s2.isDeletedStatus IS NULL)
+    
+    WITH s1, s2, COUNT(k) AS sharedKeywordNum
+    WHERE sharedKeywordNum > 0
+    MERGE (l:Link {linked_two_node_Id: [s1.id, s2.id]})
+    ON CREATE SET l.sharedKeywordNum = sharedKeywordNum, l.similarityScore = 0.5, l.id = randomUUID()
+    MERGE (s1)-[:LINKED]->(l)
+    MERGE (s2)-[:LINKED]->(l)
+    """)
+    void updateLinksBetweenStars(@Param("starId") UUID starId);
+
 }
