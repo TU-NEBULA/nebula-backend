@@ -14,8 +14,11 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
+import org.springframework.web.util.UriComponentsBuilder;
 import reactor.core.publisher.Mono;
 
+import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -95,25 +98,37 @@ public class AiService {
             // 50단위로 초기화
             int dividedCnt = (updatedCnt % 50);
 
-            System.out.println("------- Keyword Sync AI 호출 전----------");
 
             if (isFibonacciNumber(dividedCnt)) {
-                Map<String, Object> requestBody = new HashMap<>();
-                requestBody.put("user_id", String.valueOf(userNode.getUserId()));
+                String sendUserId = String.valueOf(userId);
 
-                System.out.println("------- Keyword Sync AI 호출 시작----------");
+                URI uri = UriComponentsBuilder.fromUriString(aiKeywordSyncUrl)
+                        .queryParam("user_id", sendUserId)
+                        .build()
+                        .toUri();
 
                 webClient.post()
-                        .uri(aiKeywordSyncUrl)
+                        .uri(uri)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .bodyValue(requestBody)
                         .retrieve()
+                        .onStatus(HttpStatusCode::is4xxClientError, response ->
+                                response.bodyToMono(String.class)
+                                        .map(body -> {
+                                            log.error("Keyword sync 응답 본문: {}", body);
+                                            return new WebClientResponseException(
+                                                    response.statusCode().value(),
+                                                    "Unprocessable Entity",
+                                                    null,
+                                                    body.getBytes(),
+                                                    null
+                                            );
+                                        })
+                        )
                         .bodyToMono(Void.class)
                         .doOnSuccess(response -> log.info("Keyword sync 성공: userId={}", userNode.getUserId()))
                         .doOnError(e -> log.error("Keyword sync 실패: {}", e.getMessage()))
                         .subscribe();
             }
-            System.out.println("------- Keyword Sync AI 호출 끝----------");
             userNodeRepository.save(userNode);
         }catch(Exception e) {
             throw new GeneralException(ErrorStatus._AI_KEYWORD_SYNC_ERROR);

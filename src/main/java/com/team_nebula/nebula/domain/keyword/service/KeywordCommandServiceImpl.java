@@ -38,12 +38,9 @@ public class KeywordCommandServiceImpl implements KeywordCommandService {
 
     @Override
     public void updateKeywordsForStar(Star star, List<String> newKeywordNames) {
-        System.out.println("------변경 전 스타 - 키워드1 --------:"+ star.getKeywords());
         // 키워드와 스타 연결 업데이트
         Star updateStar = keywordRepository.removeLinkAndReconnect(star.getId(), newKeywordNames);
-
-        System.out.println("------변경된 스타 - 키워드1 --------:"+ updateStar.getKeywords());
-
+        // 링크 재설정
         linkrepository.updateLinksBetweenStars(updateStar.getId());
     }
 
