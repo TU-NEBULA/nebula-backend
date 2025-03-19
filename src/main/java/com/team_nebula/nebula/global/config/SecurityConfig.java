@@ -2,7 +2,9 @@ package com.team_nebula.nebula.global.config;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -33,16 +35,21 @@ public class SecurityConfig {
 	private final CustomFailureHandler customFailureHandler;
 	private final JWTUtil jwtUtil;
 	private final UserRepository userRepository;
+	private final List<String> allowOrigins;
 
 	public SecurityConfig(CustomOAuth2UserService customOAuth2UserService, CustomSuccessHandler customSuccessHandler,
 		CustomFailureHandler customFailureHandler,
-		JWTUtil jwtUtil, UserRepository userRepository) {
+		JWTUtil jwtUtil, UserRepository userRepository,
+
+		@Value("#{'${cors.allowed-origins}'.split(',')}")
+		List<String> allowOrigins) {
 
 		this.customOAuth2UserService = customOAuth2UserService;
 		this.customSuccessHandler = customSuccessHandler;
 		this.customFailureHandler = customFailureHandler;
 		this.jwtUtil = jwtUtil;
 		this.userRepository = userRepository;
+		this.allowOrigins = allowOrigins;
 	}
 
 	@Bean
@@ -57,9 +64,9 @@ public class SecurityConfig {
 					CorsConfiguration configuration = new CorsConfiguration();
 
 					configuration.setAllowCredentials(true);
-					configuration.setAllowedOriginPatterns(Collections.singletonList("*"));
+					configuration.setAllowedOriginPatterns(allowOrigins);
 					configuration.setAllowedHeaders(Collections.singletonList("*"));
-					configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "PATCH"));
+					configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
 					configuration.setExposedHeaders(Arrays.asList("Set-Cookie", "Authorization"));
 					configuration.setMaxAge(3600L);
 
