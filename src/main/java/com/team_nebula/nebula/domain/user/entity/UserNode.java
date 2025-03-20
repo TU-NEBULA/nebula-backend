@@ -5,6 +5,7 @@ import java.util.Set;
 
 import org.springframework.data.neo4j.core.schema.Id;
 import org.springframework.data.neo4j.core.schema.Node;
+import org.springframework.data.neo4j.core.schema.Property;
 import org.springframework.data.neo4j.core.schema.Relationship;
 
 import com.team_nebula.nebula.domain.category.entity.Category;
@@ -24,6 +25,9 @@ public class UserNode extends BaseEntity {
 	@Id
 	private Long userId;
 
+	@Property(name = "updatedCnt")
+	private int updatedCnt;
+
 	@Relationship(type = "CREATED", direction = Relationship.Direction.OUTGOING)
 	private Set<Star> stars = new HashSet<>();
 
@@ -33,5 +37,10 @@ public class UserNode extends BaseEntity {
 	@Builder
 	public UserNode(Long userId) {
 		this.userId = userId;
+		this.updatedCnt = 0;
+	}
+
+	public void updateUpdatedCnt() {
+		this.updatedCnt++;
 	}
 }

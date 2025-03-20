@@ -114,10 +114,11 @@ public class StarController {
     @Operation(summary = "스타 정보 수정", description = "특정 스타 정보를 수정하는 API / title(제목), categoryName(카테고리), summaryAI(AI요약), userMemo(사용자메모)를 각각 수정할 수 있음")
     @PatchMapping("/{starId}")
     public ApiResponse<GetStarOneResponseDTO> createCompleteStar(
+            @AuthUser Long userId,
             @PathVariable UUID starId,
             @RequestBody UpdateStarOneRequestDTO requestDTO
     ){
-        GetStarOneResponseDTO responseDTO = starCommandService.updateStar(starId, requestDTO);
+        GetStarOneResponseDTO responseDTO = starCommandService.updateStar(userId, starId, requestDTO);
 
         return ApiResponse.onSuccess(responseDTO);
     }
@@ -126,7 +127,7 @@ public class StarController {
     @Operation(summary = "스타 삭제", description = "스타를 비활성화하는 API/ 완전 삭제가 아닌 Soft Delete하는 것")
     @PatchMapping("/{starId}/deactivate")
     public ApiResponse<DeleteStarResponseDTO> deleteStar(@AuthUser Long userId, @PathVariable UUID starId){
-        DeleteStarResponseDTO responseDTO = starCommandService.deleteStar(starId);
+        DeleteStarResponseDTO responseDTO = starCommandService.deleteStar(userId, starId);
 
         return ApiResponse.onSuccess(responseDTO);
     }
