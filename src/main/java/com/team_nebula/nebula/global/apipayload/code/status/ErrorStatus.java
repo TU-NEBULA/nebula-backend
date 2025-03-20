@@ -41,7 +41,9 @@ public enum ErrorStatus implements BaseErrorCode {
 	_TOKEN_TYPE_ERROR(HttpStatus.BAD_REQUEST, "TOKEN4002", "토큰 타입이 잘못되었습니다."),
 
 	_TERM_NOT_FOUND(HttpStatus.BAD_REQUEST, "TERM4001", "이용약관을 찾을 수 없습니다."),
-	_REQUIRED_TERM_NOT_AGREED(HttpStatus.BAD_REQUEST, "TERM4002", "필수 동의 약관 입니다.");
+	_TERM_NOT_AGREED(HttpStatus.BAD_REQUEST, "TERM4002", "필수 동의 약관 입니다."),
+
+	_USER_TERM_NOT_FOUND(HttpStatus.BAD_REQUEST, "USERTERM4001", "유저 이용약관을 찾을 수 없습니다.");
 
 
 	private HttpStatus httpStatus;
