@@ -31,11 +31,8 @@ public interface LinkRepository extends Neo4jRepository<Link, UUID> {
     MATCH (u:UserNode)-[:CREATED]->(s:Star)
     WHERE u.userId = $userId AND (s.isDeletedStatus = false OR s.isDeletedStatus IS NULL)
 
-    MATCH (s)-[:LINKED]->(l:Link)
-    WHERE EXISTS {
-        MATCH (s2:Star)-[:LINKED]->(l)
-        WHERE (u)-[:CREATED]->(s2)
-    }
+    MATCH (s)-[:LINKED]->(l:Link)<-[:LINKED]-(s2:Star)
+    WHERE (u)-[:CREATED]->(s2) AND (s2.isDeletedStatus = false OR s2.isDeletedStatus IS NULL)
 
     RETURN DISTINCT l.id AS linkId,
                     l.linked_two_node_Id AS linkedNodeIdList,
@@ -49,7 +46,7 @@ public interface LinkRepository extends Neo4jRepository<Link, UUID> {
     WHERE u.userId = $userId AND c.id = $categoryId AND (s.isDeletedStatus = false OR s.isDeletedStatus IS NULL)
     
     MATCH (s)-[:LINKED]->(l:Link)<-[:LINKED]-(s2:Star)
-    WHERE (u)-[:CREATED]->(s2)
+    WHERE (u)-[:CREATED]->(s2) AND (s2.isDeletedStatus = false OR s2.isDeletedStatus IS NULL)
     
     RETURN l.id AS linkId,
            l.linked_two_node_Id AS linkedNodeIdList,
@@ -63,7 +60,7 @@ public interface LinkRepository extends Neo4jRepository<Link, UUID> {
     WHERE u.userId = $userId AND k.name = $keywordId AND (s.isDeletedStatus = false OR s.isDeletedStatus IS NULL)
     
     MATCH (s)-[:LINKED]->(l:Link)<-[:LINKED]-(s2:Star)
-    WHERE (u)-[:CREATED]->(s2)
+    WHERE (u)-[:CREATED]->(s2) AND (s2.isDeletedStatus = false OR s2.isDeletedStatus IS NULL)
     
     RETURN l,
            l.linked_two_node_Id AS linkedNodeIdList,
