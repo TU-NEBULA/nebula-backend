@@ -34,6 +34,7 @@ public enum ErrorStatus implements BaseErrorCode {
 
 	_AI_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "AI5000","AI 서버에서 문제가 발생했습니다."),
 	_AI_EXTRACT_DATA_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "AI5001","AI에서 썸네일과 추천 키워드을 가져오지 못했습니다."),
+	_AI_KEYWORD_SYNC_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "AI5002","AI Keyword sync 호출에 실해하였습니다."),
 
 	_S3_HTML_FILE_DELETE_FAIL(HttpStatus.INTERNAL_SERVER_ERROR, "S35001", "S3에 저장된 html 파일을 삭제하는데 실패했습니다."),
 

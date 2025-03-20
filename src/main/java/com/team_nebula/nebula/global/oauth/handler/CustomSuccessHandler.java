@@ -70,8 +70,14 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 		user.updateRefreshToken(tokenResponseDTO.getRefreshToken());
 		userRepository.save(user);
 
-		response.addCookie(createCookie("accessToken", tokenResponseDTO.getAccessToken()));
-		response.addCookie(createCookie("refreshToken", tokenResponseDTO.getRefreshToken()));
+		long accessTokenExpirationTime = jwtUtil.getExpiration(tokenResponseDTO.getAccessToken()).getTime();
+		long refreshTokenExpirationTime = jwtUtil.getExpiration(tokenResponseDTO.getRefreshToken()).getTime();
+
+		response.addCookie(createCookie("accessToken", tokenResponseDTO.getAccessToken(),
+			accessTokenExpirationTime));
+
+		response.addCookie(createCookie("refreshToken", tokenResponseDTO.getRefreshToken(),
+			refreshTokenExpirationTime));
 
 		HttpSession session = request.getSession(false);
 		String redirectType = (String)session.getAttribute("redirectType");
@@ -91,9 +97,9 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 
 	}
 
-	private Cookie createCookie(String key, String value) {
+	private Cookie createCookie(String key, String value, long expirationTime) {
 		Cookie cookie = new Cookie(key, value);
-		cookie.setMaxAge(60 * 60 * 60);
+		cookie.setMaxAge((int)expirationTime);
 		cookie.setSecure(true);
 		cookie.setDomain("nebula-ai.kr");
 		cookie.setPath("/");

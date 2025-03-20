@@ -27,8 +27,8 @@ public class KeywordController {
     // 키워드 전체조회 API
     @Operation(summary = "키워드 전체 조회", description = "사용자가 만든 키워드 전체를 조회할 수 있다.")
     @GetMapping()
-    public ApiResponse<List<String>> getKeywordList(@AuthUser User user) {
-        List<String> keywordList = keywordQueryService.getKeywords(user);
+    public ApiResponse<List<String>> getKeywordList(@AuthUser Long userId) {
+        List<String> keywordList = keywordQueryService.getKeywords(userId);
         return ApiResponse.onSuccess(keywordList);
     }
 
