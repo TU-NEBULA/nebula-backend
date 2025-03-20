@@ -2,6 +2,7 @@ package com.team_nebula.nebula.domain.term.service;
 
 import java.util.List;
 
+import com.team_nebula.nebula.domain.term.dto.request.AgreeTermRequestDTO;
 import com.team_nebula.nebula.domain.term.dto.request.TermRequestDTO;
 import com.team_nebula.nebula.domain.term.dto.response.TermResponseDTO;
 import com.team_nebula.nebula.domain.term.entity.Term;
@@ -13,4 +14,6 @@ public interface TermService {
 	List<TermResponseDTO> getTerms();
 
 	void deleteTerm(Long termId);
+
+	void agreeTerm(Long userId, AgreeTermRequestDTO request);
 }

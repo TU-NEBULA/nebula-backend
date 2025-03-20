@@ -40,7 +40,8 @@ public enum ErrorStatus implements BaseErrorCode {
 	_TOKEN_EXPIRED(HttpStatus.BAD_REQUEST, "TOKEN4001", "토큰이 만료되었습니다."),
 	_TOKEN_TYPE_ERROR(HttpStatus.BAD_REQUEST, "TOKEN4002", "토큰 타입이 잘못되었습니다."),
 
-	_TERM_NOT_FOUND(HttpStatus.BAD_REQUEST, "TERM4001", "이용약관을 찾을 수 없습니다.");
+	_TERM_NOT_FOUND(HttpStatus.BAD_REQUEST, "TERM4001", "이용약관을 찾을 수 없습니다."),
+	_REQUIRED_TERM_NOT_AGREED(HttpStatus.BAD_REQUEST, "TERM4002", "필수 동의 약관 입니다.");
 
 
 	private HttpStatus httpStatus;
