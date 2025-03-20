@@ -123,35 +123,44 @@ public class StarCommandServiceImpl implements StarCommandService {
 
     @Override
     public GetStarOneResponseDTO updateStar(Long userId, UUID starId, UpdateStarOneRequestDTO requestDTO){
+
         Star star = starRepository.findById(starId)
                 .orElseThrow(() -> new GeneralException(ErrorStatus._STAR_NOT_FOUND));
 
+        // title, AI요약, 사용자 메모 업데이트
         Optional.ofNullable(requestDTO.getTitle()).ifPresent(star::updateTitle);
         Optional.ofNullable(requestDTO.getSummaryAI()).ifPresent(star::updateSummaryAI);
         Optional.ofNullable(requestDTO.getUserMemo()).ifPresent(star::updateUserMemo);
-        Optional.ofNullable(requestDTO.getKeywords()).ifPresent(keywords ->
-                keywordCommandService.updateKeywordsForStar(star, keywords));
 
+        // 카테고리 업데이트. 만약 수정되지 않으면 기존 카테고리 이름 반환
         String categoryName = Optional.ofNullable(requestDTO.getCategoryName())
                 .map(category -> categoryCommandService.linkStarToCategoryAndGetName(star, category))
                 .orElseGet(() -> categoryQueryService.findCategoryNameByStar(star.getId()));
 
-        Star updateStar = starRepository.findById(starId)
+        // 키워드 업데이트 -> 링크 재설정
+        Optional.ofNullable(requestDTO.getKeywordList()).ifPresent(keywords ->
+                keywordCommandService.updateKeywordsForStar(star, keywords));
+
+        // 업데이트된 최신 스타객체 조회
+        Star completedStar = starRepository.findById(starId)
                 .orElseThrow(() -> new GeneralException(ErrorStatus._STAR_NOT_FOUND));
+
+        // DB에 저장
+        Star updatedStar = starRepository.save(completedStar);
 
         // 유저 스타 작업 횟수 증가
         aiService.checkUpdatedCnt(userId);
 
         return GetStarOneResponseDTO.builder()
-                .starId(updateStar.getId())
+                .starId(updatedStar.getId())
                 .categoryName(categoryName)
-                .title(updateStar.getTitle())
-                .siteUrl(updateStar.getSiteUrl())
-                .thumbnailUrl(updateStar.getThumbnailUrl())
-                .summaryAI(updateStar.getSummaryAI())
-                .userMemo(updateStar.getUserMemo())
-                .views(updateStar.getViews())
-                .keywordList(updateStar.getKeywords().stream()
+                .title(updatedStar.getTitle())
+                .siteUrl(updatedStar.getSiteUrl())
+                .thumbnailUrl(updatedStar.getThumbnailUrl())
+                .summaryAI(updatedStar.getSummaryAI())
+                .userMemo(updatedStar.getUserMemo())
+                .views(updatedStar.getViews())
+                .keywordList(updatedStar.getKeywords().stream()
                         .map(Keyword::getName)
                         .toList())
                 .build();    

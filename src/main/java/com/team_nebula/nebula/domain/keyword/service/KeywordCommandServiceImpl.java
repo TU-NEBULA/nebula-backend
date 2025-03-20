@@ -21,7 +21,7 @@ public class KeywordCommandServiceImpl implements KeywordCommandService {
 
     private final KeywordRepository keywordRepository;
     private final LinkRepository linkrepository;
-    private final StarRepository starrepository;
+    private final StarRepository starRepository;
 
     @Override
     public void linkStarToKeywords(Star star, List<String> keywordNames) {
@@ -38,10 +38,14 @@ public class KeywordCommandServiceImpl implements KeywordCommandService {
 
     @Override
     public void updateKeywordsForStar(Star star, List<String> newKeywordNames) {
-        // 키워드와 스타 연결 업데이트
-        Star updateStar = keywordRepository.removeLinkAndReconnect(star.getId(), newKeywordNames);
-        // 링크 재설정
-        linkrepository.updateLinksBetweenStars(updateStar.getId());
+        // 키워드와 스타 연결 전부 삭제
+        keywordRepository.removeOldKeywords(star.getId());
+        // 새로운 키워드와 스타 연결
+        keywordRepository.linkStarToKeywords(star.getId(), newKeywordNames);
+        // 링크 노드 전부 삭제
+        linkrepository.deleteOldLinks(star.getId());
+        // 링크 노드 재설정
+        linkrepository.createLinksBetweenStars(star.getId());
     }
 
     @Override
