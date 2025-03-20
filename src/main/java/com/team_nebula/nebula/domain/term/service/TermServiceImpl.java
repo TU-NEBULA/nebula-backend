@@ -1,6 +1,7 @@
 package com.team_nebula.nebula.domain.term.service;
 
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -67,22 +68,30 @@ public class TermServiceImpl implements TermService {
 		User user = userRepository.findById(userId)
 			.orElseThrow(() -> new GeneralException(ErrorStatus._USER_NOT_FOUND));
 
-		for (Integer key : request.getAgreeMap().keySet()) {
+		List<Term> mandatoryTerms = termRepository.findByTermType(TermType.MANDATORY);
 
-			Long termId = key.longValue();
-			Boolean agreed = request.getAgreeMap().get(key);
+		for (Term mandatoryTerm : mandatoryTerms) {
+
+			Boolean agreed = request.getAgreeMap().get(mandatoryTerm.getId().intValue());
+
+			if (agreed == null || !agreed) {
+
+				throw new GeneralException(ErrorStatus._TERM_NOT_AGREED);
+			}
+		}
+
+		for (Map.Entry<Integer, Boolean> entry : request.getAgreeMap().entrySet()) {
+
+			Long termId = entry.getKey().longValue();
+			Boolean agreed = entry.getValue();
 
 			Term term = termRepository.findById(termId)
 				.orElseThrow(() -> new GeneralException(ErrorStatus._TERM_NOT_FOUND));
 
-			if (term.getTermType().equals(TermType.MANDATORY) && !Boolean.TRUE.equals(agreed)) {
-				throw new GeneralException(ErrorStatus._REQUIRED_TERM_NOT_AGREED);
-			}
-
 			UserTerm userTerm = UserTerm.builder()
 				.user(user)
 				.term(term)
-				.agreed(request.getAgreeMap().get(key))
+				.agreed(agreed)
 				.build();
 
 			userTermRepository.save(userTerm);
