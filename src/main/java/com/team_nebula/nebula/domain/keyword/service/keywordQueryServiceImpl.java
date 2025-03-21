@@ -1,5 +1,7 @@
 package com.team_nebula.nebula.domain.keyword.service;
 
+import com.team_nebula.nebula.domain.keyword.dto.response.GetMostUsedKeywordListResponseDTO;
+import com.team_nebula.nebula.domain.keyword.dto.response.GetMostUsedKeywordOneResponseDTO;
 import com.team_nebula.nebula.domain.keyword.repository.KeywordRepository;
 import com.team_nebula.nebula.domain.user.entity.User;
 import lombok.RequiredArgsConstructor;
@@ -19,4 +21,14 @@ public class keywordQueryServiceImpl implements  KeywordQueryService {
     public List<String> getKeywords(Long userId){
         return keywordRepository.getAllKeywordNames(userId);
     }
+
+    @Override
+    public GetMostUsedKeywordListResponseDTO getMostUsedKeywordList(){
+        List<GetMostUsedKeywordOneResponseDTO> mostUsedKeywordList = keywordRepository.getMostUsedKeywordList();
+
+        return GetMostUsedKeywordListResponseDTO.builder()
+                .mostUsedKeywordList(mostUsedKeywordList)
+                .build();
+    }
+
 }
