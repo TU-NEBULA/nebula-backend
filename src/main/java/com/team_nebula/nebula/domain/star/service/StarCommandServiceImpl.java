@@ -131,8 +131,6 @@ public class StarCommandServiceImpl implements StarCommandService {
         Optional.ofNullable(requestDTO.getTitle()).ifPresent(star::updateTitle);
         Optional.ofNullable(requestDTO.getSummaryAI()).ifPresent(star::updateSummaryAI);
         Optional.ofNullable(requestDTO.getUserMemo()).ifPresent(star::updateUserMemo);
-        starRepository.save(star);
-
 
         // 카테고리 업데이트. 만약 수정되지 않으면 기존 카테고리 이름 반환
         String categoryName = Optional.ofNullable(requestDTO.getCategoryName())
@@ -143,13 +141,12 @@ public class StarCommandServiceImpl implements StarCommandService {
         Optional.ofNullable(requestDTO.getKeywordList()).ifPresent(keywords ->
                 keywordCommandService.updateKeywordsForStar(star, keywords));
 
-
         // 업데이트된 최신 스타객체 조회
-        Star latestStar = starRepository.findById(starId)
+        Star completedStar = starRepository.findById(starId)
                 .orElseThrow(() -> new GeneralException(ErrorStatus._STAR_NOT_FOUND));
 
         // DB에 저장
-        Star updatedStar = starRepository.save(latestStar);
+        Star updatedStar = starRepository.save(completedStar);
 
         // 유저 스타 작업 횟수 증가
         aiService.checkUpdatedCnt(userId);
