@@ -3,6 +3,7 @@ package com.team_nebula.nebula.global.oauth.handler;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
@@ -10,6 +11,8 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
 
+import com.team_nebula.nebula.domain.term.entity.UserTerm;
+import com.team_nebula.nebula.domain.term.repository.UserTermRepository;
 import com.team_nebula.nebula.domain.user.entity.User;
 import com.team_nebula.nebula.domain.user.repository.mysql.UserRepository;
 import com.team_nebula.nebula.global.apipayload.code.status.ErrorStatus;
@@ -23,9 +26,7 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
-import lombok.extern.slf4j.Slf4j;
 
-@Slf4j
 @Component
 public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 
@@ -36,10 +37,12 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 	private String extensionRedirectUrl;
 
 	private final UserRepository userRepository;
+	private final UserTermRepository userTermRepository;
 	private final JWTUtil jwtUtil;
 
-	public CustomSuccessHandler(UserRepository userRepository, JWTUtil jwtUtil) {
+	public CustomSuccessHandler(UserRepository userRepository, UserTermRepository userTermRepository, JWTUtil jwtUtil) {
 		this.userRepository = userRepository;
+		this.userTermRepository = userTermRepository;
 		this.jwtUtil = jwtUtil;
 	}
 
@@ -83,6 +86,12 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 
 		redirectUrl = String.format("%s?accessToken=%s&refreshToken=%s", redirectUrl,
 			tokenResponseDTO.getAccessToken(), tokenResponseDTO.getRefreshToken());
+
+		List<UserTerm> userTerms = userTermRepository.findByUser(user);
+
+		boolean isAgreed = !userTerms.isEmpty();
+
+		redirectUrl = String.format("%s&isAgreed=%s", redirectUrl, isAgreed);
 
 		response.sendRedirect(redirectUrl);
 
