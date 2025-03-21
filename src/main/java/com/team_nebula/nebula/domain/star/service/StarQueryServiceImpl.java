@@ -29,40 +29,6 @@ public class StarQueryServiceImpl implements StarQueryService {
     private final UserNodeRepository userNodeRepository;
     private final LinkQueryService linkQueryService;
 
-    // 스타 JSON 데이터 파싱
-//    @Override
-//    public CreateStarFileDTO starDataParsing(MultipartFile thumbnailImage, MultipartFile htmlFile, String starJsonData) {
-//        ObjectMapper objectMapper = new ObjectMapper();
-//
-//        // LocalDateTime 처리
-//        objectMapper.registerModule(new JavaTimeModule());
-//
-//        // 컨트롤문자 허용
-//        objectMapper.configure(JsonReadFeature.ALLOW_UNESCAPED_CONTROL_CHARS.mappedFeature(), true);
-//        // 작은따옴표 허용
-//        objectMapper.configure(JsonReadFeature.ALLOW_SINGLE_QUOTES.mappedFeature(), true);
-//        // \ 이스케이프 허용
-//        objectMapper.configure(JsonReadFeature.ALLOW_BACKSLASH_ESCAPING_ANY_CHARACTER.mappedFeature(), true);
-//
-//        CreateStarRequestDTO request;
-//        try {
-//            // 유니코드 깨짐 방지
-//            starJsonData = new String(starJsonData.getBytes(StandardCharsets.ISO_8859_1), StandardCharsets.UTF_8);
-//
-//            request = objectMapper.readValue(starJsonData, CreateStarRequestDTO.class);
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//            throw new RuntimeException("Invalid JSON format for starJsonData.");
-//        }
-//
-//        return CreateStarFileDTO.builder()
-//                .thumbnailImage(thumbnailImage)
-//                .htmlFile(htmlFile)
-//                .starRequestDTO(request)
-//                .build();
-//    }
-
-
     // 스타 + 링크 전체 조회
     @Override
     public GetStarListResponseDTO getStarList(Long userId){

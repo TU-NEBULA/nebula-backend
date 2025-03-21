@@ -22,14 +22,8 @@ public interface KeywordRepository extends Neo4jRepository<Keyword, String> {
     @Query("""
         MATCH (s:Star {id: $starId})-[t:TAGGED]->(:Keyword)
         DELETE t
-    
-        WITH s
-        UNWIND apoc.coll.toSet($keywordNames) AS keywordName
-        MERGE (k:Keyword {name: keywordName})
-        MERGE (s)-[:TAGGED]->(k)
-        RETURN s;
     """)
-    Star removeLinkAndReconnect(@Param("starId") UUID starId, @Param("keywordNames") List<String> keywordNames);
+    void removeOldKeywords(@Param("starId") UUID starId);
 
     @Query("""
         MATCH (k:Keyword)

@@ -16,5 +16,5 @@ public class UpdateStarOneRequestDTO {
     String categoryName;
     String summaryAI;
     String userMemo;
-    List<String> keywords;
+    List<String> keywordList;
 }
