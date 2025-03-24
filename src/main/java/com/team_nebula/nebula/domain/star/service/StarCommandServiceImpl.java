@@ -89,7 +89,7 @@ public class StarCommandServiceImpl implements StarCommandService {
 
 
     @Override
-    public PutStarResponseDTO createCompleteStar(UUID starId, CreateStarRequestDTO requestDTO){
+    public PutStarResponseDTO createCompleteStar(Long userId, UUID starId, CreateStarRequestDTO requestDTO){
 
         Star star = starRepository.findById(starId)
                 .orElseThrow(() -> new GeneralException(ErrorStatus._STAR_NOT_FOUND));
@@ -105,7 +105,7 @@ public class StarCommandServiceImpl implements StarCommandService {
                 .orElseThrow(() -> new GeneralException(ErrorStatus._STAR_NOT_FOUND));
 
         // 스타 간 Link 노드 생성
-        linkCommandService.createLinksForStar(savedStar);
+        linkCommandService.createLinksForStar(userId, savedStar);
 
         savedStar.updateStar(requestDTO.getThumbnailUrl(), requestDTO.getSummaryAI(), requestDTO.getUserMemo());
         starRepository.save(savedStar);
@@ -127,13 +127,6 @@ public class StarCommandServiceImpl implements StarCommandService {
         Star star = starRepository.findById(starId)
                 .orElseThrow(() -> new GeneralException(ErrorStatus._STAR_NOT_FOUND));
 
-        // title, AI요약, 사용자 메모 업데이트
-        Optional.ofNullable(requestDTO.getTitle()).ifPresent(star::updateTitle);
-        Optional.ofNullable(requestDTO.getSummaryAI()).ifPresent(star::updateSummaryAI);
-        Optional.ofNullable(requestDTO.getUserMemo()).ifPresent(star::updateUserMemo);
-        starRepository.save(star);
-
-
         // 카테고리 업데이트. 만약 수정되지 않으면 기존 카테고리 이름 반환
         String categoryName = Optional.ofNullable(requestDTO.getCategoryName())
                 .map(category -> categoryCommandService.linkStarToCategoryAndGetName(star, category))
@@ -141,12 +134,17 @@ public class StarCommandServiceImpl implements StarCommandService {
 
         // 키워드 업데이트 -> 링크 재설정
         Optional.ofNullable(requestDTO.getKeywordList()).ifPresent(keywords ->
-                keywordCommandService.updateKeywordsForStar(star, keywords));
+                keywordCommandService.updateKeywordsForStar(userId, star, keywords));
 
 
         // 업데이트된 최신 스타객체 조회
         Star latestStar = starRepository.findById(starId)
                 .orElseThrow(() -> new GeneralException(ErrorStatus._STAR_NOT_FOUND));
+
+        // title, AI요약, 사용자 메모 업데이트
+        Optional.ofNullable(requestDTO.getTitle()).ifPresent(latestStar::updateTitle);
+        Optional.ofNullable(requestDTO.getSummaryAI()).ifPresent(latestStar::updateSummaryAI);
+        Optional.ofNullable(requestDTO.getUserMemo()).ifPresent(latestStar::updateUserMemo);
 
         // DB에 저장
         Star updatedStar = starRepository.save(latestStar);

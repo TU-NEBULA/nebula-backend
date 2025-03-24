@@ -47,7 +47,7 @@ public interface KeywordRepository extends Neo4jRepository<Keyword, String> {
     RETURN k.name AS keywordName, COUNT(s) AS usedCnt
     ORDER BY usedCnt DESC, keywordName ASC
     LIMIT 10
-""")
+    """)
     List<GetMostUsedKeywordOneResponseDTO> getMostUsedKeywordList();
 
 

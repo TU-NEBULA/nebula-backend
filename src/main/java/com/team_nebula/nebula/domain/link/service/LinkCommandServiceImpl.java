@@ -14,8 +14,8 @@ public class LinkCommandServiceImpl implements LinkCommandService{
     private final LinkRepository linkRepository;
 
     @Override
-    public void createLinksForStar(Star star) {
-        linkRepository.createLinksBetweenStars(star.getId());
+    public void createLinksForStar(Long userId, Star star) {
+        linkRepository.createLinksBetweenStars(userId, star.getId());
     }
 
 }
