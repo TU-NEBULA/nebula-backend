@@ -37,7 +37,7 @@ public class KeywordCommandServiceImpl implements KeywordCommandService {
     }
 
     @Override
-    public void updateKeywordsForStar(Star star, List<String> newKeywordNames) {
+    public void updateKeywordsForStar(Long userId, Star star, List<String> newKeywordNames) {
         // 키워드와 스타 연결 전부 삭제
         keywordRepository.removeOldKeywords(star.getId());
         // 새로운 키워드와 스타 연결
@@ -45,7 +45,7 @@ public class KeywordCommandServiceImpl implements KeywordCommandService {
         // 링크 노드 전부 삭제
         linkrepository.deleteOldLinks(star.getId());
         // 링크 노드 재설정
-        linkrepository.createLinksBetweenStars(star.getId());
+        linkrepository.createLinksBetweenStars(userId, star.getId());
     }
 
     @Override

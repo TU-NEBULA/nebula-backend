@@ -58,8 +58,8 @@ public class StarController {
     // 스타 입력 완료 API(데이터 입력 후 나머지 노드 생성)
     @Operation(summary = "스타 입력 완료", description = "스타의 카테고리, 사용자메모, AI요약, 키워드를 입력하고 스타 정보 입력을 완료하는 API")
     @PatchMapping("/complete/{starId}")
-    public ApiResponse<PutStarResponseDTO> createCompleteStar(@PathVariable UUID starId, @RequestBody CreateStarRequestDTO requestDTO){
-        PutStarResponseDTO responseDTO = starCommandService.createCompleteStar(starId, requestDTO);
+    public ApiResponse<PutStarResponseDTO> createCompleteStar(@AuthUser Long userId, @PathVariable UUID starId, @RequestBody CreateStarRequestDTO requestDTO){
+        PutStarResponseDTO responseDTO = starCommandService.createCompleteStar(userId, starId, requestDTO);
 
         return ApiResponse.onSuccess(responseDTO);
     }

@@ -14,8 +14,8 @@ import java.util.UUID;
 public interface LinkRepository extends Neo4jRepository<Link, UUID> {
 
     @Query("""
-        MATCH (s1:Star)-[:TAGGED]->(k:Keyword)<-[:TAGGED]-(s2:Star)
-        WHERE s1.id = $starId AND s1 <> s2
+        MATCH (u:UserNode)-[:CREATED]->(s1:Star)-[:TAGGED]->(k:Keyword)<-[:TAGGED]-(s2:Star)<-[:CREATED]-(u)
+        WHERE u.userId=$userId AND s1.id = $starId AND s1 <> s2
         AND (s1.isDeletedStatus = false OR s1.isDeletedStatus IS NULL)
         AND (s2.isDeletedStatus = false OR s2.isDeletedStatus IS NULL)
         WITH s1, s2, COUNT(k) AS sharedKeywordNum
@@ -25,7 +25,7 @@ public interface LinkRepository extends Neo4jRepository<Link, UUID> {
         MERGE (s1)-[:LINKED]->(l)
         MERGE (s2)-[:LINKED]->(l)
     """)
-    void createLinksBetweenStars(@Param("starId") UUID starId);
+    void createLinksBetweenStars(@Param("userId") Long userId, @Param("starId") UUID starId);
 
     @Query("""
     MATCH (u:UserNode)-[:CREATED]->(s:Star)
