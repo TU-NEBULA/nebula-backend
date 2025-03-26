@@ -14,6 +14,8 @@ public final class Constants {
 		"/swagger-ui/**",
 		"/h2-console/**",
 		"/api/v1/oauth/generate",
-		"/api/v1/oauth/{provider}"
+		"/api/v1/oauth/{provider}",
+		"/api/v1/terms",
+		"/api/v1/keywords/top10-used"
 	);
 }
