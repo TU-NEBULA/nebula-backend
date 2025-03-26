@@ -1,5 +1,6 @@
 package com.team_nebula.nebula.domain.keyword.repository;
 
+import com.team_nebula.nebula.domain.keyword.dto.response.GetMostUsedKeywordOneResponseDTO;
 import com.team_nebula.nebula.domain.keyword.entity.Keyword;
 import com.team_nebula.nebula.domain.star.entity.Star;
 import org.springframework.data.neo4j.repository.Neo4jRepository;
@@ -39,5 +40,15 @@ public interface KeywordRepository extends Neo4jRepository<Keyword, String> {
         RETURN DISTINCT k.name
     """)
     List<String> getAllKeywordNames(@Param("userId") Long userId);
+
+    @Query("""
+    MATCH (k:Keyword)<-[:TAGGED]-(s:Star)
+    WHERE (s.isDeletedStatus = false OR s.isDeletedStatus IS NULL)
+    RETURN k.name AS keywordName, COUNT(s) AS usedCnt
+    ORDER BY usedCnt DESC, keywordName ASC
+    LIMIT 10
+""")
+    List<GetMostUsedKeywordOneResponseDTO> getMostUsedKeywordList();
+
 
 }
