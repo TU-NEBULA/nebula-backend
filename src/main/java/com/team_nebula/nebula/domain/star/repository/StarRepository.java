@@ -16,6 +16,8 @@ public interface StarRepository extends Neo4jRepository<Star, UUID> {
     WHERE u.userId = $userId AND s.isDeletedStatus = false
     OPTIONAL MATCH (s)-[:TAGGED]->(k:Keyword)
     OPTIONAL MATCH (s)-[:BELONGS_TO]->(c:Category)
+    OPTIONAL MATCH (s)-[:HAS_FAVICON]->(f:Favicon)
+
     RETURN s.id AS starId,
            s.title AS title,
            s.siteUrl AS siteUrl,
@@ -24,6 +26,7 @@ public interface StarRepository extends Neo4jRepository<Star, UUID> {
            s.userMemo AS userMemo,
            s.views AS views,
            c.name AS categoryName,
+           f.faviconUrl AS faviconUrl,
            COLLECT(k.name) AS keywordList
 """)
     List<GetStarOneResponseDTO> findStarsByUserId(@Param("userId") Long userId);
@@ -32,6 +35,7 @@ public interface StarRepository extends Neo4jRepository<Star, UUID> {
     @Query("""
         MATCH (s:Star {id: $starId})-[:BELONGS_TO]->(c:Category)
         OPTIONAL MATCH (s)-[:TAGGED]->(k:Keyword)
+        OPTIONAL MATCH (s)-[:HAS_FAVICON]->(f:Favicon)
         WHERE s.isDeletedStatus = false
     
         RETURN s.id AS starId,
@@ -42,6 +46,7 @@ public interface StarRepository extends Neo4jRepository<Star, UUID> {
                s.userMemo AS userMemo,
                s.views AS views,
                c.name AS categoryName,
+               f.faviconUrl AS faviconUrl,
                COLLECT(k.name) AS keywordList
     """)
     GetStarOneResponseDTO findStarDetailById(@Param("starId") UUID starId);
@@ -50,6 +55,7 @@ public interface StarRepository extends Neo4jRepository<Star, UUID> {
     MATCH (u:UserNode)-[:CREATED]->(s:Star)-[:BELONGS_TO]->(c:Category)
     WHERE u.userId = $userId AND c.id = $categoryId AND s.isDeletedStatus = false
     OPTIONAL MATCH (s)-[:TAGGED]->(k:Keyword)
+    OPTIONAL MATCH (s)-[:HAS_FAVICON]->(f:Favicon)
     RETURN s.id AS starId,
            s.title AS title,
            s.siteUrl AS siteUrl,
@@ -58,6 +64,7 @@ public interface StarRepository extends Neo4jRepository<Star, UUID> {
            s.userMemo AS userMemo,
            s.views AS views,
            c.name AS categoryName,
+           f.faviconUrl AS faviconUrl,
            COLLECT(k.name) AS keywordList
     """)
     List<GetStarOneResponseDTO> findStarsInCategory(@Param("userId") Long userId, @Param("categoryId") UUID categoryId);
@@ -66,6 +73,7 @@ public interface StarRepository extends Neo4jRepository<Star, UUID> {
     MATCH (u:UserNode)-[:CREATED]->(s:Star)-[:TAGGED]->(k:Keyword)
     WHERE u.userId = $userId AND k.name = $keywordId AND s.isDeletedStatus = false
     OPTIONAL MATCH (s)-[:BELONGS_TO]->(c:Category)
+    OPTIONAL MATCH (s)-[:HAS_FAVICON]->(f:Favicon)
     RETURN s.id AS starId,
            s.title AS title,
            s.siteUrl AS siteUrl,
@@ -74,6 +82,7 @@ public interface StarRepository extends Neo4jRepository<Star, UUID> {
            s.userMemo AS userMemo,
            s.views AS views,
            c.name AS categoryName,
+           f.faviconUrl AS faviconUrl,
            COLLECT(k.name) AS keywordList
     """)
     List<GetStarOneResponseDTO> findStarsInKeyword(@Param("userId") Long userId, @Param("keywordId") String keywordId);
@@ -86,15 +95,17 @@ public interface StarRepository extends Neo4jRepository<Star, UUID> {
 
     OPTIONAL MATCH (s)-[:TAGGED]->(k:Keyword)
     OPTIONAL MATCH (s)-[:BELONGS_TO]->(c:Category)
+    OPTIONAL MATCH (s)-[:HAS_FAVICON]->(f:Favicon)
 
     OPTIONAL MATCH (s)-[:LINKED]->(l:Link)-[:LINKED]-(s2:Star)
     WHERE s2 <> s
     OPTIONAL MATCH (s2)-[:BELONGS_TO]->(c2:Category)
     OPTIONAL MATCH (s2)-[:TAGGED]->(k2:Keyword)
+    OPTIONAL MATCH (s2)-[:HAS_FAVICON]->(f2:Favicon)
 
     WITH
-        s, c, COLLECT(DISTINCT k.name) AS keywordList,
-        s2, c2, COLLECT(DISTINCT k2.name) AS linkedKeywordList,
+        s, c, f, COLLECT(DISTINCT k.name) AS keywordList,
+        s2, c2, f2, COLLECT(DISTINCT k2.name) AS linkedKeywordList,
         COLLECT(DISTINCT {
             linkId: l.id,
             sharedKeywordNum: l.sharedKeywordNum,
@@ -112,11 +123,12 @@ public interface StarRepository extends Neo4jRepository<Star, UUID> {
                 summaryAI: s.summaryAI,
                 userMemo: s.userMemo,
                 views: s.views,
+                faviconUrl: f.faviconUrl,
                 keywordList: keywordList
             },
             linkData: links,
             linkedStar: {
-                starId: s.id,
+                starId: s2.id,
                 categoryName: c2.name,
                 title: s2.title,
                 siteUrl: s2.siteUrl,
@@ -124,10 +136,11 @@ public interface StarRepository extends Neo4jRepository<Star, UUID> {
                 summaryAI: s2.summaryAI,
                 userMemo: s2.userMemo,
                 views: s2.views,
+                faviconUrl: f2.faviconUrl,
                 keywordList: linkedKeywordList
             }
         }) AS result
-""")
+    """)
     List<GetSearchedStarOneResponseDTO> searchStars(@Param("userId") Long userId, @Param("title") String title);
 
     @Query("""
