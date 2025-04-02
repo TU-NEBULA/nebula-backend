@@ -12,12 +12,12 @@ import java.io.File;
 import java.util.Optional;
 
 @Service
+@Transactional
 @RequiredArgsConstructor
 public class FaviconServiceImpl implements FaviconService {
     private final FaviconRepository faviconRepository;
     private final S3Service s3Service;
 
-    @Transactional
     @Override
     public Favicon getOrCreateFavicon(String siteUrl) {
         // 1. 도메인 추출
