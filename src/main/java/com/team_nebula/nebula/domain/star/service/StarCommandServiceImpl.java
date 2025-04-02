@@ -1,5 +1,7 @@
 package com.team_nebula.nebula.domain.star.service;
 
+import com.team_nebula.nebula.domain.favicon.entity.Favicon;
+import com.team_nebula.nebula.domain.favicon.service.FaviconService;
 import com.team_nebula.nebula.global.AI.dto.GetThumbnailAndKeywordsResponseDTO;
 import com.team_nebula.nebula.global.AI.service.AiService;
 import com.team_nebula.nebula.domain.category.service.CategoryCommandService;
@@ -40,6 +42,7 @@ public class StarCommandServiceImpl implements StarCommandService {
     private final CategoryQueryService categoryQueryService;
     private final KeywordCommandService keywordCommandService;
     private final LinkCommandService linkCommandService;
+    private final FaviconService faviconService;
     private final S3Service s3Service;
     private final AiService aiService;
 
@@ -62,6 +65,11 @@ public class StarCommandServiceImpl implements StarCommandService {
             throw new GeneralException(ErrorStatus._STAR_CREATION_FAILED);
         }
 
+        Favicon favicon = faviconService.getOrCreateFavicon(siteUrl);
+
+        savedStar.getFavicons().add(favicon);
+
+
         try {
             // AI 기능 호출 (썸네일 및 추천 키워드 생성)
             GetThumbnailAndKeywordsResponseDTO responseDTO = aiService.analyzeHtmlFile(savedStar.getId(), userId, htmlFileKey);
@@ -78,6 +86,7 @@ public class StarCommandServiceImpl implements StarCommandService {
                     .title(savedStar.getTitle())
                     .siteUrl(savedStar.getSiteUrl())
                     .thumbnailUrl(responseDTO.getImage_url())
+                    .faviconUrl(favicon.getFaviconUrl())
                     .keywords(responseDTO.getKeywords())
                     .build();
         } catch (Exception e) {

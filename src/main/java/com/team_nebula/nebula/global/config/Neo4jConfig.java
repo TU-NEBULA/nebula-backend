@@ -20,7 +20,9 @@ import java.util.concurrent.TimeUnit;
                 "com.team_nebula.nebula.domain.star.repository",
                 "com.team_nebula.nebula.domain.link.repository",
                 "com.team_nebula.nebula.domain.category.repository",
-                "com.team_nebula.nebula.domain.keyword.repository"
+                "com.team_nebula.nebula.domain.keyword.repository",
+                "com.team_nebula.nebula.domain.favicon.repository"
+
         },
         transactionManagerRef = "neo4jTransactionManager"
 )

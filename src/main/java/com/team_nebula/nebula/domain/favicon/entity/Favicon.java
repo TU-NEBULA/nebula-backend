@@ -12,7 +12,7 @@ import org.springframework.data.neo4j.core.schema.Property;
 @NoArgsConstructor
 public class Favicon {
     @Id
-    private String domain;  // 도메인 (예: google.com)
+    private String domain;
 
     @Property("faviconUrl")
     private String faviconUrl;

@@ -45,6 +45,9 @@ dependencies {
 	// Logback
 	implementation 'org.springframework.boot:spring-boot-starter-logging'
 
+	// Apache Commons IO
+	implementation 'commons-io:commons-io:2.18.0'
+
 	compileOnly 'org.projectlombok:lombok'
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'
 	runtimeOnly 'com.mysql:mysql-connector-j'

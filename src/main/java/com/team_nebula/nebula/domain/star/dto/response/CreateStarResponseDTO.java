@@ -18,5 +18,6 @@ public class CreateStarResponseDTO {
     private String title;
     private String siteUrl;
     private String thumbnailUrl;
+    private String faviconUrl;
     private List<String> keywords;
 }
