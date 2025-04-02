@@ -1,5 +1,6 @@
 package com.team_nebula.nebula.domain.star.entity;
 
+import com.team_nebula.nebula.domain.favicon.entity.Favicon;
 import com.team_nebula.nebula.global.common.BaseEntity;
 import com.team_nebula.nebula.domain.keyword.entity.Keyword;
 import com.team_nebula.nebula.domain.link.entity.Link;
@@ -54,6 +55,9 @@ public class Star extends BaseEntity {
 
     @Relationship(type = "TAGGED", direction = Relationship.Direction.OUTGOING)
     private Set<Keyword> keywords = new HashSet<>();
+
+    @Relationship(type = "HAS_FAVICON", direction = Relationship.Direction.OUTGOING)
+    private Set<Favicon> favicons = new HashSet<>();
 
     @Builder
     public Star(String title, String siteUrl, String thumbnailUrl, String summaryAI, String userMemo, int views,

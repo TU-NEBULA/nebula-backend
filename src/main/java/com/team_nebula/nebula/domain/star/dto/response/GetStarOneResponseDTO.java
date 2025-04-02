@@ -21,5 +21,6 @@ public class GetStarOneResponseDTO {
     private String summaryAI;
     private String userMemo;
     private int views;
+    private String faviconUrl;
     private List<String> keywordList;
 }

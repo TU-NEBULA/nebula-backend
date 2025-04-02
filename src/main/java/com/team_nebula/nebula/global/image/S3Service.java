@@ -33,6 +33,7 @@ public class S3Service {
 
     private static final String THUMBNAIL_DIR = "thumbnails/";
     private static final String HTML_FILE_DIR = "html_files/";
+    private static final String FAVICON_FILE_DIR = "favicons/";
 
 
     public String saveThumbnail(MultipartFile thumbnailImage, String dataInfo) {
@@ -41,6 +42,11 @@ public class S3Service {
 
     public String saveHtmlFile(MultipartFile htmlFile, String dataInfo) {
         return uploadHtmlToS3(htmlFile, HTML_FILE_DIR, dataInfo);
+    }
+
+    public String saveFavicon(File faviconFile, String domain) {
+        String fileName = FAVICON_FILE_DIR + domain + ".png";
+        return uploadFileToS3(faviconFile, fileName);
     }
 
     private String uploadHtmlToS3(MultipartFile file, String dirName, String dataInfo)  {
@@ -65,12 +71,23 @@ public class S3Service {
         return fileUrl;
     }
 
+    private String uploadFileToS3(File file, String fileName) {
+        amazonS3Client.putObject(new PutObjectRequest(bucket, fileName, file));
+        return amazonS3Client.getUrl(bucket, fileName).toString();
+    }
+
     private void putHtmlS3(File uploadFile, String fileName) {
         amazonS3Client.putObject(new PutObjectRequest(bucket, fileName, uploadFile));
     }
 
     private String putThumbnailS3(File uploadFile, String fileName) {
         amazonS3Client.putObject(new PutObjectRequest(bucket, fileName, uploadFile));
+
+        return amazonS3Client.getUrl(bucket, fileName).toString();
+    }
+
+    private String putFaviconS3(String faviconPath, String fileName) {
+        amazonS3Client.putObject(new PutObjectRequest(bucket, fileName, faviconPath));
 
         return amazonS3Client.getUrl(bucket, fileName).toString();
     }
