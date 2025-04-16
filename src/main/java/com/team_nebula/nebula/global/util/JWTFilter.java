@@ -1,10 +1,14 @@
 package com.team_nebula.nebula.global.util;
 
+import static com.team_nebula.nebula.global.util.CookieUtil.*;
+
 import java.io.IOException;
+import java.util.Map;
 
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.util.AntPathMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.team_nebula.nebula.domain.user.dto.request.UserDTO;
@@ -12,6 +16,7 @@ import com.team_nebula.nebula.domain.user.entity.User;
 import com.team_nebula.nebula.domain.user.repository.mysql.UserRepository;
 import com.team_nebula.nebula.global.apipayload.code.status.ErrorStatus;
 import com.team_nebula.nebula.global.apipayload.exception.GeneralException;
+import com.team_nebula.nebula.global.constants.Constants;
 import com.team_nebula.nebula.global.oauth.dto.CustomOAuth2User;
 
 import jakarta.servlet.FilterChain;
@@ -24,9 +29,18 @@ public class JWTFilter extends OncePerRequestFilter {
 	private final JWTUtil jwtUtil;
 	private final UserRepository userRepository;
 
+	private static final AntPathMatcher pathMatcher = new AntPathMatcher();
+
 	public JWTFilter(JWTUtil jwtUtil, UserRepository userRepository) {
 		this.jwtUtil = jwtUtil;
 		this.userRepository = userRepository;
+	}
+
+	@Override
+	protected boolean shouldNotFilter(HttpServletRequest request) {
+		String uri = request.getRequestURI();
+		return Constants.NO_NEED_FILTER_URLS.stream()
+			.anyMatch(pattern -> pathMatcher.match(pattern, uri));
 	}
 
 	@Override
@@ -34,33 +48,33 @@ public class JWTFilter extends OncePerRequestFilter {
 		FilterChain filterChain) throws
 		ServletException, IOException {
 
-		String authorizationHeader = request.getHeader("Authorization");
+		Map<String, String> tokens = extractTokensFromCookie(request);
 
-		if (!jwtUtil.validateAuthorizationHeader(authorizationHeader)) {
-			filterChain.doFilter(request, response);
+		if (tokens.isEmpty() || tokens.get("refreshToken") == null) {
+			ErrorResponseUtil.sendErrorResponse(response, ErrorStatus._UNAUTHORIZED);
 			return;
 		}
 
-		String token = authorizationHeader.substring(7);
-
-		if (jwtUtil.isExpired(token)) {
-			ErrorResponseUtil.sendErrorResponse(response, ErrorStatus._BAD_REQUEST);
+		if (tokens.get("accessToken") == null) {
+			ErrorResponseUtil.sendErrorResponse(response, ErrorStatus._TOKEN_EXPIRED);
 			return;
 		}
 
-		String tokenType = jwtUtil.getTokenType(token);
-
-		if (request.getRequestURI().equals("/api/v1/oauth/reissue")) {
-			if (!"refresh".equals(tokenType)) {
-				ErrorResponseUtil.sendErrorResponse(response, ErrorStatus._TOKEN_TYPE_ERROR);
+		if (jwtUtil.isExpired(tokens.get("accessToken"))) {
+			if (request.getRequestURI().equals("/api/v1/oauth/reissue")) {
+				authenticateUser(tokens.get("refreshToken"));
+				filterChain.doFilter(request, response);
 				return;
 			}
 
-		} else if (!"access".equals(tokenType)) {
-			ErrorResponseUtil.sendErrorResponse(response, ErrorStatus._TOKEN_TYPE_ERROR);
+			ErrorResponseUtil.sendErrorResponse(response, ErrorStatus._TOKEN_EXPIRED);
 			return;
 		}
+		authenticateUser(tokens.get("accessToken"));
+		filterChain.doFilter(request, response);
+	}
 
+	private void authenticateUser(String token) {
 		String username = jwtUtil.getUsername(token);
 
 		User user = userRepository.findByUsername(username)
@@ -85,7 +99,5 @@ public class JWTFilter extends OncePerRequestFilter {
 
 		//세션에 사용자 등록
 		SecurityContextHolder.getContext().setAuthentication(authToken);
-
-		filterChain.doFilter(request, response);
 	}
 }
