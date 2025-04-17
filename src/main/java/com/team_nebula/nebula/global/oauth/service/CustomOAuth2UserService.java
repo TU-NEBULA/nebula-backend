@@ -161,4 +161,9 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 			.refreshToken(refreshToken)
 			.build();
 	}
+
+	public void logout(HttpServletResponse response) {
+		CookieUtil.deleteCookie("accessToken", response);
+		CookieUtil.deleteCookie("refreshToken", response);
+	}
 }

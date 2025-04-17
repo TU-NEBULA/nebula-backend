@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.team_nebula.nebula.global.annotation.AuthUser;
 import com.team_nebula.nebula.global.apipayload.ApiResponse;
-import com.team_nebula.nebula.global.oauth.dto.TokenResponseDTO;
 import com.team_nebula.nebula.global.oauth.handler.CustomSuccessHandler;
 import com.team_nebula.nebula.global.oauth.service.CustomOAuth2UserService;
 
@@ -46,6 +45,12 @@ public class OAuthController {
 		@AuthUser Long userId) {
 		customOAuth2UserService.reissue(userId, response);
 		return ApiResponse.onSuccess("토큰 재발급 완료");
+	}
+
+	@PostMapping("/logout")
+	public ApiResponse<?> logout(HttpServletResponse response) {
+		customOAuth2UserService.logout(response);
+		return ApiResponse.onSuccess("로그아웃 완료");
 	}
 
 	/*
