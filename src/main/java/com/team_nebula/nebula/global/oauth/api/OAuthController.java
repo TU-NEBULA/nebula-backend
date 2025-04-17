@@ -42,10 +42,10 @@ public class OAuthController {
 	}
 
 	@PostMapping("/reissue")
-	public ApiResponse<?> reissue(HttpServletRequest request,
+	public ApiResponse<?> reissue(HttpServletResponse response,
 		@AuthUser Long userId) {
-		TokenResponseDTO dto = customOAuth2UserService.reissue(userId);
-		return ApiResponse.onSuccess(dto);
+		customOAuth2UserService.reissue(userId, response);
+		return ApiResponse.onSuccess("토큰 재발급 완료");
 	}
 
 	/*
