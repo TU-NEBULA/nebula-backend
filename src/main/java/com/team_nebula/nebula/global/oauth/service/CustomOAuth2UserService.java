@@ -119,12 +119,6 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 		}
 	}
 
-	public User loadUserByUsername(String username) {
-
-		return userRepository.findByUsername(username)
-			.orElseThrow(() -> new GeneralException(ErrorStatus._USER_NOT_FOUND));
-	}
-
 	@Transactional
 	public void reissue(Long userId, HttpServletResponse response) {
 
