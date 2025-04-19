@@ -5,7 +5,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.team_nebula.nebula.domain.user.dto.response.UserResponseDTO;
-import com.team_nebula.nebula.domain.user.service.UserService;
+import com.team_nebula.nebula.domain.user.service.UserQueryService;
 import com.team_nebula.nebula.global.annotation.AuthUser;
 import com.team_nebula.nebula.global.apipayload.ApiResponse;
 
@@ -19,12 +19,12 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping("/api/v1/users")
 public class UserController {
 
-	private final UserService userService;
+	private final UserQueryService userQueryService;
 
 	// 유저 조회 API
 	@Operation(summary = "유저 조회", description = "유저 정보를 조회하는 API")
 	@GetMapping
 	public ApiResponse<UserResponseDTO> getUser(@AuthUser Long userId) {
-		return ApiResponse.onSuccess(userService.getUser(userId));
+		return ApiResponse.onSuccess(userQueryService.getUser(userId));
 	}
 }

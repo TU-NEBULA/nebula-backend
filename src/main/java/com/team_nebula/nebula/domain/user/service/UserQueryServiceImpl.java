@@ -14,16 +14,22 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
-public class UserServiceImpl implements UserService {
+@Transactional(readOnly = true)
+public class UserQueryServiceImpl implements UserQueryService {
 
 	private final UserRepository userRepository;
 
 	@Override
-	@Transactional(readOnly = true)
 	public UserResponseDTO getUser(Long userId) {
 		User user = userRepository.findById(userId)
 			.orElseThrow(() -> new GeneralException(ErrorStatus._USER_NOT_FOUND));
 
 		return UserConverter.toUserResponseDTO(user);
+	}
+
+	@Override
+	public User getUserEntity(Long userId) {
+		return userRepository.findById(userId)
+			.orElseThrow(() -> new GeneralException(ErrorStatus._USER_NOT_FOUND));
 	}
 }
