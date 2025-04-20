@@ -28,7 +28,7 @@ public class History extends BaseEntity {
 	private Long id;
 
 	@Column(name = "last_visit_time", nullable = false)
-	private LocalDateTime lastVisitTime;
+	private Double lastVisitTime;
 
 	@Column(name = "titlte", nullable = false)
 	private String title;
