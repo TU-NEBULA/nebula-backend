@@ -33,10 +33,13 @@ public interface LinkRepository extends Neo4jRepository<Link, UUID> {
 
     MATCH (s)-[:LINKED]->(l:Link)<-[:LINKED]-(s2:Star)
     WHERE (u)-[:CREATED]->(s2) AND (s2.isDeletedStatus = false OR s2.isDeletedStatus IS NULL)
+    
+    MATCH (s)-[:TAGGED]->(k:Keyword)<-[:TAGGED]-(s2)
 
     RETURN DISTINCT l.id AS linkId,
                     l.linked_two_node_Id AS linkedNodeIdList,
                     l.sharedKeywordNum AS sharedKeywordNum,
+                    COLLECT(DISTINCT k.name) AS sharedKeywords,
                     l.similarityScore AS similarity
     """)
     List<GetLinkOneResponseDTO> findLinksByUserId(@Param("userId") Long userId);
@@ -48,9 +51,13 @@ public interface LinkRepository extends Neo4jRepository<Link, UUID> {
     MATCH (s)-[:LINKED]->(l:Link)<-[:LINKED]-(s2:Star)
     WHERE (u)-[:CREATED]->(s2) AND (s2.isDeletedStatus = false OR s2.isDeletedStatus IS NULL)
     
+    MATCH (s)-[:TAGGED]->(k:Keyword)<-[:TAGGED]-(s2)
+
+    
     RETURN l.id AS linkId,
            l.linked_two_node_Id AS linkedNodeIdList,
            l.sharedKeywordNum AS sharedKeywordNum,
+           COLLECT(DISTINCT k.name) AS sharedKeywords,
            l.similarityScore AS similarity
     """)
     List<GetLinkOneResponseDTO> findLinkInCategory(@Param("userId") Long userId, @Param("categoryId") UUID categoryId);
@@ -62,9 +69,13 @@ public interface LinkRepository extends Neo4jRepository<Link, UUID> {
     MATCH (s)-[:LINKED]->(l:Link)<-[:LINKED]-(s2:Star)
     WHERE (u)-[:CREATED]->(s2) AND (s2.isDeletedStatus = false OR s2.isDeletedStatus IS NULL)
     
+    MATCH (s)-[:TAGGED]->(kShared:Keyword)<-[:TAGGED]-(s2)
+
+    
     RETURN l,
            l.linked_two_node_Id AS linkedNodeIdList,
            l.sharedKeywordNum AS sharedKeywordNum,
+           COLLECT(DISTINCT kShared.name) AS sharedKeywords,
            l.similarityScore AS similarity
     """)
     List<GetLinkOneResponseDTO> findLinkInKeyword(@Param("userId") Long userId, @Param("keywordId") String keywordId);
