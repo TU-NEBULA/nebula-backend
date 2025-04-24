@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class GetHistoryListResponseDTO {
 	private Long id;
-	private String lastVisitTime;
+	private Double lastVisitTime;
 	private String title;
 	private Long typedCount;
 	private String url;
@@ -26,7 +26,7 @@ public class GetHistoryListResponseDTO {
 			.url(history.getUrl())
 			.visitCount(history.getVisitCount())
 			.typedCount(history.getTypedCount())
-			.lastVisitTime(String.valueOf(history.getLastVisitTime()))
+			.lastVisitTime(history.getLastVisitTime())
 			.build();
 	}
 }
