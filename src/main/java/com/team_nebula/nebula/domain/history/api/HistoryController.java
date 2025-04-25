@@ -2,10 +2,13 @@ package com.team_nebula.nebula.domain.history.api;
 
 import java.util.List;
 
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.team_nebula.nebula.domain.history.dto.request.CreateHistoryRequestDTO;
@@ -39,7 +42,11 @@ public class HistoryController {
 	// 방문기록 전체 조회 API
 	@Operation(summary = "방문기록 전체 조회", description = "사용자의 모든 방문기록 조회하는 API")
 	@GetMapping
-	public ApiResponse<List<GetHistoryListResponseDTO>> getHistories(@AuthUser Long userId) {
-		return ApiResponse.onSuccess(historyQueryService.getHistories(userId));
+	public ApiResponse<List<GetHistoryListResponseDTO>> getHistories(
+		@AuthUser Long userId,
+		@RequestParam(name = "page", defaultValue = "0") int page,
+		@RequestParam(name = "size", defaultValue = "7") int size) {
+		Pageable pageable = PageRequest.of(page, size);
+		return ApiResponse.onSuccess(historyQueryService.getHistories(userId, pageable));
 	}
 }
