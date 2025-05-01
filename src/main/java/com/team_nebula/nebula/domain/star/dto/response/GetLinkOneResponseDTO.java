@@ -15,6 +15,7 @@ import java.util.UUID;
 public class GetLinkOneResponseDTO {
     private UUID linkId;
     private int sharedKeywordNum;
+    private List<String> sharedKeywords;
     private double similarity;
     private List<UUID> linkedNodeIdList;
 }

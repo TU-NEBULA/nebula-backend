@@ -170,6 +170,7 @@ public class StarCommandServiceImpl implements StarCommandService {
                 .summaryAI(updatedStar.getSummaryAI())
                 .userMemo(updatedStar.getUserMemo())
                 .views(updatedStar.getViews())
+                .faviconUrl(updatedStar.getFavicons().toString())
                 .keywordList(updatedStar.getKeywords().stream()
                         .map(Keyword::getName)
                         .toList())

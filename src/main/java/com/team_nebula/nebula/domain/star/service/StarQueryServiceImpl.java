@@ -14,7 +14,6 @@ import com.team_nebula.nebula.domain.star.dto.response.GetSearchedStarOneRespons
 import com.team_nebula.nebula.domain.star.dto.response.GetStarListResponseDTO;
 import com.team_nebula.nebula.domain.star.dto.response.GetStarOneResponseDTO;
 import com.team_nebula.nebula.domain.star.repository.StarRepository;
-import com.team_nebula.nebula.domain.user.repository.neo4j.UserNodeRepository;
 import com.team_nebula.nebula.global.apipayload.code.status.ErrorStatus;
 import com.team_nebula.nebula.global.apipayload.exception.GeneralException;
 
@@ -26,7 +25,6 @@ import lombok.RequiredArgsConstructor;
 public class StarQueryServiceImpl implements StarQueryService {
 
     private final StarRepository starRepository;
-    private final UserNodeRepository userNodeRepository;
     private final LinkQueryService linkQueryService;
 
     // 스타 + 링크 전체 조회
