@@ -53,4 +53,16 @@ public class HistoryController {
 		Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "lastVisitTime"));
 		return ApiResponse.onSuccess(historyQueryService.getHistories(userId, pageable));
 	}
+
+	@Operation(summary = "방문기록 검색", description = "방문기록울 제목과 url 기준으로 검색하는 API")
+	@GetMapping("/search")
+	public ApiResponse<GetHistoryListPageResponseDTO> searchHistories(
+			@AuthUser Long userId,
+			@RequestParam("keyword") String keyword,
+			@RequestParam(name = "page", defaultValue = "0") int page,
+			@RequestParam(name = "size", defaultValue = "7") int size
+	) {
+		Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "lastVisitTime"));
+		return ApiResponse.onSuccess(historyQueryService.searchHistories(userId, keyword, pageable));
+	}
 }

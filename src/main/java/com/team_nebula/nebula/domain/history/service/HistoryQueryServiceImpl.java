@@ -60,4 +60,36 @@ public class HistoryQueryServiceImpl implements HistoryQueryService {
 				.content(dtoList)
 				.build();
 	}
+
+	@Override
+	public GetHistoryListPageResponseDTO searchHistories(Long userId, String keyword, Pageable pageable){
+		User user = userQueryService.getUserEntity(userId);
+
+		Page<History> historyPage = historyRepository.searchByKeyword(user, keyword, pageable);
+		List<History> historyList = historyPage.getContent();
+
+		List<String> urls = historyList.stream()
+				.map(History::getUrl)
+				.toList();
+		Set<String> starUrls = starQueryService.getStarUrls(urls, userId);
+
+		List<GetHistoryListResponseDTO> dtoList = historyList.stream()
+				.map(history -> HistoryConverter.convertToHistoryListDto(history, starUrls))
+				.toList();
+
+		int maxPage;
+		if (historyPage.getTotalPages() > 0) {
+			maxPage = historyPage.getTotalPages() - 1;
+		} else {
+			maxPage = 0;
+		}
+		boolean hasNext = historyPage.hasNext();
+
+		return GetHistoryListPageResponseDTO.builder()
+				.maxPage(maxPage)
+				.hasNext(hasNext)
+				.content(dtoList)
+				.build();
+	}
+
 }
