@@ -8,7 +8,7 @@ public interface FaviconRepository extends Neo4jRepository<Favicon, String> {
     @Query("""
         MATCH (f:Favicon)
         WHERE f.faviconUrl = $faviconUrl
-        return favicon
+        return f
            \s""")
     Favicon findByFaviconUrl(String faviconUrl);
 }

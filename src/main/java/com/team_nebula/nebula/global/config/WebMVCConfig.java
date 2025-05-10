@@ -29,7 +29,7 @@ public class WebMVCConfig implements WebMvcConfigurer {
 	@Override
 	public void addInterceptors(final InterceptorRegistry registry) {
 		registry.addInterceptor(new JWTInterceptor())
-			.addPathPatterns("/api/v1/**")
+			.addPathPatterns("/api/**")
 			.excludePathPatterns(Constants.NO_NEED_FILTER_URLS);
 	}
 }

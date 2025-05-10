@@ -161,7 +161,7 @@ public class StarCommandServiceImpl implements StarCommandService {
         Star updatedStar = starRepository.save(latestStar);
 
         // 유저 스타 작업 횟수 증가
-        aiService.checkUpdatedCnt(userId);
+//        aiService.checkUpdatedCnt(userId);
 
         return GetStarOneResponseDTO.builder()
                 .starId(updatedStar.getId())
@@ -280,7 +280,7 @@ public class StarCommandServiceImpl implements StarCommandService {
                 .siteUrl(lastStar.getSiteUrl())
                 .thumbnailUrl(lastStar.getThumbnailUrl())
                 .faviconUrl(favicon.getFaviconUrl())
-                .keywordList(updatedStar.getKeywords().stream()
+                .keywordList(lastStar.getKeywords().stream()
                         .map(Keyword::getName)
                         .toList())
                 .build();
