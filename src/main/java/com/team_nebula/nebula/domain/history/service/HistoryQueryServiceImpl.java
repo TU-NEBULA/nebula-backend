@@ -3,6 +3,7 @@ package com.team_nebula.nebula.domain.history.service;
 import java.util.List;
 import java.util.Set;
 
+import com.team_nebula.nebula.domain.history.dto.response.GetHistoryListPageResponseDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -28,7 +29,7 @@ public class HistoryQueryServiceImpl implements HistoryQueryService {
 	private final StarQueryService starQueryService;
 
 	@Override
-	public List<GetHistoryListResponseDTO> getHistories(Long userId, Pageable pageable) {
+	public GetHistoryListPageResponseDTO getHistories(Long userId, Pageable pageable) {
 		User user = userQueryService.getUserEntity(userId);
 		Page<History> historyPage = historyRepository.findAllByUser(user, pageable);
 		List<History> historyList = historyPage.getContent();
@@ -39,8 +40,24 @@ public class HistoryQueryServiceImpl implements HistoryQueryService {
 
 		Set<String> starUrls = starQueryService.getStarUrls(urls, userId);
 
-		return historyList.stream()
-			.map(history -> HistoryConverter.convertToHistoryListDto(history, starUrls))
-			.toList();
+		List<GetHistoryListResponseDTO> dtoList = historyList.stream()
+				.map(history -> HistoryConverter.convertToHistoryListDto(history, starUrls))
+				.toList();
+
+		int maxPage;
+		if (historyPage.getTotalPages() > 0) {
+			maxPage = historyPage.getTotalPages() - 1;
+		} else {
+			maxPage = 0;
+		}
+
+		boolean hasNext = historyPage.hasNext();
+
+
+		return GetHistoryListPageResponseDTO.builder()
+				.maxPage(maxPage)
+				.hasNext(hasNext)
+				.content(dtoList)
+				.build();
 	}
 }

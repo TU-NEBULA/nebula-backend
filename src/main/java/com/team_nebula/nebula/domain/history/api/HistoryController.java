@@ -2,6 +2,8 @@ package com.team_nebula.nebula.domain.history.api;
 
 import java.util.List;
 
+import com.team_nebula.nebula.domain.history.dto.response.GetHistoryListPageResponseDTO;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -23,6 +25,7 @@ import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequiredArgsConstructor
+@Tag(name = "[ 방문기록 ]")
 @RequestMapping("/api/v1/histories")
 public class HistoryController {
 
@@ -42,7 +45,7 @@ public class HistoryController {
 	// 방문기록 전체 조회 API
 	@Operation(summary = "방문기록 전체 조회", description = "사용자의 모든 방문기록 조회하는 API")
 	@GetMapping
-	public ApiResponse<List<GetHistoryListResponseDTO>> getHistories(
+	public ApiResponse<GetHistoryListPageResponseDTO> getHistories(
 		@AuthUser Long userId,
 		@RequestParam(name = "page", defaultValue = "0") int page,
 		@RequestParam(name = "size", defaultValue = "7") int size) {
