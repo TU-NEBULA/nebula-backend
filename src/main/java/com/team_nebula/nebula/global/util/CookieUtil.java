@@ -14,7 +14,7 @@ public class CookieUtil {
 		cookie.setHttpOnly(true);
 		cookie.setPath("/");
 		cookie.setMaxAge((int)getTokenMaxAgeInSeconds(expiration));
-		cookie.setAttribute("SameSite", "None");
+		cookie.setAttribute("SameSite", "Strict");
 		return cookie;
 	}
 
