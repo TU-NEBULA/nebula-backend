@@ -22,7 +22,10 @@ import com.team_nebula.nebula.global.oauth.dto.GoogleResponseDTO;
 import com.team_nebula.nebula.global.oauth.dto.KakaoResponseDTO;
 import com.team_nebula.nebula.global.oauth.dto.OAuth2Response;
 import com.team_nebula.nebula.global.oauth.dto.TokenResponseDTO;
+import com.team_nebula.nebula.global.util.CookieUtil;
 import com.team_nebula.nebula.global.util.JWTUtil;
+
+import jakarta.servlet.http.HttpServletResponse;
 
 @Service
 public class CustomOAuth2UserService extends DefaultOAuth2UserService {
@@ -116,19 +119,16 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 		}
 	}
 
-	public User loadUserByUsername(String username) {
-
-		return userRepository.findByUsername(username)
-			.orElseThrow(() -> new GeneralException(ErrorStatus._USER_NOT_FOUND));
-	}
-
 	@Transactional
-	public TokenResponseDTO reissue(Long userId) {
+	public void reissue(Long userId, HttpServletResponse response) {
 
 		User user = userRepository.findById(userId)
 			.orElseThrow(() -> new GeneralException(ErrorStatus._USER_NOT_FOUND));
 
-		return jwtUtil.generateTokens(user.getUsername());
+		TokenResponseDTO tokenResponseDTO = jwtUtil.generateTokens(user.getUsername());
+		long expiration = jwtUtil.getExpiration(tokenResponseDTO.getRefreshToken()).getTime();
+
+		response.addCookie(CookieUtil.createCookie("accessToken", tokenResponseDTO.getAccessToken(), expiration));
 	}
 
 	public TokenResponseDTO generate() {
@@ -154,5 +154,10 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 			.accessToken(accessToken)
 			.refreshToken(refreshToken)
 			.build();
+	}
+
+	public void logout(HttpServletResponse response) {
+		CookieUtil.deleteCookie("accessToken", response);
+		CookieUtil.deleteCookie("refreshToken", response);
 	}
 }
