@@ -64,7 +64,7 @@ public class SecurityConfig {
 					CorsConfiguration configuration = new CorsConfiguration();
 
 					configuration.setAllowCredentials(true);
-					configuration.setAllowedOriginPatterns(Collections.singletonList("*"));
+					configuration.setAllowedOriginPatterns(allowOrigins);
 					configuration.setAllowedHeaders(Collections.singletonList("*"));
 					configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
 					configuration.setExposedHeaders(Arrays.asList("Set-Cookie", "Authorization"));
@@ -94,14 +94,14 @@ public class SecurityConfig {
 		http
 			.oauth2Login((oauth2) -> oauth2
 				.userInfoEndpoint((userInfoEndpointConfig) -> userInfoEndpointConfig
-				.userService(customOAuth2UserService))
+					.userService(customOAuth2UserService))
 				.successHandler(customSuccessHandler)
 				.failureHandler(customFailureHandler)
 			)
 
 			.exceptionHandling(exception -> exception
 				.authenticationEntryPoint(new CustomAuthenticationEntryPoint())
-		);
+			);
 
 		//경로별 인가 작업
 		http
