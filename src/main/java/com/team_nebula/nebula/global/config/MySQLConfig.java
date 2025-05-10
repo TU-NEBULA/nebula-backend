@@ -22,7 +22,8 @@ import javax.sql.DataSource;
 @EnableJpaRepositories(
         basePackages = {
             "com.team_nebula.nebula.domain.user.repository.mysql",
-            "com.team_nebula.nebula.domain.term.repository"
+            "com.team_nebula.nebula.domain.term.repository",
+            "com.team_nebula.nebula.domain.history.repository"
         }, // MySQL 관련 Repository 위치
         entityManagerFactoryRef = "mysqlEntityManager",
         transactionManagerRef = "mysqlTransactionManager"
@@ -49,7 +50,8 @@ public class MySQLConfig {
                 .dataSource(dataSource)
                 .packages(
                     "com.team_nebula.nebula.domain.user.entity",
-                    "com.team_nebula.nebula.domain.term.entity"
+                    "com.team_nebula.nebula.domain.term.entity",
+                    "com.team_nebula.nebula.domain.history.entity"
                 )
                 .persistenceUnit("mysql")
                 .properties(properties)
