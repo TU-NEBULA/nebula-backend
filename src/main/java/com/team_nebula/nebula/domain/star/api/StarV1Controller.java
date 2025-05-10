@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.team_nebula.nebula.domain.star.dto.request.CreateStarRequestDTO;
+import com.team_nebula.nebula.domain.star.dto.request.CompleteStarRequestDTO;
 import com.team_nebula.nebula.domain.star.dto.request.UpdateStarOneRequestDTO;
 import com.team_nebula.nebula.domain.star.dto.response.CreateStarResponseDTO;
 import com.team_nebula.nebula.domain.star.dto.response.DeleteStarResponseDTO;
@@ -61,7 +61,7 @@ public class StarV1Controller {
     public ApiResponse<PutStarResponseDTO> createCompleteStar(
             @AuthUser Long userId,
             @PathVariable UUID starId,
-            @RequestBody CreateStarRequestDTO requestDTO){
+            @RequestBody CompleteStarRequestDTO requestDTO){
         PutStarResponseDTO responseDTO = starCommandService.createCompleteStar(userId, starId, requestDTO);
 
         return ApiResponse.onSuccess(responseDTO);

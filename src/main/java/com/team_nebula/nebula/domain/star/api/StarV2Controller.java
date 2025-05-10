@@ -1,7 +1,9 @@
 package com.team_nebula.nebula.domain.star.api;
 
+import com.team_nebula.nebula.domain.star.dto.request.CompleteStarRequestDTO;
 import com.team_nebula.nebula.domain.star.dto.request.CreateStarRequestDTO;
 import com.team_nebula.nebula.domain.star.dto.response.AddBookMarkResponseDTO;
+import com.team_nebula.nebula.domain.star.dto.response.CreateStarResponseDTO;
 import com.team_nebula.nebula.domain.star.dto.response.PutStarResponseDTO;
 import com.team_nebula.nebula.domain.star.service.StarCommandService;
 import com.team_nebula.nebula.global.annotation.AuthUser;
@@ -34,18 +36,17 @@ public class StarV2Controller {
     ){
         AddBookMarkResponseDTO responseDTO = starCommandService.addBookMark(userId, htmlFile, title, siteUrl);
 
-        return ApiResponse.onSuccessCreated(responseDTO);
+        return ApiResponse.onSuccess(responseDTO);
     }
 
     // 스타 저장 API(데이터 입력 후 나머지 노드 생성)
-    @Operation(summary = "스타 저장", description = "스타의 타이틀, 사이트 url, Tjaspdlf카테고리, 사용자메모, AI요약, 키워드를 입력하고 스타 정보 입력을 완료하는 API")
-    @PatchMapping("/complete/{starId}")
-    public ApiResponse<PutStarResponseDTO> createCompleteStar(
+    @Operation(summary = "스타 저장", description = "스타의 타이틀, 사이트 url, 썸네일url, 파비콘url, 카테고리, 사용자메모, AI요약, 키워드를 입력하고 스타 정보 입력을 완료하는 API")
+    @PostMapping("/save")
+    public ApiResponse<CreateStarResponseDTO> createStar(
             @AuthUser Long userId,
-            @PathVariable UUID starId,
             @RequestBody CreateStarRequestDTO requestDTO){
-        PutStarResponseDTO responseDTO = starCommandService.createCompleteStar(userId, starId, requestDTO);
+        CreateStarResponseDTO responseDTO = starCommandService.createStar(userId, requestDTO);
 
-        return ApiResponse.onSuccess(responseDTO);
+        return ApiResponse.onSuccessCreated(responseDTO);
     }
 }

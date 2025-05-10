@@ -21,11 +21,8 @@ public class AiMessageService {
     private final RabbitTemplate rabbitTemplate;
     private final ObjectMapper objectMapper;
 
-    @Value("${rabbitmq.queues.extractData}")
+    @Value("${rabbitmq.queue.extract-data}")
     private String extractDataQueue;
-
-    @Value("${rabbitmq.queues.extractDataResponse}")
-    private String extractDataResponseQueue;
 
     public GetThumbnailAndKeywordsResponseDTO analyzeHtmlFile(Long userId, String htmlFileKey) {
         try {
