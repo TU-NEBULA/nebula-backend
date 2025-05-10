@@ -226,6 +226,7 @@ public class StarCommandServiceImpl implements StarCommandService {
                 .faviconUrl(favicon.getFaviconUrl())
                 .thumbnailUrl(responseDTO.getImage_url())
                 .keywords(responseDTO.getKeywords())
+                .s3key(htmlFileKey)
                 .build();
     }
 
