@@ -2,7 +2,9 @@ package com.team_nebula.nebula.domain.star.service;
 
 import com.team_nebula.nebula.domain.favicon.entity.Favicon;
 import com.team_nebula.nebula.domain.favicon.service.FaviconService;
+import com.team_nebula.nebula.domain.star.dto.response.*;
 import com.team_nebula.nebula.global.AI.dto.GetThumbnailAndKeywordsResponseDTO;
+import com.team_nebula.nebula.global.AI.service.AiMessageService;
 import com.team_nebula.nebula.global.AI.service.AiService;
 import com.team_nebula.nebula.domain.category.service.CategoryCommandService;
 import com.team_nebula.nebula.domain.category.service.CategoryQueryService;
@@ -12,10 +14,6 @@ import com.team_nebula.nebula.domain.keyword.service.KeywordCommandService;
 import com.team_nebula.nebula.domain.link.service.LinkCommandService;
 import com.team_nebula.nebula.domain.star.dto.request.CreateStarRequestDTO;
 import com.team_nebula.nebula.domain.star.dto.request.UpdateStarOneRequestDTO;
-import com.team_nebula.nebula.domain.star.dto.response.CreateStarResponseDTO;
-import com.team_nebula.nebula.domain.star.dto.response.DeleteStarResponseDTO;
-import com.team_nebula.nebula.domain.star.dto.response.GetStarOneResponseDTO;
-import com.team_nebula.nebula.domain.star.dto.response.PutStarResponseDTO;
 import com.team_nebula.nebula.domain.star.entity.Star;
 import com.team_nebula.nebula.domain.star.repository.StarRepository;
 import com.team_nebula.nebula.domain.user.entity.UserNode;
@@ -45,6 +43,7 @@ public class StarCommandServiceImpl implements StarCommandService {
     private final FaviconService faviconService;
     private final S3Service s3Service;
     private final AiService aiService;
+    private final AiMessageService aiMessageService;
 
     @Override
     public CreateStarResponseDTO createFirstStar(Long userId, MultipartFile htmlFile, String title, String siteUrl){
@@ -209,5 +208,23 @@ public class StarCommandServiceImpl implements StarCommandService {
                 .deleteStatus(canceledMessage)
                 .build();
     }
+
+    @Override
+    public AddBookMarkResponseDTO addBookMark(MultipartFile htmlFile, String title, String siteUrl){
+        String htmlFileKey = s3Service.saveHtmlFile(htmlFile, title);
+
+        Favicon favicon = faviconService.getOrCreateFavicon(siteUrl);
+
+        GetThumbnailAndKeywordsResponseDTO responseDTO = aiMessageService.analyzeHtmlFile(htmlFileKey);
+
+        return AddBookMarkResponseDTO.builder()
+                .title(title)
+                .siteUrl(siteUrl)
+                .faviconUrl(favicon.getFaviconUrl())
+                .thumbnailUrl(responseDTO.getImage_url())
+                .keywords(responseDTO.getKeywords())
+                .build();
+    }
+
 
 }
