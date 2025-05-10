@@ -41,8 +41,8 @@ public class KeywordController {
     }
 
     // 가장 많이 사용된 키워드 10개 조회 API
-    @Operation(summary = "사용순 상위 키워드 30개 조회", description = "가장 많이 사용되고 있는 상위 30개 키워드 이름리스트를 반환한다. 추가로 순위와 키워드가 사용된 횟수를 볼 수 있다.")
-    @GetMapping("/trending")
+    @Operation(summary = "사용순 상위 키워드 10개 조회", description = "가장 많이 사용되고 있는 상위 10개 키워드 이름리스트를 반환한다. 추가로 순위와 키워드가 사용된 횟수를 볼 수 있다.")
+    @GetMapping("/top10-used")
     public ApiResponse<GetMostUsedKeywordListResponseDTO> getKeywords() {
         GetMostUsedKeywordListResponseDTO mostUsedKeywordList = keywordQueryService.getMostUsedKeywordList();
         return ApiResponse.onSuccess(mostUsedKeywordList);

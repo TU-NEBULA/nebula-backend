@@ -17,5 +17,4 @@ public class AddBookMarkResponseDTO {
     private String thumbnailUrl;
     private String faviconUrl;
     private List<String> keywords;
-    private String s3key;
 }

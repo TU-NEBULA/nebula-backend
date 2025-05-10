@@ -1,7 +1,7 @@
 package com.team_nebula.nebula.global.AI.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.team_nebula.nebula.domain.star.entity.Star;
+import com.team_nebula.nebula.domain.star.dto.request.AnalyzeHtmlRequestDTO;
 import com.team_nebula.nebula.global.AI.dto.GetThumbnailAndKeywordsResponseDTO;
 import com.team_nebula.nebula.global.apipayload.code.status.ErrorStatus;
 import com.team_nebula.nebula.global.apipayload.exception.GeneralException;
@@ -12,7 +12,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 @Service
@@ -24,9 +23,6 @@ public class AiMessageService {
 
     @Value("${rabbitmq.queue.extract-data}")
     private String extractDataQueue;
-
-    @Value("${rabbitmq.queue.save-data}")
-    private String saveDataQueue;
 
     public GetThumbnailAndKeywordsResponseDTO analyzeHtmlFile(Long userId, String htmlFileKey) {
         try {
@@ -52,24 +48,6 @@ public class AiMessageService {
 
         } catch (Exception e) {
             throw new GeneralException(ErrorStatus._AI_EXTRACT_DATA_ERROR);
-        }
-    }
-
-    public void sendStarData(Long userId, Star star, String s3key, String userMemo, String summaryAI, List<String> keywordList){
-        try {
-            Map<String, Object> message = new HashMap<>();
-            message.put("userId", userId);
-            message.put("starId", star.getId().toString());
-            message.put("s3Key", s3key);
-            message.put("memo", userMemo);
-            message.put("summary", summaryAI);
-            message.put("keywords", keywordList);
-
-            String jsonMessage = objectMapper.writeValueAsString(message);
-
-            rabbitTemplate.convertAndSend(saveDataQueue, jsonMessage);
-        } catch (Exception e) {
-            throw new GeneralException(ErrorStatus._AI_STAR_DATA_SEND_ERROR);
         }
     }
 }

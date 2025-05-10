@@ -20,7 +20,6 @@ public class CreateStarRequestDTO {
     private String userMemo;
     private String categoryName;
     private List<String> keywordList;
-    private String s3key;
 
     public String getSummaryAI() {
         if (summaryAI == null || summaryAI.isBlank()) {
