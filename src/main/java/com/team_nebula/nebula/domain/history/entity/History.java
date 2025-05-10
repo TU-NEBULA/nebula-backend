@@ -29,7 +29,7 @@ public class History extends BaseEntity {
 	@Column(name = "last_visit_time", nullable = false)
 	private Double lastVisitTime;
 
-	@Column(name = "titlte", nullable = false)
+	@Column(name = "title", nullable = false)
 	private String title;
 
 	@Column(name = "typed_count", nullable = false)
