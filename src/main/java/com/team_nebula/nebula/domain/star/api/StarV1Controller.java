@@ -34,9 +34,9 @@ import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequiredArgsConstructor
-@Tag(name = "[ 스타 ]")
+@Tag(name = "[ 스타 V1 ]")
 @RequestMapping("/api/v1/stars")
-public class StarController {
+public class StarV1Controller {
 
     private final StarCommandService starCommandService;
     private final StarQueryService starQueryService;
