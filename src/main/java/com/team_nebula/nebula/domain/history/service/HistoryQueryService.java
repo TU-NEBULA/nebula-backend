@@ -9,4 +9,6 @@ import com.team_nebula.nebula.domain.history.dto.response.GetHistoryListResponse
 
 public interface HistoryQueryService {
 	GetHistoryListPageResponseDTO getHistories(Long userId, Pageable pageable);
+
+	GetHistoryListPageResponseDTO searchHistories(Long userId, String keyword, Pageable pageable);
 }
