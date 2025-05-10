@@ -19,10 +19,12 @@ import com.team_nebula.nebula.global.annotation.AuthUser;
 import com.team_nebula.nebula.global.apipayload.ApiResponse;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequiredArgsConstructor
+@Tag(name = "[방문기록]")
 @RequestMapping("/api/v1/histories")
 public class HistoryController {
 
