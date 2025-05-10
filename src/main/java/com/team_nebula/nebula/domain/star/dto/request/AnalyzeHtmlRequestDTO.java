@@ -8,5 +8,6 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 public class AnalyzeHtmlRequestDTO {
+    private Long userId;
     private String htmlFileKey;
 }

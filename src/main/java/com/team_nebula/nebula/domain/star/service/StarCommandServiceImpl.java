@@ -210,12 +210,12 @@ public class StarCommandServiceImpl implements StarCommandService {
     }
 
     @Override
-    public AddBookMarkResponseDTO addBookMark(MultipartFile htmlFile, String title, String siteUrl){
+    public AddBookMarkResponseDTO addBookMark(Long userId, MultipartFile htmlFile, String title, String siteUrl){
         String htmlFileKey = s3Service.saveHtmlFile(htmlFile, title);
 
         Favicon favicon = faviconService.getOrCreateFavicon(siteUrl);
 
-        GetThumbnailAndKeywordsResponseDTO responseDTO = aiMessageService.analyzeHtmlFile(htmlFileKey);
+        GetThumbnailAndKeywordsResponseDTO responseDTO = aiMessageService.analyzeHtmlFile(userId, htmlFileKey);
 
         return AddBookMarkResponseDTO.builder()
                 .title(title)

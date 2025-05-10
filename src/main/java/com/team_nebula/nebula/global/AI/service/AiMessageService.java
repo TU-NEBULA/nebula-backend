@@ -21,8 +21,9 @@ public class AiMessageService {
     @Value("${rabbitmq.routing.key}")
     private String routingKey;
 
-    public GetThumbnailAndKeywordsResponseDTO analyzeHtmlFile(String htmlFileKey) {
+    public GetThumbnailAndKeywordsResponseDTO analyzeHtmlFile(Long userId, String htmlFileKey) {
         AnalyzeHtmlRequestDTO request = AnalyzeHtmlRequestDTO.builder()
+                .userId(userId)
                 .htmlFileKey(htmlFileKey)
                 .build();
 

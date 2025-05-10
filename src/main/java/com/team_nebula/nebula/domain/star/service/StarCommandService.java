@@ -19,5 +19,5 @@ public interface StarCommandService {
 
     public DeleteStarResponseDTO cancelStar(UUID starId);
 
-    public AddBookMarkResponseDTO addBookMark(MultipartFile htmlFile, String title, String siteUrl);
+    public AddBookMarkResponseDTO addBookMark(Long userId, MultipartFile htmlFile, String title, String siteUrl);
 }

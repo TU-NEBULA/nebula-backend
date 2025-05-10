@@ -58,7 +58,10 @@ public class StarV1Controller {
     // 스타 입력 완료 API(데이터 입력 후 나머지 노드 생성)
     @Operation(summary = "스타 입력 완료", description = "스타의 카테고리, 사용자메모, AI요약, 키워드를 입력하고 스타 정보 입력을 완료하는 API")
     @PatchMapping("/complete/{starId}")
-    public ApiResponse<PutStarResponseDTO> createCompleteStar(@AuthUser Long userId, @PathVariable UUID starId, @RequestBody CreateStarRequestDTO requestDTO){
+    public ApiResponse<PutStarResponseDTO> createCompleteStar(
+            @AuthUser Long userId,
+            @PathVariable UUID starId,
+            @RequestBody CreateStarRequestDTO requestDTO){
         PutStarResponseDTO responseDTO = starCommandService.createCompleteStar(userId, starId, requestDTO);
 
         return ApiResponse.onSuccess(responseDTO);
@@ -85,7 +88,9 @@ public class StarV1Controller {
     // 카테고리별 스타 조회 API
     @Operation(summary = "카테고리별 스타 조회", description = "특정 카테고리에 속한 스타들을 조회하는 API")
     @GetMapping("/categories/{categoryId}")
-    public ApiResponse<GetStarListResponseDTO> getStarListByCategory(@AuthUser Long userId, @PathVariable UUID categoryId){
+    public ApiResponse<GetStarListResponseDTO> getStarListByCategory(
+            @AuthUser Long userId,
+            @PathVariable UUID categoryId){
         GetStarListResponseDTO responseDTO = starQueryService.getStarListInCategory(userId, categoryId);
 
         return ApiResponse.onSuccess(responseDTO);
@@ -94,7 +99,9 @@ public class StarV1Controller {
     // 키워드별 스타 조회 API
     @Operation(summary = "키워드별 스타 조회", description = "특정 키워드가 포함된 스타들을 조회하는 API")
     @GetMapping("/keywords/{keywordId}")
-    public ApiResponse<GetStarListResponseDTO> getStarListByKeyword(@AuthUser Long userId, @PathVariable String keywordId){
+    public ApiResponse<GetStarListResponseDTO> getStarListByKeyword(
+            @AuthUser Long userId,
+            @PathVariable String keywordId){
         System.out.println("KeywordId: " + keywordId);
         GetStarListResponseDTO responseDTO = starQueryService.getStarListInKeyword(userId, keywordId);
 
@@ -104,7 +111,9 @@ public class StarV1Controller {
     // 스타 검색 API
     @Operation(summary = "스타 검색", description = "title(제목)을 기준으로 스타를 검색하는 API")
     @GetMapping("/search")
-    public ApiResponse<GetSearchedStarListResponseDTO> searchStar(@RequestParam String title, @AuthUser Long userId){
+    public ApiResponse<GetSearchedStarListResponseDTO> searchStar(
+            @RequestParam String title,
+            @AuthUser Long userId){
         GetSearchedStarListResponseDTO responseDTO = starQueryService.searchStars(userId, title);
 
         return ApiResponse.onSuccess(responseDTO);
@@ -126,7 +135,9 @@ public class StarV1Controller {
     // 스타 삭제 API
     @Operation(summary = "스타 삭제", description = "스타를 비활성화하는 API/ 완전 삭제가 아닌 Soft Delete하는 것")
     @PatchMapping("/{starId}/deactivate")
-    public ApiResponse<DeleteStarResponseDTO> deleteStar(@AuthUser Long userId, @PathVariable UUID starId){
+    public ApiResponse<DeleteStarResponseDTO> deleteStar(
+            @AuthUser Long userId,
+            @PathVariable UUID starId){
         DeleteStarResponseDTO responseDTO = starCommandService.deleteStar(userId, starId);
 
         return ApiResponse.onSuccess(responseDTO);
@@ -135,7 +146,9 @@ public class StarV1Controller {
     // 스타화 취소 API
     @Operation(summary = "스타화 취소", description = "스타 등록을 취소하는 API / 크롬 익스텐션에서 북마크 추가하기를 누르고 넘어가는 화면에서 저장 말고 취소를 눌렀을때 스타를 완전 삭제하는 기능")
     @DeleteMapping("/{starId}/cancel")
-    public ApiResponse<DeleteStarResponseDTO> cancelStar(@PathVariable UUID starId, @AuthUser Long userId){
+    public ApiResponse<DeleteStarResponseDTO> cancelStar(
+            @PathVariable UUID starId,
+            @AuthUser Long userId){
         DeleteStarResponseDTO responseDTO = starCommandService.cancelStar(starId);
 
         return ApiResponse.onSuccess(responseDTO);
