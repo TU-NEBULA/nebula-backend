@@ -51,16 +51,6 @@ public class JWTUtil {
 			.get("role", String.class);
 	}
 
-	public String getTokenType(String token) {
-
-		return Jwts.parser()
-			.verifyWith(secretKey)
-			.build()
-			.parseSignedClaims(token)
-			.getPayload()
-			.get("tokenType", String.class);
-	}
-
 	public Date getExpiration(String token) {
 		return Jwts.parser()
 			.setSigningKey(secretKey)
@@ -90,19 +80,6 @@ public class JWTUtil {
 			.expiration(new Date(System.currentTimeMillis() + expiredMs * 1000))
 			.signWith(secretKey)
 			.compact();
-	}
-
-	public boolean validateAuthorizationHeader(String authorizationHeader) {
-		if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
-			return false;
-		}
-
-		String token = extractTokenFromAuthorizationHeader(authorizationHeader);
-		return !isExpired(token); // 토큰 만료 여부 확인
-	}
-
-	public String extractTokenFromAuthorizationHeader(String authorizationHeader) {
-		return authorizationHeader.replace("Bearer ", "").trim();
 	}
 
 	public TokenResponseDTO generateTokens(String username) {

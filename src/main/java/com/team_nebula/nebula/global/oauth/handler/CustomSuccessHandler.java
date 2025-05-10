@@ -1,13 +1,10 @@
 package com.team_nebula.nebula.global.oauth.handler;
 
 import java.io.IOException;
-import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
 
@@ -19,10 +16,10 @@ import com.team_nebula.nebula.global.apipayload.code.status.ErrorStatus;
 import com.team_nebula.nebula.global.apipayload.exception.GeneralException;
 import com.team_nebula.nebula.global.oauth.dto.CustomOAuth2User;
 import com.team_nebula.nebula.global.oauth.dto.TokenResponseDTO;
+import com.team_nebula.nebula.global.util.CookieUtil;
 import com.team_nebula.nebula.global.util.JWTUtil;
 
 import jakarta.servlet.ServletException;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
@@ -50,52 +47,60 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 	public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
 		Authentication authentication) throws IOException, ServletException {
 
-		CustomOAuth2User customUserDetails = (CustomOAuth2User) authentication.getPrincipal();
+		CustomOAuth2User customUserDetails = (CustomOAuth2User)authentication.getPrincipal();
 		String username = customUserDetails.getUsername();
+		User user = findUserByUsername(username);
 
 		TokenResponseDTO tokenResponseDTO = jwtUtil.generateTokens(username);
+		updateRefreshToken(user, tokenResponseDTO.getRefreshToken());
 
-		User user = userRepository.findByUsername(username)
-			.orElseThrow(() -> new GeneralException(ErrorStatus._USER_NOT_FOUND));
-
-		user.updateRefreshToken(tokenResponseDTO.getRefreshToken());
-		userRepository.save(user);
-
-		long accessTokenExpirationTime = jwtUtil.getExpiration(tokenResponseDTO.getAccessToken()).getTime();
-		long refreshTokenExpirationTime = jwtUtil.getExpiration(tokenResponseDTO.getRefreshToken()).getTime();
-
-		// redirectType web 과 extension 구분
 		HttpSession session = request.getSession(false);
-		String redirectType = (String) session.getAttribute("redirectType");
+		String redirectType = (String)session.getAttribute("redirectType");
+		String redirectUrl = "";
 
-		String redirectUrl = "web".equals(redirectType) ? webRedirectUrl : extensionRedirectUrl;
-
-		if (redirectType.equals("web")) {
-			response.addCookie(createCookie("accessToken", tokenResponseDTO.getAccessToken(), accessTokenExpirationTime));
-			response.addCookie(createCookie("refreshToken", tokenResponseDTO.getRefreshToken(), refreshTokenExpirationTime));
+		if (redirectType.equals("extension")) {
+			redirectUrl = generateExtensionToken(tokenResponseDTO);
 		} else {
-			redirectUrl = String.format("%s?accessToken=%s&refreshToken=%s", redirectUrl,
-				tokenResponseDTO.getAccessToken(), tokenResponseDTO.getRefreshToken());
+			redirectUrl = generateWebToken(response, tokenResponseDTO);
 		}
 
-		// 이용약관 동의 여부 확인
-		List<UserTerm> userTerms = userTermRepository.findByUser(user);
-
-		boolean isAgreed = !userTerms.isEmpty();
-
+		boolean isAgreed = isAgreedTerms(user);
 		redirectUrl = String.format("%s?isAgreed=%s", redirectUrl, isAgreed);
-
 		response.sendRedirect(redirectUrl);
 	}
 
-	private Cookie createCookie(String key, String value, long expirationTime) {
-		Cookie cookie = new Cookie(key, value);
-		cookie.setMaxAge((int)expirationTime);
-		cookie.setSecure(true);
-		cookie.setDomain("nebula-ai.kr");
-		cookie.setPath("/");
-		cookie.setHttpOnly(true);
+	private User findUserByUsername(String username) {
+		return userRepository.findByUsername(username)
+			.orElseThrow(() -> new GeneralException(ErrorStatus._USER_NOT_FOUND));
+	}
 
-		return cookie;
+	private void updateRefreshToken(User user, String refreshToken) {
+		user.updateRefreshToken(refreshToken);
+		userRepository.save(user);
+	}
+
+	private String generateWebToken(HttpServletResponse response, TokenResponseDTO tokenResponseDTO) {
+		long refreshTokenExpirationTime = jwtUtil.getExpiration(tokenResponseDTO.getRefreshToken()).getTime();
+
+		response.addCookie(
+			CookieUtil.createCookie("accessToken", tokenResponseDTO.getAccessToken(), refreshTokenExpirationTime));
+		response.addCookie(
+			CookieUtil.createCookie("refreshToken", tokenResponseDTO.getRefreshToken(), refreshTokenExpirationTime));
+
+		return webRedirectUrl;
+	}
+
+	private String generateExtensionToken(TokenResponseDTO tokenResponseDTO) {
+		String redirectUrl = extensionRedirectUrl;
+
+		redirectUrl = String.format("%s?accessToken=%s&refreshToken=%s", redirectUrl,
+			tokenResponseDTO.getAccessToken(), tokenResponseDTO.getRefreshToken());
+
+		return redirectUrl;
+	}
+
+	private boolean isAgreedTerms(User user) {
+		List<UserTerm> userTerms = userTermRepository.findByUser(user);
+		return !userTerms.isEmpty();
 	}
 }

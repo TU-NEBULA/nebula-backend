@@ -22,6 +22,9 @@ public class Link extends BaseEntity {
     @Property("sharedKeywordNum")
     private int sharedKeywordNum;
 
+    @Property("sharedKeywords")
+    private List<String> sharedKeywords;
+
     @Property("similarityScore")
     private double similarityScore;
 
@@ -29,10 +32,11 @@ public class Link extends BaseEntity {
     private List<UUID> linkedNode;
 
     @Builder
-    public Link(int sharedKeywordNum, double similarityScore, List<UUID> linkedNode) {
+    public Link(int sharedKeywordNum, double similarityScore, List<UUID> linkedNode, List<String> sharedKeywords) {
         this.id = UUID.randomUUID();
         this.sharedKeywordNum = sharedKeywordNum;
         this.similarityScore = similarityScore;
         this.linkedNode = linkedNode;
+        this.sharedKeywords = sharedKeywords;
     }
 }

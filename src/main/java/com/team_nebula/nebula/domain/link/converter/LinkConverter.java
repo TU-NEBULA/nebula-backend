@@ -8,6 +8,7 @@ public class LinkConverter {
         return GetLinkOneResponseDTO.builder()
                 .linkId(data.getLinkId())
                 .sharedKeywordNum(data.getSharedKeywordNum())
+                .sharedKeywords(data.getSharedKeywords())
                 .similarity(data.getSimilarity())
                 .linkedNodeIdList(data.getLinkedNodeIdList())
                 .build();
