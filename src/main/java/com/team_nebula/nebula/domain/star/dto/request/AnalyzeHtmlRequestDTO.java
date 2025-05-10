@@ -9,5 +9,5 @@ import lombok.*;
 @Builder
 public class AnalyzeHtmlRequestDTO {
     private Long userId;
-    private String htmlFileKey;
+    private String s3Key;
 }
