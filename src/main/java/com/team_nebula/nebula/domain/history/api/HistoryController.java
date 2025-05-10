@@ -6,6 +6,7 @@ import com.team_nebula.nebula.domain.history.dto.response.GetHistoryListPageResp
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -49,7 +50,7 @@ public class HistoryController {
 		@AuthUser Long userId,
 		@RequestParam(name = "page", defaultValue = "0") int page,
 		@RequestParam(name = "size", defaultValue = "7") int size) {
-		Pageable pageable = PageRequest.of(page, size);
+		Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "lastVisitTime"));
 		return ApiResponse.onSuccess(historyQueryService.getHistories(userId, pageable));
 	}
 }
