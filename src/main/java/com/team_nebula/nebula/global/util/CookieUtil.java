@@ -14,7 +14,6 @@ public class CookieUtil {
 		cookie.setHttpOnly(true);
 		cookie.setPath("/");
 		cookie.setMaxAge((int)getTokenMaxAgeInSeconds(expiration));
-		cookie.setAttribute("SameSite", "Strict");
 		return cookie;
 	}
 
@@ -41,12 +40,10 @@ public class CookieUtil {
 		for (Cookie cookie : cookies) {
 			if ("accessToken".equals(cookie.getName())) {
 				tokens.put("accessToken", cookie.getValue());
-
 			} else if ("refreshToken".equals(cookie.getName())) {
 				tokens.put("refreshToken", cookie.getValue());
 			}
 		}
-
 		return tokens;
 	}
 }
