@@ -1,8 +1,12 @@
 package com.team_nebula.nebula.domain.star.service;
 
 import com.team_nebula.nebula.domain.favicon.entity.Favicon;
+import com.team_nebula.nebula.domain.favicon.repository.FaviconRepository;
 import com.team_nebula.nebula.domain.favicon.service.FaviconService;
+import com.team_nebula.nebula.domain.star.dto.request.CreateStarRequestDTO;
+import com.team_nebula.nebula.domain.star.dto.response.*;
 import com.team_nebula.nebula.global.AI.dto.GetThumbnailAndKeywordsResponseDTO;
+import com.team_nebula.nebula.global.AI.service.AiMessageService;
 import com.team_nebula.nebula.global.AI.service.AiService;
 import com.team_nebula.nebula.domain.category.service.CategoryCommandService;
 import com.team_nebula.nebula.domain.category.service.CategoryQueryService;
@@ -10,12 +14,8 @@ import com.team_nebula.nebula.global.image.S3Service;
 import com.team_nebula.nebula.domain.keyword.entity.Keyword;
 import com.team_nebula.nebula.domain.keyword.service.KeywordCommandService;
 import com.team_nebula.nebula.domain.link.service.LinkCommandService;
-import com.team_nebula.nebula.domain.star.dto.request.CreateStarRequestDTO;
+import com.team_nebula.nebula.domain.star.dto.request.CompleteStarRequestDTO;
 import com.team_nebula.nebula.domain.star.dto.request.UpdateStarOneRequestDTO;
-import com.team_nebula.nebula.domain.star.dto.response.CreateStarResponseDTO;
-import com.team_nebula.nebula.domain.star.dto.response.DeleteStarResponseDTO;
-import com.team_nebula.nebula.domain.star.dto.response.GetStarOneResponseDTO;
-import com.team_nebula.nebula.domain.star.dto.response.PutStarResponseDTO;
 import com.team_nebula.nebula.domain.star.entity.Star;
 import com.team_nebula.nebula.domain.star.repository.StarRepository;
 import com.team_nebula.nebula.domain.user.entity.UserNode;
@@ -45,6 +45,8 @@ public class StarCommandServiceImpl implements StarCommandService {
     private final FaviconService faviconService;
     private final S3Service s3Service;
     private final AiService aiService;
+    private final AiMessageService aiMessageService;
+    private final FaviconRepository faviconRepository;
 
     @Override
     public CreateStarResponseDTO createFirstStar(Long userId, MultipartFile htmlFile, String title, String siteUrl){
@@ -87,7 +89,7 @@ public class StarCommandServiceImpl implements StarCommandService {
                     .siteUrl(savedStar.getSiteUrl())
                     .thumbnailUrl(responseDTO.getImage_url())
                     .faviconUrl(favicon.getFaviconUrl())
-                    .keywords(responseDTO.getKeywords())
+                    .keywordList(responseDTO.getKeywords())
                     .build();
         } catch (Exception e) {
             starRepository.delete(savedStar);
@@ -98,7 +100,7 @@ public class StarCommandServiceImpl implements StarCommandService {
 
 
     @Override
-    public PutStarResponseDTO createCompleteStar(Long userId, UUID starId, CreateStarRequestDTO requestDTO){
+    public PutStarResponseDTO createCompleteStar(Long userId, UUID starId, CompleteStarRequestDTO requestDTO){
 
         Star star = starRepository.findById(starId)
                 .orElseThrow(() -> new GeneralException(ErrorStatus._STAR_NOT_FOUND));
@@ -159,7 +161,7 @@ public class StarCommandServiceImpl implements StarCommandService {
         Star updatedStar = starRepository.save(latestStar);
 
         // 유저 스타 작업 횟수 증가
-        aiService.checkUpdatedCnt(userId);
+//        aiService.checkUpdatedCnt(userId);
 
         return GetStarOneResponseDTO.builder()
                 .starId(updatedStar.getId())
@@ -209,5 +211,80 @@ public class StarCommandServiceImpl implements StarCommandService {
                 .deleteStatus(canceledMessage)
                 .build();
     }
+
+    @Override
+    public AddBookMarkResponseDTO addBookMark(Long userId, MultipartFile htmlFile, String title, String siteUrl){
+        String htmlFileKey = s3Service.saveHtmlFile(htmlFile, title);
+
+        Favicon favicon = faviconService.getOrCreateFavicon(siteUrl);
+
+        GetThumbnailAndKeywordsResponseDTO responseDTO = aiMessageService.analyzeHtmlFile(userId, htmlFileKey);
+
+        return AddBookMarkResponseDTO.builder()
+                .title(title)
+                .siteUrl(siteUrl)
+                .faviconUrl(favicon.getFaviconUrl())
+                .thumbnailUrl(responseDTO.getImage_url())
+                .keywords(responseDTO.getKeywords())
+                .build();
+    }
+
+    @Override
+    public CreateStarResponseDTO createStar(Long userId, CreateStarRequestDTO requestDTO){
+        // 유저 찾기
+        UserNode userNode = userNodeRepository.findById(userId)
+                .orElseThrow(() -> new GeneralException(ErrorStatus._USER_NOT_FOUND));
+
+        // 스타 노드 생성
+        Star star = Star.builder()
+                .title(requestDTO.getTitle())
+                .siteUrl(requestDTO.getSiteUrl())
+                .thumbnailUrl(requestDTO.getThumbnailUrl())
+                .summaryAI(requestDTO.getSummaryAI())
+                .userMemo(requestDTO.getUserMemo())
+                .build();
+
+        Star savedStar = starRepository.save(star);
+        if (savedStar.getId() == null) {
+            throw new GeneralException(ErrorStatus._STAR_CREATION_FAILED);
+        }
+
+        // 유저-스타 관계 설정
+        userNode.getStars().add(savedStar);
+        userNodeRepository.save(userNode);
+
+        // 카테고리 생성 및 유저-카테고리 관게설정
+        categoryCommandService.linkStarToCategory(star, requestDTO.getCategoryName());
+
+        // 스타-파비콘 관계 설정
+        Favicon favicon = faviconRepository.findByFaviconUrl(requestDTO.getFaviconUrl());
+        savedStar.getFavicons().add(favicon);
+        Star updatedStar = starRepository.save(savedStar);
+
+        // 키워드 노드 생성 및 스타-키워드 관계설정
+        keywordCommandService.linkStarToKeywords(updatedStar, requestDTO.getKeywordList());
+
+        // 스타간 링크 노드 생성 및 관계설정
+        Star lastStar = starRepository.findById(updatedStar.getId())
+                .orElseThrow(() -> new GeneralException(ErrorStatus._STAR_NOT_FOUND));
+        linkCommandService.createLinksForStar(userId, lastStar);
+
+        starRepository.save(lastStar);
+
+        // 유저 스타 작업 횟수 증가
+//        aiService.checkUpdatedCnt(userId);
+
+        return CreateStarResponseDTO.builder()
+                .starId(lastStar.getId())
+                .title(lastStar.getTitle())
+                .siteUrl(lastStar.getSiteUrl())
+                .thumbnailUrl(lastStar.getThumbnailUrl())
+                .faviconUrl(favicon.getFaviconUrl())
+                .keywordList(lastStar.getKeywords().stream()
+                        .map(Keyword::getName)
+                        .toList())
+                .build();
+    }
+
 
 }

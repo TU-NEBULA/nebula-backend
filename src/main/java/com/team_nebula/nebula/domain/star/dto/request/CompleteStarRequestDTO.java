@@ -11,10 +11,8 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class CreateStarRequestDTO {
-    private String title;
-    private String siteUrl;
-    private String faviconUrl;
+public class CompleteStarRequestDTO {
+
     private String thumbnailUrl;
     private String summaryAI;
     private String userMemo;
