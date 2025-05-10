@@ -12,7 +12,6 @@ public class CookieUtil {
 	public static Cookie createCookie(String name, String value, long expiration) {
 		Cookie cookie = new Cookie(name, value);
 		cookie.setHttpOnly(true);
-		cookie.setDomain("nebula-ai.kr");
 		cookie.setPath("/");
 		cookie.setMaxAge((int)getTokenMaxAgeInSeconds(expiration));
 		return cookie;
@@ -26,7 +25,6 @@ public class CookieUtil {
 	public static void deleteCookie(String name, HttpServletResponse response) {
 		Cookie cookie = new Cookie(name, null);
 		cookie.setHttpOnly(true);
-		cookie.setDomain("nebula-ai.kr");
 		cookie.setPath("/");
 		cookie.setMaxAge(0);
 		response.addCookie(cookie);
