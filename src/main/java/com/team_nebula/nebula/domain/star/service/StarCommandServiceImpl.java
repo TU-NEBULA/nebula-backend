@@ -274,6 +274,7 @@ public class StarCommandServiceImpl implements StarCommandService {
 
         // 유저 스타 작업 횟수 증가
 //        aiService.checkUpdatedCnt(userId);
+        aiMessageService.sendStarData(userId, lastStar, requestDTO.getS3key(), lastStar.getUserMemo(), lastStar.getSummaryAI(), requestDTO.getKeywordList());
 
         return CreateStarResponseDTO.builder()
                 .starId(lastStar.getId())
