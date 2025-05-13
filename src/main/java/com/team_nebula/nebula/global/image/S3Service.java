@@ -132,5 +132,23 @@ public class S3Service {
             throw new GeneralException(ErrorStatus._S3_HTML_FILE_DELETE_FAIL);
         }
     }
+
+    public String sanitizeTitleForS3(String title) {
+        if (title == null) return "";
+
+        // 1. 공백을 하나로 정규화
+        title = title.replaceAll("\\s+", " ");
+
+        // 2. 한글, 영문, 숫자, '-', '_', '.', '~', 공백만 허용 (이모티콘, 특수문자, 대괄호 등 제거)
+        title = title.replaceAll("[^가-힣a-zA-Z0-9\\-_.~ ]", "");
+
+        // 3. 공백을 하이픈으로 변환
+        title = title.replace(" ", "-");
+
+        // 4. 소문자로 변환
+        title = title.toLowerCase();
+
+        return title;
+    }
 }
 

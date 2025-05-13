@@ -54,7 +54,8 @@ public class StarCommandServiceImpl implements StarCommandService {
         UserNode userNode = userNodeRepository.findById(userId)
                 .orElseThrow(() -> new GeneralException(ErrorStatus._USER_NOT_FOUND));
 
-        String htmlFileKey = s3Service.saveHtmlFile(htmlFile, title);
+        String sanitizedTitle = s3Service.sanitizeTitleForS3(title);
+        String htmlFileKey = s3Service.saveHtmlFile(htmlFile, sanitizedTitle);
 
         Star star = Star.builder()
                 .title(title)
