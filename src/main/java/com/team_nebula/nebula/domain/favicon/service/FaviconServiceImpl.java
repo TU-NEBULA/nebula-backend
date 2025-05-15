@@ -5,6 +5,7 @@ import com.team_nebula.nebula.domain.favicon.repository.FaviconRepository;
 import com.team_nebula.nebula.global.image.FaviconDownloader;
 import com.team_nebula.nebula.global.image.S3Service;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,22 +19,30 @@ public class FaviconServiceImpl implements FaviconService {
     private final FaviconRepository faviconRepository;
     private final S3Service s3Service;
 
+    @Value("${favicon.tistory-default}")
+    private String tistoryDefaultFavicon;
+
     @Override
     public Favicon getOrCreateFavicon(String siteUrl) {
-        // 1. 도메인 추출
+        // 도메인 추출
         String domain = extractDomain(siteUrl);
 
-        // 2. 기존 Favicon이 있는지 확인
+        // tistoy일 경우 체크
+        if (domain.equals("tistory.com") || domain.endsWith(".tistory.com")) {
+            domain = tistoryDefaultFavicon;
+        }
+
+        // 기존 Favicon이 있는지 확인
         Optional<Favicon> existingFavicon = faviconRepository.findById(domain);
         if (existingFavicon.isPresent()) {
             return existingFavicon.get();
         }
 
-        // 3. 파비콘 다운로드 후 S3 업로드
+        // 파비콘 다운로드 후 S3 업로드
         File faviconFile = downloadFavicon(domain);
         String faviconUrl = s3Service.saveFavicon(faviconFile, domain);
 
-        // 4. 새로운 Favicon 노드 저장 후 반환
+        // 새로운 Favicon 노드 저장 후 반환
         Favicon newFavicon = new Favicon(domain, faviconUrl);
         return faviconRepository.save(newFavicon);
     }
