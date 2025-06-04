@@ -56,7 +56,7 @@ public class AiMessageService {
         }
     }
 
-    public void sendStarData(Long userId, Star star, String s3key, String userMemo, String summaryAI, List<String> keywordList){
+    public void sendStarData(Long userId, Star star, String s3key, String userMemo, String summaryAI, List<String> keywordList, String title, String siteUrl){
         try {
             Map<String, Object> message = new HashMap<>();
             message.put("userId", userId);
@@ -65,6 +65,8 @@ public class AiMessageService {
             message.put("memo", userMemo);
             message.put("summary", summaryAI);
             message.put("keywords", keywordList);
+            message.put("title", title);
+            message.put("url", siteUrl);
 
             String jsonMessage = objectMapper.writeValueAsString(message);
 
