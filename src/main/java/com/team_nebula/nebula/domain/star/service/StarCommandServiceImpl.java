@@ -219,7 +219,7 @@ public class StarCommandServiceImpl implements StarCommandService {
 
         Favicon favicon = faviconService.getOrCreateFavicon(siteUrl);
 
-        GetThumbnailAndKeywordsResponseDTO responseDTO = aiMessageService.analyzeHtmlFile(userId, htmlFileKey);
+        GetThumbnailAndKeywordsResponseDTO responseDTO = aiMessageService.analyzeHtmlFile(userId, htmlFileKey, siteUrl);
 
         return AddBookMarkResponseDTO.builder()
                 .title(title)
