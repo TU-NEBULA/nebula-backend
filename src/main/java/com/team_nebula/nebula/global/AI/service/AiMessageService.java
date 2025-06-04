@@ -28,12 +28,13 @@ public class AiMessageService {
     @Value("${rabbitmq.queue.save-data}")
     private String saveDataQueue;
 
-    public GetThumbnailAndKeywordsResponseDTO analyzeHtmlFile(Long userId, String htmlFileKey) {
+    public GetThumbnailAndKeywordsResponseDTO analyzeHtmlFile(Long userId, String htmlFileKey, String siteUrl) {
         try {
             // 1. 요청 메시지 생성
             Map<String, Object> message = new HashMap<>();
             message.put("s3_key", htmlFileKey);
             message.put("user_id", userId);
+            message.put("url", siteUrl);
 
             // 2. JSON 문자열로 변환
             String jsonMessage = objectMapper.writeValueAsString(message);
@@ -55,7 +56,7 @@ public class AiMessageService {
         }
     }
 
-    public void sendStarData(Long userId, Star star, String s3key, String userMemo, String summaryAI, List<String> keywordList){
+    public void sendStarData(Long userId, Star star, String s3key, String userMemo, String summaryAI, List<String> keywordList, String title, String siteUrl){
         try {
             Map<String, Object> message = new HashMap<>();
             message.put("userId", userId);
@@ -64,6 +65,8 @@ public class AiMessageService {
             message.put("memo", userMemo);
             message.put("summary", summaryAI);
             message.put("keywords", keywordList);
+            message.put("title", title);
+            message.put("url", siteUrl);
 
             String jsonMessage = objectMapper.writeValueAsString(message);
 

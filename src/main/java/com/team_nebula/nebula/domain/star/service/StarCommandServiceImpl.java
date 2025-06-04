@@ -219,7 +219,7 @@ public class StarCommandServiceImpl implements StarCommandService {
 
         Favicon favicon = faviconService.getOrCreateFavicon(siteUrl);
 
-        GetThumbnailAndKeywordsResponseDTO responseDTO = aiMessageService.analyzeHtmlFile(userId, htmlFileKey);
+        GetThumbnailAndKeywordsResponseDTO responseDTO = aiMessageService.analyzeHtmlFile(userId, htmlFileKey, siteUrl);
 
         return AddBookMarkResponseDTO.builder()
                 .title(title)
@@ -275,7 +275,7 @@ public class StarCommandServiceImpl implements StarCommandService {
 
         // 유저 스타 작업 횟수 증가
 //        aiService.checkUpdatedCnt(userId);
-        aiMessageService.sendStarData(userId, lastStar, requestDTO.getS3key(), lastStar.getUserMemo(), lastStar.getSummaryAI(), requestDTO.getKeywordList());
+        aiMessageService.sendStarData(userId, lastStar, requestDTO.getS3key(), lastStar.getUserMemo(), lastStar.getSummaryAI(), requestDTO.getKeywordList(), lastStar.getTitle(), lastStar.getSiteUrl());
 
         return CreateStarResponseDTO.builder()
                 .starId(lastStar.getId())
