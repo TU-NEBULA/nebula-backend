@@ -9,18 +9,13 @@ import com.team_nebula.nebula.global.annotation.AuthUser;
 
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
-import io.swagger.v3.oas.models.security.SecurityRequirement;
-import io.swagger.v3.oas.models.security.SecurityScheme;
 import io.swagger.v3.oas.models.servers.Server;
 
 @Configuration
 public class SwaggerConfig {
 
-	@Value("${app.local-url}")
-	private String localUrl;
-
-	@Value("${app.ec2-url}")
-	private String ec2Url;
+	@Value("${app.url}")
+	private String url;
 
 	static {
 		SpringDocUtils.getConfig().addAnnotationsToIgnore(AuthUser.class);
@@ -28,28 +23,12 @@ public class SwaggerConfig {
 
 	@Bean
 	public OpenAPI openAPI() {
-
-		SecurityScheme securityScheme = new SecurityScheme()
-			.type(SecurityScheme.Type.HTTP)
-			.scheme("bearer")
-			.bearerFormat("JWT");
-
-		SecurityRequirement securityRequirement = new SecurityRequirement()
-			.addList("bearerAuth");
-
-		Server localServer = new Server()
-			.url(localUrl)
-			.description("Local development server");
-
-		Server ec2Server = new Server()
-			.url(ec2Url)
-			.description("EC2 development server");
+		Server server = new Server()
+			.url(url)
+			.description("server");
 
 		return new OpenAPI()
 			.info(new Info().title("Nebula API").version("1.0"))
-			.addServersItem(localServer)
-			.addServersItem(ec2Server)
-			.addSecurityItem(securityRequirement)
-			.schemaRequirement("bearerAuth", securityScheme);
+			.addServersItem(server);
 	}
 }
