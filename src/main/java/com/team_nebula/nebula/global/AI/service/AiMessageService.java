@@ -34,7 +34,7 @@ public class AiMessageService {
             Map<String, Object> message = new HashMap<>();
             message.put("s3_key", htmlFileKey);
             message.put("user_id", userId);
-            message.put("site_url", siteUrl);
+            message.put("url", siteUrl);
 
             // 2. JSON 문자열로 변환
             String jsonMessage = objectMapper.writeValueAsString(message);
