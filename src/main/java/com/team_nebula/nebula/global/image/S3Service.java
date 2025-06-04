@@ -7,6 +7,7 @@ import com.amazonaws.services.s3.model.DeleteObjectRequest;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.team_nebula.nebula.global.apipayload.code.status.ErrorStatus;
 import com.team_nebula.nebula.global.apipayload.exception.GeneralException;
+import com.team_nebula.nebula.global.util.HashUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -40,8 +41,8 @@ public class S3Service {
         return uploadThumbnailToS3(thumbnailImage, THUMBNAIL_DIR, dataInfo);
     }
 
-    public String saveHtmlFile(MultipartFile htmlFile, String dataInfo) {
-        return uploadHtmlToS3(htmlFile, HTML_FILE_DIR, dataInfo);
+    public String saveHtmlFile(MultipartFile htmlFile, String dataInfo, Long userId) {
+        return uploadHtmlToS3(htmlFile, HTML_FILE_DIR, dataInfo, userId);
     }
 
     public String saveFavicon(File faviconFile, String domain) {
@@ -49,11 +50,12 @@ public class S3Service {
         return uploadFileToS3(faviconFile, fileName);
     }
 
-    private String uploadHtmlToS3(MultipartFile file, String dirName, String dataInfo)  {
+    private String uploadHtmlToS3(MultipartFile file, String dirName, String dataInfo, Long userId)  {
         File uploadFile = convert(file)
                 .orElseThrow(() -> new GeneralException(ErrorStatus._MULTIPARTFILE_CONVERT_FAIL));
+        String hashUserId = HashUtil.hashUserId(userId);
 
-        String fileName = dirName + dataInfo + "/" + UUID.randomUUID() + "_" + file.getOriginalFilename();
+        String fileName = dirName + hashUserId + "/" + dataInfo + "/" + UUID.randomUUID() + "_" + file.getOriginalFilename();
 
         putHtmlS3(uploadFile, fileName);
         removeNewFile(uploadFile);

@@ -55,7 +55,7 @@ public class StarCommandServiceImpl implements StarCommandService {
                 .orElseThrow(() -> new GeneralException(ErrorStatus._USER_NOT_FOUND));
 
         String sanitizedTitle = s3Service.sanitizeTitleForS3(title);
-        String htmlFileKey = s3Service.saveHtmlFile(htmlFile, sanitizedTitle);
+        String htmlFileKey = s3Service.saveHtmlFile(htmlFile, sanitizedTitle, userNode.getUserId());
 
         Star star = Star.builder()
                 .title(title)
@@ -215,7 +215,7 @@ public class StarCommandServiceImpl implements StarCommandService {
 
     @Override
     public AddBookMarkResponseDTO addBookMark(Long userId, MultipartFile htmlFile, String title, String siteUrl){
-        String htmlFileKey = s3Service.saveHtmlFile(htmlFile, title);
+        String htmlFileKey = s3Service.saveHtmlFile(htmlFile, title, userId);
 
         Favicon favicon = faviconService.getOrCreateFavicon(siteUrl);
 
