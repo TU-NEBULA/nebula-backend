@@ -4,28 +4,40 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
-import com.team_nebula.nebula.domain.chatbot.dto.response.ChatResponseDTO;
+import com.team_nebula.nebula.domain.chatbot.dto.request.ChatRequestDTO;
+import com.team_nebula.nebula.domain.chatbot.dto.request.SessionRequestDTO;
+import com.team_nebula.nebula.domain.chatbot.dto.response.SessionResponseDTO;
 import com.team_nebula.nebula.domain.chatbot.service.ChatbotService;
 import com.team_nebula.nebula.global.annotation.AuthUser;
 import com.team_nebula.nebula.global.apipayload.ApiResponse;
 
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 
 @RestController
+@RequestMapping("/api/v1/chat")
 @RequiredArgsConstructor
 @Tag(name = "[챗봇]")
-@RequestMapping("/api/v1/chatbots")
 public class ChatbotController {
 
 	private final ChatbotService chatbotService;
 
-	@PostMapping
-	public ApiResponse<ChatResponseDTO> chat(
+	@Operation(summary = "새 채팅 세션 생성", description = "새로운 채팅 세션을 생성하는 API")
+	@PostMapping("/sessions")
+	public ApiResponse<SessionResponseDTO> createSession(
 		@AuthUser Long userId,
-		@RequestBody String prompt) {
-		ChatResponseDTO response = chatbotService.chat(userId, prompt);
-		return ApiResponse.onSuccess(response);
+		@RequestBody SessionRequestDTO request) {
+		return ApiResponse.onSuccess(chatbotService.createSession(userId, request));
+	}
+
+	@Operation(summary = "채팅 스트림", description = "채팅 세션에서 메시지를 스트리밍하는 API")
+	@PostMapping("/stream")
+	public SseEmitter chatStream(
+		@AuthUser Long userId,
+		@RequestBody ChatRequestDTO request) {
+		return chatbotService.chatStream(userId, request);
 	}
 }
