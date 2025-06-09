@@ -3,6 +3,7 @@ package com.team_nebula.nebula.domain.chatbot.service;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -24,6 +25,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.team_nebula.nebula.domain.chatbot.dto.request.ChatRequestDTO;
 import com.team_nebula.nebula.domain.chatbot.dto.request.SessionRequestDTO;
+import com.team_nebula.nebula.domain.chatbot.dto.response.CharResponseDTO;
+import com.team_nebula.nebula.domain.chatbot.dto.response.MessageResponseDTO;
 import com.team_nebula.nebula.domain.chatbot.dto.response.SessionListResponseDTO;
 import com.team_nebula.nebula.domain.chatbot.dto.response.SessionResponseDTO;
 import com.team_nebula.nebula.global.apipayload.code.status.ErrorStatus;
@@ -189,7 +192,9 @@ public class ChatbotServiceImpl implements ChatbotService {
 	}
 
 	private Void handleStreamResponse(ClientHttpResponse response, SseEmitter emitter) {
-		try (BufferedReader reader = new BufferedReader(new InputStreamReader(response.getBody()))) {
+		try (BufferedReader reader = new BufferedReader(
+			new InputStreamReader(response.getBody(), StandardCharsets.UTF_8))) {
+
 			String line;
 			while ((line = reader.readLine()) != null) {
 				if (!line.isBlank()) {
@@ -202,5 +207,66 @@ public class ChatbotServiceImpl implements ChatbotService {
 			emitter.completeWithError(e);
 		}
 		return null;
+	}
+
+	@Override
+	public List<CharResponseDTO> getSessionMessages(Long userId, String sessionId) {
+		try {
+			String url = String.format("%s/chat/sessions/%s/messages?user_id=%d", aiChatUrl, sessionId, userId);
+
+			HttpHeaders headers = new HttpHeaders();
+			headers.setContentType(MediaType.APPLICATION_JSON);
+
+			ResponseEntity<String> response = restTemplate.exchange(
+				url,
+				HttpMethod.GET,
+				new HttpEntity<>(headers),
+				String.class
+			);
+
+			log.info("AI 서버 메시지 응답: {}", response.getBody());
+
+			JsonNode root = objectMapper.readTree(response.getBody());
+			JsonNode data = root.path("data");
+
+			String receivedSessionId = getText(data, "session_id");
+			JsonNode messagesNode = data.path("messages");
+
+			List<MessageResponseDTO> messageList = new ArrayList<>();
+
+			if (messagesNode.isArray()) {
+				for (JsonNode messageNode : messagesNode) {
+					messageList.add(MessageResponseDTO.builder()
+						.id(getText(messageNode, "id"))
+						.content(getText(messageNode, "content"))
+						.role(getText(messageNode, "role"))
+						.createdAt(getText(messageNode, "created_at"))
+						.metadata(convertMetadata(messageNode.path("metadata")))
+						.build()
+					);
+				}
+			}
+
+			CharResponseDTO responseDto = CharResponseDTO.builder()
+				.sessionId(receivedSessionId)
+				.messages(messageList)
+				.build();
+
+			return List.of(responseDto);
+
+		} catch (Exception e) {
+			log.error("세션 메시지 조회 중 오류 발생", e);
+			throw new GeneralException(ErrorStatus._AI_CHATBOT_ERROR);
+		}
+	}
+
+	private Map<String, String> convertMetadata(JsonNode metadataNode) {
+		Map<String, String> metadata = new HashMap<>();
+		if (metadataNode != null && metadataNode.isObject()) {
+			metadataNode.fields().forEachRemaining(entry ->
+				metadata.put(entry.getKey(), entry.getValue().asText())
+			);
+		}
+		return metadata;
 	}
 }
