@@ -1,5 +1,6 @@
 package com.team_nebula.nebula.global.util;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -35,7 +36,7 @@ public class CookieUtil {
 
 		Cookie[] cookies = request.getCookies();
 		if (cookies == null)
-			return null;
+			return Collections.emptyMap();
 
 		for (Cookie cookie : cookies) {
 			if ("accessToken".equals(cookie.getName())) {
