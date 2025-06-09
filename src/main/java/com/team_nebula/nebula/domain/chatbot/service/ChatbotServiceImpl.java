@@ -198,6 +198,10 @@ public class ChatbotServiceImpl implements ChatbotService {
 			String line;
 			while ((line = reader.readLine()) != null) {
 				if (!line.isBlank()) {
+					if (line.startsWith("data: ")) {
+						line = line.substring(6);
+					}
+					log.info("SSE chunk received: {}", line);
 					emitter.send(line);
 				}
 			}
