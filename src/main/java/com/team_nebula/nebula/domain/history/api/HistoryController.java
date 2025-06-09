@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -12,7 +13,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.team_nebula.nebula.domain.history.dto.request.CreateHistoryRequestDTO;
-import com.team_nebula.nebula.domain.history.dto.response.GetHistoryListResponseDTO;
+import com.team_nebula.nebula.domain.history.dto.response.GetHistoryListPageResponseDTO;
 import com.team_nebula.nebula.domain.history.service.HistoryCommandService;
 import com.team_nebula.nebula.domain.history.service.HistoryQueryService;
 import com.team_nebula.nebula.global.annotation.AuthUser;
@@ -24,7 +25,7 @@ import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequiredArgsConstructor
-@Tag(name = "[방문기록]")
+@Tag(name = "[ 방문기록 ]")
 @RequestMapping("/api/v1/histories")
 public class HistoryController {
 
@@ -44,11 +45,24 @@ public class HistoryController {
 	// 방문기록 전체 조회 API
 	@Operation(summary = "방문기록 전체 조회", description = "사용자의 모든 방문기록 조회하는 API")
 	@GetMapping
-	public ApiResponse<List<GetHistoryListResponseDTO>> getHistories(
+	public ApiResponse<GetHistoryListPageResponseDTO> getHistories(
 		@AuthUser Long userId,
 		@RequestParam(name = "page", defaultValue = "0") int page,
 		@RequestParam(name = "size", defaultValue = "7") int size) {
-		Pageable pageable = PageRequest.of(page, size);
+		Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "lastVisitTime"));
 		return ApiResponse.onSuccess(historyQueryService.getHistories(userId, pageable));
+	}
+
+	// 방문기록 검색 API
+	@Operation(summary = "방문기록 검색", description = "방문기록울 제목과 url 기준으로 검색하는 API")
+	@GetMapping("/search")
+	public ApiResponse<GetHistoryListPageResponseDTO> searchHistories(
+		@AuthUser Long userId,
+		@RequestParam("keyword") String keyword,
+		@RequestParam(name = "page", defaultValue = "0") int page,
+		@RequestParam(name = "size", defaultValue = "7") int size
+	) {
+		Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "lastVisitTime"));
+		return ApiResponse.onSuccess(historyQueryService.searchHistories(userId, keyword, pageable));
 	}
 }

@@ -1,19 +1,19 @@
 package com.team_nebula.nebula.global.AI.service;
 
-import java.util.HashMap;
-import java.util.Map;
-
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.team_nebula.nebula.domain.star.entity.Star;
+import com.team_nebula.nebula.global.AI.dto.GetThumbnailAndKeywordsResponseDTO;
+import com.team_nebula.nebula.global.apipayload.code.status.ErrorStatus;
+import com.team_nebula.nebula.global.apipayload.exception.GeneralException;
+import lombok.RequiredArgsConstructor;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.team_nebula.nebula.global.AI.dto.GetThumbnailAndKeywordsResponseDTO;
-import com.team_nebula.nebula.global.apipayload.code.status.ErrorStatus;
-import com.team_nebula.nebula.global.apipayload.exception.GeneralException;
-
-import lombok.RequiredArgsConstructor;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -25,12 +25,16 @@ public class AiMessageService {
 	@Value("${rabbitmq.queue.extract-data}")
 	private String extractDataQueue;
 
-	public GetThumbnailAndKeywordsResponseDTO analyzeHtmlFile(Long userId, String htmlFileKey) {
+	@Value("${rabbitmq.queue.save-data}")
+	private String saveDataQueue;
+
+	public GetThumbnailAndKeywordsResponseDTO analyzeHtmlFile(Long userId, String htmlFileKey, String siteUrl) {
 		try {
 			// 1. 요청 메시지 생성
 			Map<String, Object> message = new HashMap<>();
 			message.put("s3_key", htmlFileKey);
 			message.put("user_id", userId);
+			message.put("url", siteUrl);
 
 			// 2. JSON 문자열로 변환
 			String jsonMessage = objectMapper.writeValueAsString(message);
@@ -49,6 +53,26 @@ public class AiMessageService {
 
 		} catch (Exception e) {
 			throw new GeneralException(ErrorStatus._AI_EXTRACT_DATA_ERROR);
+		}
+	}
+
+	public void sendStarData(Long userId, Star star, String s3key, String userMemo, String summaryAI, List<String> keywordList, String title, String siteUrl){
+		try {
+			Map<String, Object> message = new HashMap<>();
+			message.put("userId", userId);
+			message.put("starId", star.getId().toString());
+			message.put("s3Key", s3key);
+			message.put("memo", userMemo);
+			message.put("summary", summaryAI);
+			message.put("keywords", keywordList);
+			message.put("title", title);
+			message.put("url", siteUrl);
+
+			String jsonMessage = objectMapper.writeValueAsString(message);
+
+			rabbitTemplate.convertAndSend(saveDataQueue, jsonMessage);
+		} catch (Exception e) {
+			throw new GeneralException(ErrorStatus._AI_STAR_DATA_SEND_ERROR);
 		}
 	}
 }

@@ -4,8 +4,7 @@ import java.util.List;
 
 public final class Constants {
 
-	private Constants() {
-	}
+	private Constants() {}
 
 	public static List<String> NO_NEED_FILTER_URLS = List.of(
 		"/swagger-ui.html/**",
@@ -16,7 +15,7 @@ public final class Constants {
 		"/api/v1/oauth/kakao",
 		"/api/v1/oauth/google",
 		"/api/v1/terms",
-		"/api/v1/keywords/top10-used",
+		"/api/v1/keywords/trending",
 		"/api/v1/chat/stream"
 	);
 }

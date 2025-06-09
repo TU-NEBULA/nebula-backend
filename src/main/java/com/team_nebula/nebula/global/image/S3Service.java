@@ -7,6 +7,7 @@ import com.amazonaws.services.s3.model.DeleteObjectRequest;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.team_nebula.nebula.global.apipayload.code.status.ErrorStatus;
 import com.team_nebula.nebula.global.apipayload.exception.GeneralException;
+import com.team_nebula.nebula.global.util.HashUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -40,8 +41,8 @@ public class S3Service {
         return uploadThumbnailToS3(thumbnailImage, THUMBNAIL_DIR, dataInfo);
     }
 
-    public String saveHtmlFile(MultipartFile htmlFile, String dataInfo) {
-        return uploadHtmlToS3(htmlFile, HTML_FILE_DIR, dataInfo);
+    public String saveHtmlFile(MultipartFile htmlFile, String dataInfo, Long userId) {
+        return uploadHtmlToS3(htmlFile, HTML_FILE_DIR, dataInfo, userId);
     }
 
     public String saveFavicon(File faviconFile, String domain) {
@@ -49,11 +50,12 @@ public class S3Service {
         return uploadFileToS3(faviconFile, fileName);
     }
 
-    private String uploadHtmlToS3(MultipartFile file, String dirName, String dataInfo)  {
+    private String uploadHtmlToS3(MultipartFile file, String dirName, String dataInfo, Long userId)  {
         File uploadFile = convert(file)
                 .orElseThrow(() -> new GeneralException(ErrorStatus._MULTIPARTFILE_CONVERT_FAIL));
+        String hashUserId = HashUtil.hashUserId(userId);
 
-        String fileName = dirName + dataInfo + "/" + UUID.randomUUID() + "_" + file.getOriginalFilename();
+        String fileName = dirName + hashUserId + "/" + dataInfo + "/" + UUID.randomUUID() + "_" + file.getOriginalFilename();
 
         putHtmlS3(uploadFile, fileName);
         removeNewFile(uploadFile);
@@ -131,6 +133,24 @@ public class S3Service {
             log.error("Failed to delete HTML file from S3: {}", fileKey, e);
             throw new GeneralException(ErrorStatus._S3_HTML_FILE_DELETE_FAIL);
         }
+    }
+
+    public String sanitizeTitleForS3(String title) {
+        if (title == null) return "";
+
+        // 1. 공백을 하나로 정규화
+        title = title.replaceAll("\\s+", " ");
+
+        // 2. 한글, 영문, 숫자, '-', '_', '.', '~', 공백만 허용 (이모티콘, 특수문자, 대괄호 등 제거)
+        title = title.replaceAll("[^가-힣a-zA-Z0-9\\-_.~ ]", "");
+
+        // 3. 공백을 하이픈으로 변환
+        title = title.replace(" ", "-");
+
+        // 4. 소문자로 변환
+        title = title.toLowerCase();
+
+        return title;
     }
 }
 

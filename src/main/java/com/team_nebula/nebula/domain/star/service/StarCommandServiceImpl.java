@@ -54,7 +54,8 @@ public class StarCommandServiceImpl implements StarCommandService {
         UserNode userNode = userNodeRepository.findById(userId)
                 .orElseThrow(() -> new GeneralException(ErrorStatus._USER_NOT_FOUND));
 
-        String htmlFileKey = s3Service.saveHtmlFile(htmlFile, title);
+        String sanitizedTitle = s3Service.sanitizeTitleForS3(title);
+        String htmlFileKey = s3Service.saveHtmlFile(htmlFile, sanitizedTitle, userNode.getUserId());
 
         Star star = Star.builder()
                 .title(title)
@@ -214,11 +215,11 @@ public class StarCommandServiceImpl implements StarCommandService {
 
     @Override
     public AddBookMarkResponseDTO addBookMark(Long userId, MultipartFile htmlFile, String title, String siteUrl){
-        String htmlFileKey = s3Service.saveHtmlFile(htmlFile, title);
+        String htmlFileKey = s3Service.saveHtmlFile(htmlFile, title, userId);
 
         Favicon favicon = faviconService.getOrCreateFavicon(siteUrl);
 
-        GetThumbnailAndKeywordsResponseDTO responseDTO = aiMessageService.analyzeHtmlFile(userId, htmlFileKey);
+        GetThumbnailAndKeywordsResponseDTO responseDTO = aiMessageService.analyzeHtmlFile(userId, htmlFileKey, siteUrl);
 
         return AddBookMarkResponseDTO.builder()
                 .title(title)
@@ -226,6 +227,7 @@ public class StarCommandServiceImpl implements StarCommandService {
                 .faviconUrl(favicon.getFaviconUrl())
                 .thumbnailUrl(responseDTO.getImage_url())
                 .keywords(responseDTO.getKeywords())
+                .s3key(htmlFileKey)
                 .build();
     }
 
@@ -273,6 +275,7 @@ public class StarCommandServiceImpl implements StarCommandService {
 
         // 유저 스타 작업 횟수 증가
 //        aiService.checkUpdatedCnt(userId);
+        aiMessageService.sendStarData(userId, lastStar, requestDTO.getS3key(), lastStar.getUserMemo(), lastStar.getSummaryAI(), requestDTO.getKeywordList(), lastStar.getTitle(), lastStar.getSiteUrl());
 
         return CreateStarResponseDTO.builder()
                 .starId(lastStar.getId())
