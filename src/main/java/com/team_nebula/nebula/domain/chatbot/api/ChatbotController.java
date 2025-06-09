@@ -3,6 +3,7 @@ package com.team_nebula.nebula.domain.chatbot.api;
 import java.util.List;
 
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -12,6 +13,7 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import com.team_nebula.nebula.domain.chatbot.dto.request.ChatRequestDTO;
 import com.team_nebula.nebula.domain.chatbot.dto.request.SessionRequestDTO;
+import com.team_nebula.nebula.domain.chatbot.dto.response.CharResponseDTO;
 import com.team_nebula.nebula.domain.chatbot.dto.response.SessionListResponseDTO;
 import com.team_nebula.nebula.domain.chatbot.dto.response.SessionResponseDTO;
 import com.team_nebula.nebula.domain.chatbot.service.ChatbotService;
@@ -50,8 +52,16 @@ public class ChatbotController {
 	@Operation(summary = "채팅 스트림", description = "채팅 세션에서 메시지를 스트리밍하는 API")
 	@PostMapping("/stream")
 	public SseEmitter chatStream(
-		@AuthUser Long userId,
+		@RequestParam Long userId,
 		@RequestBody ChatRequestDTO request) {
 		return chatbotService.chatStream(userId, request);
+	}
+
+	@Operation(summary = "채팅 세션 메시지 조회", description = "채팅 세션의 메시지를 조회하는 API")
+	@GetMapping("/sessions/{sessionId}/messages")
+	public ApiResponse<List<CharResponseDTO>> getSessionMessages(
+		@AuthUser Long userId,
+		@PathVariable String sessionId) {
+		return ApiResponse.onSuccess(chatbotService.getSessionMessages(userId, sessionId));
 	}
 }
