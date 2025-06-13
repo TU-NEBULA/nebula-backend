@@ -1,9 +1,5 @@
 package com.team_nebula.nebula.domain.chatbot.service;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -16,9 +12,9 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -42,6 +38,7 @@ public class ChatbotServiceImpl implements ChatbotService {
 
 	private final RestTemplate restTemplate = new RestTemplate();
 	private final ObjectMapper objectMapper;
+	private final WebClient webClient;
 
 	@Value("${ai.url.chat}")
 	private String aiChatUrl;
@@ -155,30 +152,42 @@ public class ChatbotServiceImpl implements ChatbotService {
 
 	@Override
 	public SseEmitter chatStream(Long userId, ChatRequestDTO request) {
-		SseEmitter emitter = new SseEmitter();
+		SseEmitter emitter = new SseEmitter(300_000L);
 
-		try {
-			HttpHeaders headers = new HttpHeaders();
-			headers.setContentType(MediaType.APPLICATION_JSON);
+		Map<String, Object> requestBody = buildChatRequestBody(userId, request);
 
-			Map<String, Object> requestBody = buildChatRequestBody(userId, request);
-
-			HttpEntity<Map<String, Object>> requestEntity = new HttpEntity<>(requestBody, headers);
-
-			restTemplate.execute(
-				aiChatUrl + "/chat/stream",
-				HttpMethod.POST,
-				clientRequest -> {
-					clientRequest.getHeaders().setContentType(MediaType.APPLICATION_JSON);
-					objectMapper.writeValue(clientRequest.getBody(), requestBody);
+		webClient.post()
+			.uri(aiChatUrl + "/chat/stream")
+			.contentType(MediaType.APPLICATION_JSON)
+			.bodyValue(requestBody)
+			.accept(MediaType.TEXT_EVENT_STREAM)
+			.retrieve()
+			.bodyToFlux(String.class)
+			.subscribe(
+				chunk -> {
+					try {
+						
+						if (!chunk.isBlank()) {
+							if (chunk.startsWith("data: ")) {
+								chunk = chunk.substring(6);
+							}
+							emitter.send(SseEmitter.event()
+								.data(chunk, MediaType.APPLICATION_JSON_UTF8));
+						}
+					} catch (Exception e) {
+						log.error("SSE 전송 중 오류", e);
+						emitter.completeWithError(e);
+					}
 				},
-				clientResponse -> handleStreamResponse(clientResponse, emitter)
+				error -> {
+					log.error("AI 스트리밍 중 오류 발생", error);
+					emitter.completeWithError(error);
+				},
+				() -> {
+					log.info("스트리밍 완료");
+					emitter.complete();
+				}
 			);
-
-		} catch (Exception e) {
-			log.error("AI 스트리밍 중 오류 발생", e);
-			emitter.completeWithError(e);
-		}
 
 		return emitter;
 	}
@@ -189,28 +198,6 @@ public class ChatbotServiceImpl implements ChatbotService {
 		body.put("message", request.getMessage());
 		body.put("session_id", request.getSessionId());
 		return body;
-	}
-
-	private Void handleStreamResponse(ClientHttpResponse response, SseEmitter emitter) {
-		try (BufferedReader reader = new BufferedReader(
-			new InputStreamReader(response.getBody(), StandardCharsets.UTF_8))) {
-
-			String line;
-			while ((line = reader.readLine()) != null) {
-				if (!line.isBlank()) {
-					if (line.startsWith("data: ")) {
-						line = line.substring(6);
-					}
-					log.info("SSE chunk received: {}", line);
-					emitter.send(line);
-				}
-			}
-			emitter.complete();
-		} catch (IOException e) {
-			log.error("AI 응답 스트리밍 처리 중 오류", e);
-			emitter.completeWithError(e);
-		}
-		return null;
 	}
 
 	@Override
