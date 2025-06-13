@@ -48,9 +48,8 @@ dependencies {
     // Apache Commons IO
     implementation 'commons-io:commons-io:2.18.0'
 
-    // AWS DynamoDB
-    implementation platform('software.amazon.awssdk:bom:2.20.85')
-    implementation 'software.amazon.awssdk:dynamodb-enhanced'
+    // WebFlux
+    implementation 'org.springframework.boot:spring-boot-starter-webflux'
 
     compileOnly 'org.projectlombok:lombok'
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
