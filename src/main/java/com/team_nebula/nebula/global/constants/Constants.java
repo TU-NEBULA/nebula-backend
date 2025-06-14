@@ -15,6 +15,7 @@ public final class Constants {
 		"/api/v1/oauth/kakao",
 		"/api/v1/oauth/google",
 		"/api/v1/terms",
-		"/api/v1/keywords/trending"
+		"/api/v1/keywords/trending",
+		"/api/v1/chat/stream"
 	);
 }
