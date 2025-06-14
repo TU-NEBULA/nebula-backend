@@ -9,11 +9,8 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
@@ -36,7 +33,6 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class ChatbotServiceImpl implements ChatbotService {
 
-	private final RestTemplate restTemplate = new RestTemplate();
 	private final ObjectMapper objectMapper;
 	private final WebClient webClient;
 
@@ -54,16 +50,17 @@ public class ChatbotServiceImpl implements ChatbotService {
 			Map<String, Object> requestBody = Map.of("title", request.getTitle());
 			HttpEntity<Map<String, Object>> requestEntity = new HttpEntity<>(requestBody, headers);
 
-			ResponseEntity<String> response = restTemplate.exchange(
-				url,
-				HttpMethod.POST,
-				requestEntity,
-				String.class
-			);
+			String response = webClient.post()
+				.uri(url)
+				.contentType(MediaType.APPLICATION_JSON)
+				.bodyValue(requestBody)
+				.retrieve()
+				.bodyToMono(String.class)
+				.block();
 
-			log.info("AI 서버 응답: {}", response.getBody());
+			log.info("AI 서버 응답: {}", response);
 
-			String sessionId = extractSessionId(response.getBody());
+			String sessionId = extractSessionId(response);
 
 			return SessionResponseDTO.builder()
 				.sessionId(sessionId)
@@ -94,19 +91,16 @@ public class ChatbotServiceImpl implements ChatbotService {
 			String url = String.format("%s/chat/sessions?user_id=%d&limit=%d&offset=%d", aiChatUrl, userId, limit,
 				offset);
 
-			HttpHeaders headers = new HttpHeaders();
-			headers.setContentType(MediaType.APPLICATION_JSON);
+			String response = webClient.get()
+				.uri(url)
+				.accept(MediaType.APPLICATION_JSON)
+				.retrieve()
+				.bodyToMono(String.class)
+				.block();
 
-			ResponseEntity<String> response = restTemplate.exchange(
-				url,
-				HttpMethod.GET,
-				new HttpEntity<>(headers),
-				String.class
-			);
+			log.info("AI 서버 세션 목록 응답: {}", response);
 
-			log.info("AI 서버 세션 목록 응답: {}", response.getBody());
-
-			return parseSessionsFromResponse(response.getBody());
+			return parseSessionsFromResponse(response);
 
 		} catch (Exception e) {
 			log.error("세션 목록 조회 중 오류 발생", e);
@@ -166,13 +160,13 @@ public class ChatbotServiceImpl implements ChatbotService {
 			.subscribe(
 				chunk -> {
 					try {
-						
+						log.info("Received chunk: {}", chunk);
 						if (!chunk.isBlank()) {
 							if (chunk.startsWith("data: ")) {
 								chunk = chunk.substring(6);
 							}
 							emitter.send(SseEmitter.event()
-								.data(chunk, MediaType.APPLICATION_JSON_UTF8));
+								.data(chunk));
 						}
 					} catch (Exception e) {
 						log.error("SSE 전송 중 오류", e);
@@ -208,16 +202,16 @@ public class ChatbotServiceImpl implements ChatbotService {
 			HttpHeaders headers = new HttpHeaders();
 			headers.setContentType(MediaType.APPLICATION_JSON);
 
-			ResponseEntity<String> response = restTemplate.exchange(
-				url,
-				HttpMethod.GET,
-				new HttpEntity<>(headers),
-				String.class
-			);
+			String response = webClient.get()
+				.uri(url)
+				.accept(MediaType.APPLICATION_JSON)
+				.retrieve()
+				.bodyToMono(String.class)
+				.block();
 
-			log.info("AI 서버 메시지 응답: {}", response.getBody());
+			log.info("AI 서버 메시지 응답: {}", response);
 
-			JsonNode root = objectMapper.readTree(response.getBody());
+			JsonNode root = objectMapper.readTree(response);
 			JsonNode data = root.path("data");
 
 			String receivedSessionId = getText(data, "session_id");
