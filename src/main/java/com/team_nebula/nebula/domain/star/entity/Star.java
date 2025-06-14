@@ -13,6 +13,7 @@ import org.springframework.data.neo4j.core.schema.Node;
 import org.springframework.data.neo4j.core.schema.Property;
 import org.springframework.data.neo4j.core.schema.Relationship;
 
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
@@ -44,6 +45,9 @@ public class Star extends BaseEntity {
     @Property("views")
     private Integer views;
 
+    @Property("lastAccessedAt")
+    private LocalDateTime lastAccessedAt;
+
     @Property("html_file_url")
     private String htmlFileUrl;
 
@@ -61,7 +65,7 @@ public class Star extends BaseEntity {
 
     @Builder
     public Star(String title, String siteUrl, String thumbnailUrl, String summaryAI, String userMemo, int views,
-                String htmlFileUrl) {
+                LocalDateTime lastAccessedAt, String htmlFileUrl) {
         this.id = UUID.randomUUID();
         this.title = title;
         this.siteUrl = siteUrl;
@@ -71,6 +75,7 @@ public class Star extends BaseEntity {
         this.views = views;
         this.htmlFileUrl = htmlFileUrl;
         this.isDeletedStatus = false;
+        this.lastAccessedAt = lastAccessedAt;
     }
 
     public void updateStar(String thumbnailUrl, String summaryAI, String userMemo) {
