@@ -1,5 +1,6 @@
 package com.team_nebula.nebula.domain.star.dto.response;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -21,5 +22,7 @@ public class Get2DStarOneResponseDTO {
     private String userMemo;
     private Integer views;
     private String faviconUrl;
+
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX")
     private OffsetDateTime lastAccessedAt;
 }

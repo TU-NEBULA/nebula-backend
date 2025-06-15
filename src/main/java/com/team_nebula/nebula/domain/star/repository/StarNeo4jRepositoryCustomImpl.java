@@ -24,6 +24,7 @@ public class StarNeo4jRepositoryCustomImpl implements StarNeo4jRepositoryCustom{
             WHERE s.isDeletedStatus = false
 
             OPTIONAL MATCH (s)-[:TAGGED]->(k:Keyword)
+            OPTIONAL MATCH (s)-[:HAS_FAVICON]->(f:Favicon)
 
             RETURN c.name AS categoryName,
                    k.name AS keywordName,
@@ -33,8 +34,8 @@ public class StarNeo4jRepositoryCustomImpl implements StarNeo4jRepositoryCustom{
                    s.thumbnailUrl AS thumbnailUrl,
                    s.summaryAI AS summaryAI,
                    s.userMemo AS userMemo,
-                   s.faviconUrl AS faviconUrl
                    s.views AS views,
+                   f.faviconUrl AS faviconUrl,
                    s.lastAccessedAt AS lastAccessedAt
         """;
 
@@ -50,13 +51,12 @@ public class StarNeo4jRepositoryCustomImpl implements StarNeo4jRepositoryCustom{
                         .thumbnailUrl(record.get("thumbnailUrl").asString(null))
                         .summaryAI(record.get("summaryAI").asString(null))
                         .userMemo(record.get("userMemo").asString(null))
-                        .faviconUrl(record.get("faviconUrl").asString(null))
                         .views(record.get("views").asInt(0))
+                        .faviconUrl(record.get("faviconUrl").asString(null))
                         .lastAccessedAt(record.get("lastAccessedAt").asOffsetDateTime(null))
                         .build())
                 .all()
                 .stream()
                 .toList();
     }
-
 }
