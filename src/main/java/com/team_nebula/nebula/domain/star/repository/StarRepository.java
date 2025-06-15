@@ -70,6 +70,7 @@ public interface StarRepository extends Neo4jRepository<Star, UUID> {
 		       s.views AS views,
 		       c.name AS categoryName,
 		       f.faviconUrl AS faviconUrl,
+		       s.lastAccessedAt AS lastAccessedAt,
 		       COLLECT(k.name) AS keywordList
 		""")
 	List<GetStarOneResponseDTO> findStarsInCategory(@Param("userId") Long userId, @Param("categoryId") UUID categoryId);
@@ -88,6 +89,7 @@ public interface StarRepository extends Neo4jRepository<Star, UUID> {
 		       s.views AS views,
 		       c.name AS categoryName,
 		       f.faviconUrl AS faviconUrl,
+		       s.lastAccessedAt AS lastAccessedAt,
 		       COLLECT(k.name) AS keywordList
 		""")
 	List<GetStarOneResponseDTO> findStarsInKeyword(@Param("userId") Long userId, @Param("keywordId") String keywordId);
@@ -129,6 +131,7 @@ public interface StarRepository extends Neo4jRepository<Star, UUID> {
 		            userMemo: s.userMemo,
 		            views: s.views,
 		            faviconUrl: f.faviconUrl,
+		            lastAccessedAt: s.lastAccessedAt,
 		            keywordList: keywordList
 		        },
 		        linkData: links,
@@ -147,21 +150,6 @@ public interface StarRepository extends Neo4jRepository<Star, UUID> {
 		    }) AS result
 		""")
 	List<GetSearchedStarOneResponseDTO> searchStars(@Param("userId") Long userId, @Param("title") String title);
-
-	@Query("""
-		MATCH (s:Star)
-		WHERE s.id = $starId
-		SET s.views = s.views + 1,
-			s.lastAccessedAt = datetime()
-		""")
-	void incrementViews(UUID starId);
-
-	@Query("""
-		MATCH (s:Star)
-		WHERE s.id = $starId
-		SET s.views = s.views - 1
-		""")
-	void reduceViews(UUID starId);
 
 	@Query("""
 		MATCH (u:UserNode)-[:CREATED]->(s:Star)
