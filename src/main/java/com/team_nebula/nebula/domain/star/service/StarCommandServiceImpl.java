@@ -27,6 +27,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -244,6 +245,7 @@ public class StarCommandServiceImpl implements StarCommandService {
                 .thumbnailUrl(requestDTO.getThumbnailUrl())
                 .summaryAI(requestDTO.getSummaryAI())
                 .userMemo(requestDTO.getUserMemo())
+                .lastAccessedAt(LocalDateTime.now())
                 .build();
 
         Star savedStar = starRepository.save(star);

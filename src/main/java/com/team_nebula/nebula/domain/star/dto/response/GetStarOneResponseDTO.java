@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -22,5 +23,6 @@ public class GetStarOneResponseDTO {
     private String userMemo;
     private int views;
     private String faviconUrl;
+    private LocalDateTime lastAccessedAt;
     private List<String> keywordList;
 }
