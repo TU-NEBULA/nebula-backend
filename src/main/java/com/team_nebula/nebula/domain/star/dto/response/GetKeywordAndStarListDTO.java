@@ -13,5 +13,5 @@ import java.util.List;
 @NoArgsConstructor
 public class GetKeywordAndStarListDTO {
     private String keyword;
-    private List<GetStarOneResponseDTO> starList;
+    private List<Get2DStarOneResponseDTO> starList;
 }

@@ -22,7 +22,7 @@ public class Category extends BaseEntity {
     @Property(name = "name")
     private String name;
 
-    @Property("Deleted status")
+    @Property("isDeletedStatus")
     private Boolean isDeletedStatus;
 
     @Relationship(type = "BELONGS_TO", direction = Relationship.Direction.INCOMING)

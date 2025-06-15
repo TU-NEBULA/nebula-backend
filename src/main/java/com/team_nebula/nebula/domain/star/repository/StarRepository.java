@@ -3,6 +3,7 @@ package com.team_nebula.nebula.domain.star.repository;
 import java.util.List;
 import java.util.UUID;
 
+import org.springframework.context.annotation.Primary;
 import org.springframework.data.neo4j.repository.Neo4jRepository;
 import org.springframework.data.neo4j.repository.query.Query;
 import org.springframework.data.repository.query.Param;
@@ -11,7 +12,8 @@ import com.team_nebula.nebula.domain.star.dto.response.GetSearchedStarOneRespons
 import com.team_nebula.nebula.domain.star.dto.response.GetStarOneResponseDTO;
 import com.team_nebula.nebula.domain.star.entity.Star;
 
-public interface StarRepository extends Neo4jRepository<Star, UUID> {
+@Primary
+public interface StarRepository extends Neo4jRepository<Star, UUID>, StarNeo4jRepositoryCustom {
 	@Query("""
 		    MATCH (u:UserNode)-[:CREATED]->(s:Star)
 		    WHERE u.userId = $userId AND s.isDeletedStatus = false
@@ -157,4 +159,6 @@ public interface StarRepository extends Neo4jRepository<Star, UUID> {
 		RETURN s.siteUrl
 		""")
 	List<String> findStarUrlsByUrlsAndUserId(@Param("urls") List<String> urls, @Param("userId") Long userId);
+
+
 }

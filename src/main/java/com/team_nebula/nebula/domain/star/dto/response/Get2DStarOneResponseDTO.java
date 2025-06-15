@@ -5,18 +5,15 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
-import java.util.List;
 import java.util.UUID;
 
 @Getter
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class GetStarOneResponseDTO {
+public class Get2DStarOneResponseDTO {
     private UUID starId;
-    private String categoryName;
     private String title;
     private String siteUrl;
     private String thumbnailUrl;
@@ -25,5 +22,4 @@ public class GetStarOneResponseDTO {
     private Integer views;
     private String faviconUrl;
     private OffsetDateTime lastAccessedAt;
-    private List<String> keywordList;
 }

@@ -36,19 +36,19 @@ public interface LinkRepository extends Neo4jRepository<Link, UUID> {
 
 
     @Query("""
-    MATCH (u:UserNode)-[:CREATED]->(s:Star)
-    WHERE u.userId = $userId AND (s.isDeletedStatus = false OR s.isDeletedStatus IS NULL)
-
-    MATCH (s)-[:LINKED]->(l:Link)<-[:LINKED]-(s2:Star)
+    MATCH (u:UserNode {userId: $userId})-[:CREATED]->(s:Star)
+    WHERE s.isDeletedStatus = false OR s.isDeletedStatus IS NULL
+   
+    MATCH (s)-[:LINKED]-(l:Link)-[:LINKED]-(s2:Star)
     WHERE (u)-[:CREATED]->(s2) AND (s2.isDeletedStatus = false OR s2.isDeletedStatus IS NULL)
-    
-    MATCH (s)-[:TAGGED]->(k:Keyword)<-[:TAGGED]-(s2)
-
+   
+    OPTIONAL MATCH (s)-[:TAGGED]->(k:Keyword)<-[:TAGGED]-(s2)
+   
     RETURN DISTINCT l.id AS linkId,
-                    l.linked_two_node_Id AS linkedNodeIdList,
-                    l.sharedKeywordNum AS sharedKeywordNum,
-                    COLLECT(DISTINCT k.name) AS sharedKeywords,
-                    l.similarityScore AS similarity
+                   l.linked_two_node_Id AS linkedNodeIdList,
+                   l.sharedKeywordNum AS sharedKeywordNum,
+                   COLLECT(DISTINCT k.name) AS sharedKeywords,
+                   l.similarityScore AS similarity
     """)
     List<GetLinkOneResponseDTO> findLinksByUserId(@Param("userId") Long userId);
 
