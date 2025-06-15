@@ -1,0 +1,21 @@
+2025-03-06 14:29:54.151996+09:00 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Table "USERS" not found (this database is empty); SQL statement:
+select u1_0.id,u1_0.email,u1_0.name,u1_0.refresh_token,u1_0.role,u1_0.username from users u1_0 where u1_0.username=? [42104-224]
+2025-03-06 14:30:42.223336+09:00 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Table "USERS" not found (this database is empty); SQL statement:
+select u1_0.id,u1_0.email,u1_0.name,u1_0.refresh_token,u1_0.role,u1_0.username from users u1_0 where u1_0.username=? [42104-224]
+2025-03-06 14:30:48.663140+09:00 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Table "USERS" not found (this database is empty); SQL statement:
+select u1_0.id,u1_0.email,u1_0.name,u1_0.refresh_token,u1_0.role,u1_0.username from users u1_0 where u1_0.username=? [42104-224]
+2025-03-15 14:11:51.719896+09:00 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Table "USERS" not found (this database is empty); SQL statement:
+select u1_0.id,u1_0.email,u1_0.name,u1_0.refresh_token,u1_0.role,u1_0.username from users u1_0 where u1_0.username=? [42104-224]
+2025-03-15 14:11:59.193304+09:00 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Table "USERS" not found (this database is empty); SQL statement:
+select u1_0.id,u1_0.email,u1_0.name,u1_0.refresh_token,u1_0.role,u1_0.username from users u1_0 where u1_0.username=? [42104-224]
+2025-03-15 14:57:23.019542+09:00 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Table "USERS" not found (this database is empty); SQL statement:
+select u1_0.id,u1_0.email,u1_0.name,u1_0.refresh_token,u1_0.role,u1_0.username from users u1_0 where u1_0.username=? [42104-224]
+2025-03-15 14:58:28.511833+09:00 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Table "USERS" not found (this database is empty); SQL statement:
+select u1_0.id,u1_0.email,u1_0.name,u1_0.refresh_token,u1_0.role,u1_0.username from users u1_0 where u1_0.username=? [42104-224]
