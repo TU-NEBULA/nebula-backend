@@ -18,7 +18,7 @@ public class StarConverter {
                 .userMemo(data.getUserMemo())
                 .views(data.getViews())
                 .faviconUrl(data.getFaviconUrl())
-                .lastAccessedAt(LocalDateTime.now())
+                .lastAccessedAt(data.getLastAccessedAt())
                 .keywordList(data.getKeywordList())
                 .build();
     }

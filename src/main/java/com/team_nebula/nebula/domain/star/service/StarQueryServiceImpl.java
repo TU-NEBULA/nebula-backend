@@ -62,10 +62,9 @@ public class StarQueryServiceImpl implements StarQueryService {
 	// 단일 스타 조회
 	@Override
 	public GetStarOneResponseDTO getStarOne(UUID starId) {
-		starRepository.incrementViews(starId);
 		GetStarOneResponseDTO data = starRepository.findStarDetailById(starId);
+
 		if (data == null) {
-			starRepository.reduceViews(starId);
 			throw new GeneralException(ErrorStatus._STAR_NOT_FOUND);
 		}
 
