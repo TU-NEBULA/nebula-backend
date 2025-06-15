@@ -159,6 +159,8 @@ public class StarCommandServiceImpl implements StarCommandService {
         Optional.ofNullable(requestDTO.getSummaryAI()).ifPresent(latestStar::updateSummaryAI);
         Optional.ofNullable(requestDTO.getUserMemo()).ifPresent(latestStar::updateUserMemo);
 
+        latestStar.updateLastAccessedAt();
+
         // DB에 저장
         Star updatedStar = starRepository.save(latestStar);
 
@@ -175,6 +177,7 @@ public class StarCommandServiceImpl implements StarCommandService {
                 .userMemo(updatedStar.getUserMemo())
                 .views(updatedStar.getViews())
                 .faviconUrl(updatedStar.getFavicons().toString())
+                .lastAccessedAt(updatedStar.getLastAccessedAt())
                 .keywordList(updatedStar.getKeywords().stream()
                         .map(Keyword::getName)
                         .toList())
