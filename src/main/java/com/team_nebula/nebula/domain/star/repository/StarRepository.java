@@ -28,28 +28,33 @@ public interface StarRepository extends Neo4jRepository<Star, UUID> {
 		           s.views AS views,
 		           c.name AS categoryName,
 		           f.faviconUrl AS faviconUrl,
+		           s.lastAccessedAt AS lastAccessedAt,
 		           COLLECT(k.name) AS keywordList
 		""")
 	List<GetStarOneResponseDTO> findStarsByUserId(@Param("userId") Long userId);
 
 	@Query("""
-		    MATCH (s:Star {id: $starId})-[:BELONGS_TO]->(c:Category)
-		    OPTIONAL MATCH (s)-[:TAGGED]->(k:Keyword)
-		    OPTIONAL MATCH (s)-[:HAS_FAVICON]->(f:Favicon)
-		    WHERE s.isDeletedStatus = false
-		
-		    RETURN s.id AS starId,
-		           s.title AS title,
-		           s.siteUrl AS siteUrl,
-		           s.thumbnailUrl AS thumbnailUrl,
-		           s.summaryAI AS summaryAI,
-		           s.userMemo AS userMemo,
-		           s.views AS views,
-		           c.name AS categoryName,
-		           f.faviconUrl AS faviconUrl,
-		           COLLECT(k.name) AS keywordList
+			MATCH (s:Star {id: $starId})
+			WHERE s.isDeletedStatus = false
+			OPTIONAL MATCH (s)-[:BELONGS_TO]->(c:Category)
+			OPTIONAL MATCH (s)-[:TAGGED]->(k:Keyword)
+			OPTIONAL MATCH (s)-[:HAS_FAVICON]->(f:Favicon)
+			SET s.views = s.views + 1,
+				s.lastAccessedAt = datetime()
+			RETURN s.id AS starId,
+				   s.title AS title,
+				   s.siteUrl AS siteUrl,
+				   s.thumbnailUrl AS thumbnailUrl,
+				   s.summaryAI AS summaryAI,
+				   s.userMemo AS userMemo,
+				   s.views AS views,
+				   c.name AS categoryName,
+				   f.faviconUrl AS faviconUrl,
+				   s.lastAccessedAt AS lastAccessedAt,
+				   COLLECT(DISTINCT k.name) AS keywordList
 		""")
 	GetStarOneResponseDTO findStarDetailById(@Param("starId") UUID starId);
+
 
 	@Query("""
 		MATCH (u:UserNode)-[:CREATED]->(s:Star)-[:BELONGS_TO]->(c:Category)
@@ -146,7 +151,8 @@ public interface StarRepository extends Neo4jRepository<Star, UUID> {
 	@Query("""
 		MATCH (s:Star)
 		WHERE s.id = $starId
-		SET s.views = s.views + 1
+		SET s.views = s.views + 1,
+			s.lastAccessedAt = datetime()
 		""")
 	void incrementViews(UUID starId);
 
