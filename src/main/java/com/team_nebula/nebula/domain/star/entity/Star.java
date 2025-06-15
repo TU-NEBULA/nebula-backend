@@ -100,4 +100,6 @@ public class Star extends BaseEntity {
     public void updateIsDeletedStatus(){
         this.isDeletedStatus = true;
     }
+
+    public void updateLastAccessedAt(){ this.lastAccessedAt = LocalDateTime.now(); }
 }
