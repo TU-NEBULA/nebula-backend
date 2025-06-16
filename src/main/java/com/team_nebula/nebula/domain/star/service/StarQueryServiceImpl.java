@@ -1,20 +1,14 @@
 package com.team_nebula.nebula.domain.star.service;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
+import com.team_nebula.nebula.domain.star.dto.response.*;
+import com.team_nebula.nebula.domain.star.repository.StarNeo4jRepositoryCustom;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.team_nebula.nebula.domain.link.service.LinkQueryService;
 import com.team_nebula.nebula.domain.star.converter.StarConverter;
-import com.team_nebula.nebula.domain.star.dto.response.GetLinkOneResponseDTO;
-import com.team_nebula.nebula.domain.star.dto.response.GetSearchedStarListResponseDTO;
-import com.team_nebula.nebula.domain.star.dto.response.GetSearchedStarOneResponseDTO;
-import com.team_nebula.nebula.domain.star.dto.response.GetStarListResponseDTO;
-import com.team_nebula.nebula.domain.star.dto.response.GetStarOneResponseDTO;
 import com.team_nebula.nebula.domain.star.repository.StarRepository;
 import com.team_nebula.nebula.global.apipayload.code.status.ErrorStatus;
 import com.team_nebula.nebula.global.apipayload.exception.GeneralException;
@@ -28,6 +22,7 @@ public class StarQueryServiceImpl implements StarQueryService {
 
 	private final StarRepository starRepository;
 	private final LinkQueryService linkQueryService;
+	private final StarNeo4jRepositoryCustom starNeo4jRepositoryCustom;
 
 	// 스타 + 링크 전체 조회
 	@Override
@@ -130,4 +125,11 @@ public class StarQueryServiceImpl implements StarQueryService {
 	public Set<String> getStarUrls(List<String> urls, Long userId) {
 		return new HashSet<>(starRepository.findStarUrlsByUrlsAndUserId(urls, userId));
 	}
+
+	@Override
+	public List<GetCategoryAndKeywordListDTO> getCategoryAndKeywordList(Long userId) {
+		List<GetCategoryKeywordStarRawDTO> rawData = starNeo4jRepositoryCustom.fetchRawCategoryKeywordStarData(userId);
+		return StarConverter.convertToNestedDto(rawData);
+	}
+
 }

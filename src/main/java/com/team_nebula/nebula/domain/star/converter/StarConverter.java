@@ -4,6 +4,7 @@ import com.team_nebula.nebula.domain.star.dto.response.*;
 
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class StarConverter {
 
@@ -23,46 +24,107 @@ public class StarConverter {
                 .build();
     }
 
-
     public static GetSearchedStarListResponseDTO convertToStarListDto(List<GetSearchedStarOneResponseDTO> queryResult) {
         if (queryResult == null || queryResult.isEmpty()) {
-            return GetSearchedStarListResponseDTO.builder()
-                    .type("검색된 스타 - 링크 - 검색된 스타와 직접 연결된 스타")
-                    .totalStarCnt(0)
-                    .totalLinkCnt(0)
-                    .searchedStarListDto(Collections.emptyList())
-                    .linkListDto(Collections.emptyList())
-                    .linkedStarListDto(Collections.emptyList())
-                    .build();
+            return emptySearchedStarListResponse();
         }
 
-        Set<GetStarOneResponseDTO> starSet = new HashSet<>();
-        Set<GetStarOneResponseDTO> linkedStarSet = new HashSet<>();
-        Set<GetLinkOneResponseDTO> linkSet = new HashSet<>();
+        Set<GetStarOneResponseDTO> starSet = extractStars(queryResult);
+        Set<GetStarOneResponseDTO> linkedStarSet = extractLinkedStars(queryResult);
+        Set<GetLinkOneResponseDTO> linkSet = extractLinks(queryResult);
 
-        queryResult.forEach(result -> {
-            if (result.getSearchedStar() != null) {
-                starSet.add(result.getSearchedStar());
-            }
-            if (result.getLinkedStar() != null && result.getLinkedStar().getTitle() != null) {
-                linkedStarSet.add(result.getLinkedStar());
-            }
-            if (result.getLinkData() != null && result.getLinkData().getLinkId() != null) {
-                linkSet.add(result.getLinkData());
-            }
-        });
+        return buildSearchedStarListResponse(starSet, linkedStarSet, linkSet);
+    }
 
-        List<GetStarOneResponseDTO> starList = new ArrayList<>(starSet);
-        List<GetStarOneResponseDTO> linkedStarList = new ArrayList<>(linkedStarSet);
-        List<GetLinkOneResponseDTO> linkList = new ArrayList<>(linkSet);
-
+    private static GetSearchedStarListResponseDTO emptySearchedStarListResponse() {
         return GetSearchedStarListResponseDTO.builder()
                 .type("검색된 스타 - 링크 - 검색된 스타와 직접 연결된 스타")
-                .totalStarCnt(starList.size())
-                .totalLinkCnt(linkList.size())
-                .searchedStarListDto(starList)
-                .linkListDto(linkList)
-                .linkedStarListDto(linkedStarList)
+                .totalStarCnt(0)
+                .totalLinkCnt(0)
+                .searchedStarListDto(Collections.emptyList())
+                .linkListDto(Collections.emptyList())
+                .linkedStarListDto(Collections.emptyList())
+                .build();
+    }
+
+    private static Set<GetStarOneResponseDTO> extractStars(List<GetSearchedStarOneResponseDTO> queryResult) {
+        Set<GetStarOneResponseDTO> starSet = new HashSet<>();
+        queryResult.forEach(result -> Optional.ofNullable(result.getSearchedStar()).ifPresent(starSet::add));
+        return starSet;
+    }
+
+    private static Set<GetStarOneResponseDTO> extractLinkedStars(List<GetSearchedStarOneResponseDTO> queryResult) {
+        Set<GetStarOneResponseDTO> linkedStarSet = new HashSet<>();
+        queryResult.forEach(result -> Optional.ofNullable(result.getLinkedStar())
+                .filter(linkedStar -> linkedStar.getTitle() != null)
+                .ifPresent(linkedStarSet::add));
+        return linkedStarSet;
+    }
+
+    private static Set<GetLinkOneResponseDTO> extractLinks(List<GetSearchedStarOneResponseDTO> queryResult) {
+        Set<GetLinkOneResponseDTO> linkSet = new HashSet<>();
+        queryResult.forEach(result -> Optional.ofNullable(result.getLinkData())
+                .filter(linkData -> linkData.getLinkId() != null)
+                .ifPresent(linkSet::add));
+        return linkSet;
+    }
+
+    private static GetSearchedStarListResponseDTO buildSearchedStarListResponse(
+            Set<GetStarOneResponseDTO> starSet,
+            Set<GetStarOneResponseDTO> linkedStarSet,
+            Set<GetLinkOneResponseDTO> linkSet) {
+        return GetSearchedStarListResponseDTO.builder()
+                .type("검색된 스타 - 링크 - 검색된 스타와 직접 연결된 스타")
+                .totalStarCnt(starSet.size())
+                .totalLinkCnt(linkSet.size())
+                .searchedStarListDto(new ArrayList<>(starSet))
+                .linkListDto(new ArrayList<>(linkSet))
+                .linkedStarListDto(new ArrayList<>(linkedStarSet))
+                .build();
+    }
+
+    public static List<GetCategoryAndKeywordListDTO> convertToNestedDto(List<GetCategoryKeywordStarRawDTO> rawList) {
+        Map<String, Map<String, List<Get2DStarOneResponseDTO>>> resultMap = new HashMap<>();
+
+        for (GetCategoryKeywordStarRawDTO raw : rawList) {
+            String category = raw.getCategoryName();
+            String keyword = raw.getKeywordName();
+
+            resultMap.computeIfAbsent(category, k -> new HashMap<>());
+            Map<String, List<Get2DStarOneResponseDTO>> keywordMap = resultMap.get(category);
+
+            if (keyword != null && raw.getStarId() != null) {
+                keywordMap.computeIfAbsent(keyword, kw -> new ArrayList<>())
+                        .add(convertToStarDto(raw));
+            } else if (keyword != null) {
+                keywordMap.computeIfAbsent(keyword, kw -> new ArrayList<>());
+            }
+        }
+
+        return resultMap.entrySet().stream()
+                .map(categoryEntry -> GetCategoryAndKeywordListDTO.builder()
+                        .category(categoryEntry.getKey())
+                        .keywordList(categoryEntry.getValue().entrySet().stream()
+                                .map(keywordEntry -> GetKeywordAndStarListDTO.builder()
+                                        .keyword(keywordEntry.getKey())
+                                        .starList(keywordEntry.getValue())
+                                        .build())
+                                .collect(Collectors.toList()))
+                        .build())
+                .collect(Collectors.toList());
+    }
+
+    private static Get2DStarOneResponseDTO convertToStarDto(GetCategoryKeywordStarRawDTO raw) {
+        return Get2DStarOneResponseDTO.builder()
+                .starId(raw.getStarId())
+                .title(raw.getTitle())
+                .siteUrl(raw.getSiteUrl())
+                .thumbnailUrl(raw.getThumbnailUrl())
+                .summaryAI(raw.getSummaryAI())
+                .faviconUrl(raw.getFaviconUrl())
+                .userMemo(raw.getUserMemo())
+                .views(raw.getViews())
+                .lastAccessedAt(raw.getLastAccessedAt())
                 .build();
     }
 
