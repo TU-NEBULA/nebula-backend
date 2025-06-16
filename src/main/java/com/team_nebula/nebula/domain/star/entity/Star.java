@@ -15,6 +15,7 @@ import org.springframework.data.neo4j.core.schema.Relationship;
 
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
+
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
@@ -49,6 +50,7 @@ public class Star extends BaseEntity {
     @Property("lastAccessedAt")
     private OffsetDateTime lastAccessedAt;
 
+
     @Property("html_file_url")
     private String htmlFileUrl;
 
@@ -67,6 +69,7 @@ public class Star extends BaseEntity {
     @Builder
     public Star(String title, String siteUrl, String thumbnailUrl, String summaryAI, String userMemo, int views,
                 OffsetDateTime lastAccessedAt, String htmlFileUrl) {
+
         this.id = UUID.randomUUID();
         this.title = title;
         this.siteUrl = siteUrl;
@@ -103,4 +106,5 @@ public class Star extends BaseEntity {
     }
 
     public void updateLastAccessedAt(){ this.lastAccessedAt = OffsetDateTime.now(); }
+
 }
