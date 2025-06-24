@@ -7,7 +7,6 @@ import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
@@ -42,18 +41,12 @@ public class ChatbotServiceImpl implements ChatbotService {
 	@Override
 	public SessionResponseDTO createSession(Long userId, SessionRequestDTO request) {
 		try {
-			String url = aiChatUrl + "/chat/sessions?user_id=" + userId;
-
-			HttpHeaders headers = new HttpHeaders();
-			headers.setContentType(MediaType.APPLICATION_JSON);
-
-			Map<String, Object> requestBody = Map.of("title", request.getTitle());
-			HttpEntity<Map<String, Object>> requestEntity = new HttpEntity<>(requestBody, headers);
+			String url = aiChatUrl + "/chat/sessions?user_id=" + userId + "&title=" + request.getTitle();
 
 			String response = webClient.post()
 				.uri(url)
 				.contentType(MediaType.APPLICATION_JSON)
-				.bodyValue(requestBody)
+				.body(null)
 				.retrieve()
 				.bodyToMono(String.class)
 				.block();
