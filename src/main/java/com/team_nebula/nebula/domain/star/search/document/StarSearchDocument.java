@@ -40,8 +40,17 @@ public class StarSearchDocument {
     @Field(type = FieldType.Keyword)
     private List<String> keywords;
 
+    @Field(type = FieldType.Integer)
+    private Integer views;
+
     @Field(type = FieldType.Date)
     private OffsetDateTime lastAccessedAt;
+
+    @Field(type = FieldType.Keyword)
+    private String thumbnailUrl;
+
+    @Field(type = FieldType.Keyword)
+    private String faviconUrl;
 
     // 통합 검색 필드
     @Field(type = FieldType.Text, analyzer = "standard")
