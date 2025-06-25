@@ -138,6 +138,42 @@ public class ChatbotServiceImpl implements ChatbotService {
 	}
 
 	@Override
+	public SessionListResponseDTO updateSession(Long userId, String sessionId, SessionRequestDTO request) {
+		try {
+			String url = String.format("%s/chat/sessions/%s?user_id=%d", aiChatUrl, sessionId, userId);
+
+			Map<String, Object> requestBody = new HashMap<>();
+			requestBody.put("title", request.getTitle());
+
+			String response = webClient.put()
+				.uri(url)
+				.contentType(MediaType.APPLICATION_JSON)
+				.bodyValue(requestBody)
+				.retrieve()
+				.bodyToMono(String.class)
+				.block();
+
+			log.info("AI 서버 세션 업데이트 응답: {}", response);
+
+			JsonNode root = objectMapper.readTree(response);
+			JsonNode data = root.path("data");
+
+			return SessionListResponseDTO.builder()
+				.sessionId(getText(data, "id"))
+				.title(getText(data, "title"))
+				.sessionType(getText(data, "session_type"))
+				.createdAt(getText(data, "created_at"))
+				.updatedAt(getText(data, "updated_at"))
+				.isActive(data.path("is_active").asBoolean(true))
+				.build();
+
+		} catch (Exception e) {
+			log.error("세션 업데이트 중 오류 발생", e);
+			throw new GeneralException(ErrorStatus._AI_CHATBOT_ERROR);
+		}
+	}
+
+	@Override
 	public SseEmitter chatStream(Long userId, ChatRequestDTO request) {
 		SseEmitter emitter = new SseEmitter(300_000L);
 
