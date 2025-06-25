@@ -1,6 +1,8 @@
 package com.team_nebula.nebula.domain.star.converter;
 
 import com.team_nebula.nebula.domain.star.dto.response.*;
+import com.team_nebula.nebula.domain.star.search.document.StarSearchDocument;
+import com.team_nebula.nebula.domain.star.search.dto.response.SearchStarResponseDTO;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -125,6 +127,21 @@ public class StarConverter {
                 .userMemo(raw.getUserMemo())
                 .views(raw.getViews())
                 .lastAccessedAt(raw.getLastAccessedAt())
+                .build();
+    }
+
+    public static SearchStarResponseDTO convertToSearchStarDTO(StarSearchDocument document) {
+        return SearchStarResponseDTO.builder()
+                .starId(UUID.fromString(document.getId()))
+                .title(document.getTitle())
+                .siteUrl(document.getSiteUrl())
+                .thumbnailUrl(document.getThumbnailUrl())
+                .summaryAI(document.getSummaryAI())
+                .userMemo(document.getUserMemo())
+                .views(document.getViews())
+                .faviconUrl(document.getFaviconUrl())
+                .lastAccessedAt(document.getLastAccessedAt())
+                .keywords(document.getKeywords())
                 .build();
     }
 
