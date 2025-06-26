@@ -45,49 +45,80 @@ public class ElasticsearchService {
         }
     }
 
-    public List<StarSearchDocument> searchStars(String keyword, Long userId, int page, int size) {
+    public List<SearchResultWithScore> searchStars(String keyword, Long userId, int page, int size) {
         try {
-            // 다중 필드 검색 쿼리
-            MultiMatchQuery multiMatchQuery = MultiMatchQuery.of(m -> m
-                    .query(keyword)
-                    .fields("title^3", "summaryAI^2", "userMemo^1", "keywords^2", "allContent^1")
-                    .fuzziness("AUTO")
-            );
-
-            // 사용자 필터링
-            Query userQuery = Query.of(q -> q
-                    .term(t -> t
-                            .field("userId")
-                            .value(userId)
-                    )
-            );
-
-            // Bool 쿼리로 조합
-            BoolQuery boolQuery = BoolQuery.of(b -> b
-                    .must(Query.of(q -> q.multiMatch(multiMatchQuery)))
-                    .filter(userQuery)
-            );
-
-            SearchRequest searchRequest = SearchRequest.of(s -> s
-                    .index("star_search")
-                    .query(Query.of(q -> q.bool(boolQuery)))
-                    .from(page * size)
-                    .size(size)
-                    .sort(sort -> sort
-                            .score(sc -> sc.order(SortOrder.Desc))
-                    )
-            );
-
-            SearchResponse<StarSearchDocument> response = elasticsearchClient.search(searchRequest, StarSearchDocument.class);
-
-            return response.hits().hits().stream()
-                    .map(Hit::source)
-                    .collect(Collectors.toList());
-        }   catch (Exception e) {
+            MultiMatchQuery multiMatchQuery = createMultiMatchQuery(keyword);
+            Query userQuery = createUserQuery(userId);
+            BoolQuery boolQuery = createBoolQuery(multiMatchQuery, userQuery);
+            SearchRequest searchRequest = createSearchRequest(boolQuery, page, size);
+            return executeSearch(searchRequest);
+        } catch (Exception e) {
             log.error("Failed to search stars : " + keyword, e);
             return List.of();
         }
     }
+
+    /**
+     * 다중 필드 검색 쿼리 생성
+     */
+    private MultiMatchQuery createMultiMatchQuery(String keyword) {
+        return MultiMatchQuery.of(m -> m
+                .query(keyword)
+                .fields("title^3", "summaryAI^2", "userMemo^1", "keywords^2", "allContent^1")
+                .fuzziness("AUTO")
+        );
+    }
+
+    /**
+     * 사용자 필터링 쿼리 생성
+     */
+    private Query createUserQuery(Long userId) {
+        return Query.of(q -> q
+                .term(t -> t
+                        .field("userId")
+                        .value(userId)
+                )
+        );
+    }
+
+    /**
+     * Bool 쿼리 조합 (검색 쿼리 + 사용자 필터)
+     */
+    private BoolQuery createBoolQuery(MultiMatchQuery multiMatchQuery, Query userQuery) {
+        return BoolQuery.of(b -> b
+                .must(Query.of(q -> q.multiMatch(multiMatchQuery)))
+                .filter(userQuery)
+        );
+    }
+
+    /**
+     * SearchRequest 생성 (페이징 및 정렬 포함)
+     */
+    private SearchRequest createSearchRequest(BoolQuery boolQuery, int page, int size) {
+        return SearchRequest.of(s -> s
+                .index("star_search")
+                .query(Query.of(q -> q.bool(boolQuery)))
+                .from(page * size)
+                .size(size)
+                .sort(sort -> sort
+                        .score(sc -> sc.order(SortOrder.Desc))
+                )
+        );
+    }
+
+    /**
+     * Elasticsearch 검색 실행 및 결과 매핑 (점수 포함)
+     */
+    private List<SearchResultWithScore> executeSearch(SearchRequest searchRequest) throws Exception {
+        SearchResponse<StarSearchDocument> response = elasticsearchClient.search(searchRequest, StarSearchDocument.class);
+
+        return response.hits().hits().stream()
+                .map(hit -> new SearchResultWithScore(hit.source(), hit.score()))
+                .collect(Collectors.toList());
+    }
+
+    public record SearchResultWithScore(StarSearchDocument document, Double score) {}
+
 
 
     public List<String> getAutoComplete(String query, Long userId, int size) {

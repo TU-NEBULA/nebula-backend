@@ -143,12 +143,13 @@ public class StarQueryServiceImpl implements StarQueryService {
 		// 최근 검색어 저장
 		// saveRecentSearch(userId, keyword);
 
-		// Elasticsearch 검색 실행
-		List<StarSearchDocument> searchResults = elasticsearchService.searchStars(keyword, userId, page, size);
+		// Elasticsearch 검색 실행 (점수 포함)
+		List<ElasticsearchService.SearchResultWithScore> searchResults =
+				elasticsearchService.searchStars(keyword, userId, page, size);
 
-		// DTO 변환
+		// DTO 변환 (검색 점수 포함)
 		List<SearchStarResponseDTO> starDTOs = searchResults.stream()
-				.map(StarConverter::convertToSearchStarDTO)
+				.map(result -> StarConverter.convertToSearchStarDTO(result.document(), result.score()))
 				.collect(Collectors.toList());
 
 		// 총 개수 계산 (실제로는 Elasticsearch에서 가져와야 함)

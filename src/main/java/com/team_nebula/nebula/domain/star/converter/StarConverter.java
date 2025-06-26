@@ -1,10 +1,10 @@
 package com.team_nebula.nebula.domain.star.converter;
 
 import com.team_nebula.nebula.domain.star.dto.response.*;
+import com.team_nebula.nebula.domain.star.entity.Star;
 import com.team_nebula.nebula.domain.star.search.document.StarSearchDocument;
 import com.team_nebula.nebula.domain.star.search.dto.response.SearchStarResponseDTO;
 
-import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -130,7 +130,7 @@ public class StarConverter {
                 .build();
     }
 
-    public static SearchStarResponseDTO convertToSearchStarDTO(StarSearchDocument document) {
+    public static SearchStarResponseDTO convertToSearchStarDTO(StarSearchDocument document, Double score) {
         return SearchStarResponseDTO.builder()
                 .starId(UUID.fromString(document.getId()))
                 .title(document.getTitle())
@@ -142,6 +142,25 @@ public class StarConverter {
                 .faviconUrl(document.getFaviconUrl())
                 .lastAccessedAt(document.getLastAccessedAt())
                 .keywords(document.getKeywords())
+                .score(score) // 검색 점수 포함
+                .build();
+    }
+
+    public static StarSearchDocument convertToSearchDocument(Star star, Long userId, String allContent) {
+        return StarSearchDocument.builder()
+                .id(star.getId().toString())
+                .userId(userId)
+                .title(star.getTitle())
+                .siteUrl(star.getSiteUrl())
+                .summaryAI(star.getSummaryAI())
+                .userMemo(star.getUserMemo())
+                .keywords(star.getKeywords().stream()
+                        .map(keyword -> keyword.getName())
+                        .collect(Collectors.toList()))
+                .views(star.getViews())
+                .lastAccessedAt(star.getLastAccessedAt())
+                .thumbnailUrl(star.getThumbnailUrl())
+                .allContent(allContent)
                 .build();
     }
 
