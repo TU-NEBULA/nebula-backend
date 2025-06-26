@@ -7,6 +7,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -53,6 +54,25 @@ public class SecurityConfig {
 	}
 
 	@Bean
+	@Order(1)
+	public SecurityFilterChain swaggerSecurityFilterChain(HttpSecurity http) throws Exception {
+
+		http.
+			securityMatcher("/swagger-ui/**", "/v3/api-docs/**", "/swagger-resources/**");
+		http
+			.csrf(csrf -> csrf.disable());
+		http
+			.httpBasic(httpBasic -> httpBasic.realmName("Swagger API Documentation"));
+		http
+			.authorizeHttpRequests(auth -> auth.anyRequest().authenticated());
+		http
+			.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+
+		return http.build();
+	}
+
+	@Bean
+	@Order(2)
 	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
 		http
