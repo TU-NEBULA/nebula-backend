@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -47,6 +48,15 @@ public class ChatbotController {
 		@RequestParam(name = "limit", defaultValue = "20") int limit,
 		@RequestParam(name = "offset", defaultValue = "0") int offset) {
 		return ApiResponse.onSuccess(chatbotService.getSessions(userId, limit, offset));
+	}
+
+	@Operation(summary = "채팅 세션 정보 수정", description = "채팅 세션 정보를 수정하는 API")
+	@PutMapping("/sessions/{sessionId}")
+	public ApiResponse<SessionListResponseDTO> updateSession(
+		@AuthUser Long userId,
+		@PathVariable String sessionId,
+		@RequestBody SessionRequestDTO request) {
+		return ApiResponse.onSuccess(chatbotService.updateSession(userId, sessionId, request));
 	}
 
 	@Operation(summary = "채팅 스트림", description = "채팅 세션에서 메시지를 스트리밍하는 API")

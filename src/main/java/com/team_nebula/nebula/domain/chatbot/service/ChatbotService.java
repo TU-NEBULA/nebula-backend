@@ -15,6 +15,8 @@ public interface ChatbotService {
 
 	List<SessionListResponseDTO> getSessions(Long userId, int limit, int offset);
 
+	SessionListResponseDTO updateSession(Long userId, String sessionId, SessionRequestDTO request);
+
 	SessionResponseDTO createSession(Long userId, SessionRequestDTO request);
 
 	List<CharResponseDTO> getSessionMessages(Long userId, String sessionId);
