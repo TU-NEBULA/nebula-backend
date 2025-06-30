@@ -1,11 +1,17 @@
 package com.team_nebula.nebula.domain.star.converter;
 
+import com.team_nebula.nebula.domain.keyword.entity.Keyword;
 import com.team_nebula.nebula.domain.star.dto.response.*;
+import com.team_nebula.nebula.domain.star.entity.Star;
+import com.team_nebula.nebula.domain.star.search.document.StarSearchDocument;
+import com.team_nebula.nebula.domain.star.search.dto.response.GetStarOneWithUserIdResponseDTO;
+import com.team_nebula.nebula.domain.star.search.dto.response.SearchStarResponseDTO;
+import lombok.extern.slf4j.Slf4j;
 
-import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
+@Slf4j
 public class StarConverter {
 
     public static GetStarOneResponseDTO convertToStarOneDto(GetStarOneResponseDTO data) {
@@ -125,6 +131,86 @@ public class StarConverter {
                 .userMemo(raw.getUserMemo())
                 .views(raw.getViews())
                 .lastAccessedAt(raw.getLastAccessedAt())
+                .build();
+    }
+
+    public static SearchStarResponseDTO convertToSearchStarDTO(StarSearchDocument document, Double score) {
+        UUID starId;
+        try {
+            starId = UUID.fromString(document.getId());
+        } catch (IllegalArgumentException e) {
+            log.warn("Invalid UUID format for document ID: {}", document.getId());
+            throw new IllegalArgumentException("Invalid star ID format", e);
+        }
+
+        return SearchStarResponseDTO.builder()
+                .starId(starId)
+                .title(document.getTitle())
+                .siteUrl(document.getSiteUrl())
+                .categoryName(document.getCategoryName())
+                .thumbnailUrl(document.getThumbnailUrl())
+                .summaryAI(document.getSummaryAI())
+                .userMemo(document.getUserMemo())
+                .views(document.getViews())
+                .faviconUrl(document.getFaviconUrl())
+                .lastAccessedAt(document.getLastAccessedAt())
+                .keywords(document.getKeywords())
+                .score(score)
+                .build();
+    }
+
+
+    public static StarSearchDocument convertToSearchDocument(GetStarOneWithUserIdResponseDTO starDTO, String allContent) {
+        String lastAccessedAtStr = null;
+        if (starDTO.getLastAccessedAt() != null) {
+            lastAccessedAtStr = starDTO.getLastAccessedAt().toString();
+        }
+
+        List<String> keywords = new ArrayList<>();
+        if (starDTO.getKeywordList() != null) {
+            keywords = starDTO.getKeywordList();
+        }
+
+        return StarSearchDocument.builder()
+                .id(starDTO.getStarId().toString())
+                .userId(starDTO.getUserId())
+                .title(starDTO.getTitle())
+                .categoryName(starDTO.getCategoryName())
+                .siteUrl(starDTO.getSiteUrl())
+                .summaryAI(starDTO.getSummaryAI())
+                .userMemo(starDTO.getUserMemo())
+                .keywords(keywords)
+                .views(starDTO.getViews())
+                .lastAccessedAt(lastAccessedAtStr)
+                .thumbnailUrl(starDTO.getThumbnailUrl())
+                .faviconUrl(starDTO.getFaviconUrl())
+                .allContent(allContent)
+                .build();
+    }
+
+    public static GetStarOneWithUserIdResponseDTO convertStarEvent(Star star, Long userId, String faviconUrl, String category) {
+        List<String> keywordNames = new ArrayList<>();
+        if (star.getKeywords() != null) {
+            for (Keyword keyword : star.getKeywords()) {
+                if (keyword.getName() != null) {
+                    keywordNames.add(keyword.getName());
+                }
+            }
+        }
+
+        return GetStarOneWithUserIdResponseDTO.builder()
+                .starId(star.getId())
+                .userId(userId)
+                .categoryName(category)
+                .title(star.getTitle())
+                .siteUrl(star.getSiteUrl())
+                .thumbnailUrl(star.getThumbnailUrl())
+                .summaryAI(star.getSummaryAI())
+                .userMemo(star.getUserMemo())
+                .views(star.getViews())
+                .faviconUrl(faviconUrl)
+                .lastAccessedAt(star.getLastAccessedAt())
+                .keywordList(keywordNames)
                 .build();
     }
 

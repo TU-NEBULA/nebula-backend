@@ -1,8 +1,10 @@
 package com.team_nebula.nebula.domain.star.repository;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
+import com.team_nebula.nebula.domain.star.search.dto.response.GetStarOneWithUserIdResponseDTO;
 import org.springframework.context.annotation.Primary;
 import org.springframework.data.neo4j.repository.Neo4jRepository;
 import org.springframework.data.neo4j.repository.query.Query;
@@ -160,5 +162,26 @@ public interface StarRepository extends Neo4jRepository<Star, UUID>, StarNeo4jRe
 		""")
 	List<String> findStarUrlsByUrlsAndUserId(@Param("urls") List<String> urls, @Param("userId") Long userId);
 
+	@Query("""
+		MATCH (u:UserNode)-[:CREATED]->(s:Star)
+		WHERE s.isDeletedStatus = false
+		OPTIONAL MATCH (s)-[:TAGGED]->(k:Keyword)
+		OPTIONAL MATCH (s)-[:BELONGS_TO]->(c:Category)
+		OPTIONAL MATCH (s)-[:HAS_FAVICON]->(f:Favicon)
+	
+		RETURN s.id AS starId,
+			   u.userId AS userId,
+			   s.title AS title,
+			   s.siteUrl AS siteUrl,
+			   s.thumbnailUrl AS thumbnailUrl,
+			   s.summaryAI AS summaryAI,
+			   s.userMemo AS userMemo,
+			   s.views AS views,
+			   c.name AS categoryName,
+			   f.faviconUrl AS faviconUrl,
+			   s.lastAccessedAt AS lastAccessedAt,
+			   COLLECT(k.name) AS keywordList
+		""")
+	List<GetStarOneWithUserIdResponseDTO> findAllStarWithKeywordsAndFavicons();
 
 }

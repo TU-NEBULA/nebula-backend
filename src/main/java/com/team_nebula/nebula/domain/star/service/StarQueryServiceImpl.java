@@ -1,9 +1,14 @@
 package com.team_nebula.nebula.domain.star.service;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 import com.team_nebula.nebula.domain.star.dto.response.*;
 import com.team_nebula.nebula.domain.star.repository.StarNeo4jRepositoryCustom;
+import com.team_nebula.nebula.domain.star.search.document.StarSearchDocument;
+import com.team_nebula.nebula.domain.star.search.dto.response.SearchResultResponseDTO;
+import com.team_nebula.nebula.domain.star.search.dto.response.SearchStarResponseDTO;
+import com.team_nebula.nebula.domain.star.search.service.ElasticsearchService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,6 +28,7 @@ public class StarQueryServiceImpl implements StarQueryService {
 	private final StarRepository starRepository;
 	private final LinkQueryService linkQueryService;
 	private final StarNeo4jRepositoryCustom starNeo4jRepositoryCustom;
+	private final ElasticsearchService elasticsearchService;
 
 	// 스타 + 링크 전체 조회
 	@Override
@@ -130,6 +136,37 @@ public class StarQueryServiceImpl implements StarQueryService {
 	public List<GetCategoryAndKeywordListDTO> getCategoryAndKeywordList(Long userId) {
 		List<GetCategoryKeywordStarRawDTO> rawData = starNeo4jRepositoryCustom.fetchRawCategoryKeywordStarData(userId);
 		return StarConverter.convertToNestedDto(rawData);
+	}
+
+	@Override
+	public SearchResultResponseDTO searchStarsV2(String keyword, Long userId, int page, int size) {
+		// 최근 검색어 저장
+		// saveRecentSearch(userId, keyword);
+
+		ElasticsearchService.SearchResultsWithCount searchResults =
+				elasticsearchService.searchStars(keyword, userId, page, size);
+
+		// DTO 변환 (검색 점수 포함)
+		List<SearchStarResponseDTO> starDTOs = searchResults.results().stream()
+				.map(result -> StarConverter.convertToSearchStarDTO(result.document(), result.score()))
+				.collect(Collectors.toList());
+
+		long totalCount = searchResults.totalCount();
+		int totalPages = (int) Math.ceil((double) totalCount / size);
+
+		return SearchResultResponseDTO.builder()
+				.stars(starDTOs)
+				.totalCount(totalCount)
+				.currentPage(page)
+				.totalPages(totalPages)
+				.hasNext(page < totalPages - 1)
+				.build();
+	}
+
+
+	@Override
+	public List<String> getAutoComplete(String query, Long userId) {
+		return elasticsearchService.getAutoComplete(query, userId, 5);
 	}
 
 }

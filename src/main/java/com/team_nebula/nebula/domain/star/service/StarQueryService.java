@@ -8,6 +8,7 @@ import com.team_nebula.nebula.domain.star.dto.response.GetCategoryAndKeywordList
 import com.team_nebula.nebula.domain.star.dto.response.GetSearchedStarListResponseDTO;
 import com.team_nebula.nebula.domain.star.dto.response.GetStarListResponseDTO;
 import com.team_nebula.nebula.domain.star.dto.response.GetStarOneResponseDTO;
+import com.team_nebula.nebula.domain.star.search.dto.response.SearchResultResponseDTO;
 
 public interface StarQueryService {
 
@@ -32,4 +33,9 @@ public interface StarQueryService {
 	public Set<String> getStarUrls(List<String> urls, Long userId);
 
 	public List<GetCategoryAndKeywordListDTO> getCategoryAndKeywordList(Long userId);
+
+	public SearchResultResponseDTO searchStarsV2(String keyword, Long userId, int page, int size);
+
+	public List<String> getAutoComplete(String query, Long userId);
+
 }

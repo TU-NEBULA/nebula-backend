@@ -6,6 +6,8 @@ import com.team_nebula.nebula.domain.star.dto.response.AddBookMarkResponseDTO;
 import com.team_nebula.nebula.domain.star.dto.response.CreateStarResponseDTO;
 import com.team_nebula.nebula.domain.star.dto.response.GetCategoryAndKeywordListDTO;
 import com.team_nebula.nebula.domain.star.dto.response.PutStarResponseDTO;
+import com.team_nebula.nebula.domain.star.search.dto.response.SearchResultResponseDTO;
+import com.team_nebula.nebula.domain.star.search.service.ElasticsearchService;
 import com.team_nebula.nebula.domain.star.service.StarCommandService;
 import com.team_nebula.nebula.domain.star.service.StarQueryService;
 import com.team_nebula.nebula.global.annotation.AuthUser;
@@ -56,10 +58,33 @@ public class StarV2Controller {
     }
 
     // 스타(카테고리 -> 키워드 -> 스타) 전체 조회 API
+    @Operation(summary = "스타 2D 그래프뷰 조회", description = "카테고리 - 키워드 - 스타 순서대로 데이터를 조회하는 2D 그래브뷰 API")
     @GetMapping("/2D")
     public ApiResponse<List<GetCategoryAndKeywordListDTO>> get2DStarList(@AuthUser Long userId) {
         List<GetCategoryAndKeywordListDTO> result = starQueryService.getCategoryAndKeywordList(userId);
 
         return ApiResponse.onSuccess(result);
+    }
+
+    @Operation(summary = "스타 검색", description = "제목, 키워드, AI요약, 메모를 통합 검색")
+    @GetMapping("/search")
+    public ApiResponse<SearchResultResponseDTO> searchStars(
+            @AuthUser Long userId,
+            @RequestParam("q") String query,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        SearchResultResponseDTO result = starQueryService.searchStarsV2(query, userId, page, size);
+        return ApiResponse.onSuccess(result);
+    }
+
+    @Operation(summary = "자동완성", description = "검색어 자동완성 제안")
+    @GetMapping("/search/autocomplete")
+    public ApiResponse<List<String>> getAutoComplete(
+            @AuthUser Long userId,
+            @RequestParam("q") String query
+    ) {
+        List<String> suggestions = starQueryService.getAutoComplete(query, userId);
+        return ApiResponse.onSuccess(suggestions);
     }
 }

@@ -3,8 +3,13 @@ package com.team_nebula.nebula.domain.star.service;
 import com.team_nebula.nebula.domain.favicon.entity.Favicon;
 import com.team_nebula.nebula.domain.favicon.repository.FaviconRepository;
 import com.team_nebula.nebula.domain.favicon.service.FaviconService;
+import com.team_nebula.nebula.domain.star.converter.StarConverter;
 import com.team_nebula.nebula.domain.star.dto.request.CreateStarRequestDTO;
 import com.team_nebula.nebula.domain.star.dto.response.*;
+import com.team_nebula.nebula.domain.star.search.dto.response.GetStarOneWithUserIdResponseDTO;
+import com.team_nebula.nebula.domain.star.search.event.StarCreatedEvent;
+import com.team_nebula.nebula.domain.star.search.event.StarDeletedEvent;
+import com.team_nebula.nebula.domain.star.search.event.StarUpdatedEvent;
 import com.team_nebula.nebula.global.AI.dto.GetThumbnailAndKeywordsResponseDTO;
 import com.team_nebula.nebula.global.AI.service.AiMessageService;
 import com.team_nebula.nebula.global.AI.service.AiService;
@@ -23,6 +28,7 @@ import com.team_nebula.nebula.domain.user.repository.neo4j.UserNodeRepository;
 import com.team_nebula.nebula.global.apipayload.code.status.ErrorStatus;
 import com.team_nebula.nebula.global.apipayload.exception.GeneralException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -51,6 +57,8 @@ public class StarCommandServiceImpl implements StarCommandService {
     private final AiService aiService;
     private final AiMessageService aiMessageService;
     private final FaviconRepository faviconRepository;
+    private final ApplicationEventPublisher eventPublisher;
+
 
     @Override
     public CreateStarResponseDTO createFirstStar(Long userId, MultipartFile htmlFile, String title, String siteUrl){
@@ -169,6 +177,7 @@ public class StarCommandServiceImpl implements StarCommandService {
 
         // 유저 스타 작업 횟수 증가
 //        aiService.checkUpdatedCnt(userId);
+        eventPublisher.publishEvent(new StarUpdatedEvent(StarConverter.convertStarEvent(updatedStar, userId, updatedStar.getFavicons().toString(), categoryName)));
 
         return GetStarOneResponseDTO.builder()
                 .starId(updatedStar.getId())
@@ -196,7 +205,9 @@ public class StarCommandServiceImpl implements StarCommandService {
         starRepository.save(star);
 
         // 유저 스타 작업 횟수 증가
-        aiService.checkUpdatedCnt(userId);
+//        aiService.checkUpdatedCnt(userId);
+
+        eventPublisher.publishEvent(new StarDeletedEvent(starId.toString()));
 
         String deleteMessage = "Star with ID : " + starId + " was deleted";
         return DeleteStarResponseDTO.builder()
@@ -284,6 +295,8 @@ public class StarCommandServiceImpl implements StarCommandService {
         // 유저 스타 작업 횟수 증가
 //        aiService.checkUpdatedCnt(userId);
         aiMessageService.sendStarData(userId, lastStar, requestDTO.getS3key(), lastStar.getUserMemo(), lastStar.getSummaryAI(), requestDTO.getKeywordList(), lastStar.getTitle(), lastStar.getSiteUrl());
+
+        eventPublisher.publishEvent(new StarCreatedEvent(StarConverter.convertStarEvent(lastStar, userId, favicon.getFaviconUrl(), requestDTO.getCategoryName())));
 
         return CreateStarResponseDTO.builder()
                 .starId(lastStar.getId())
