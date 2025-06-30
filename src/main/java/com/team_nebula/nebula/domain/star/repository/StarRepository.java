@@ -163,19 +163,6 @@ public interface StarRepository extends Neo4jRepository<Star, UUID>, StarNeo4jRe
 	List<String> findStarUrlsByUrlsAndUserId(@Param("urls") List<String> urls, @Param("userId") Long userId);
 
 	@Query("""
-        MATCH (u:UserNode)-[:CREATED]->(s:Star {id: $starId})
-        RETURN u.userId
-        """)
-	Optional<Long> findUserIdByStarId(@Param("starId") UUID starId);
-
-	@Query("""
-        MATCH (s:Star)
-        WHERE s.isDeletedStatus = false
-        RETURN s
-        """)
-	List<Star> findByIsDeletedStatusFalse();
-
-	@Query("""
 		MATCH (u:UserNode)-[:CREATED]->(s:Star)
 		WHERE s.isDeletedStatus = false
 		OPTIONAL MATCH (s)-[:TAGGED]->(k:Keyword)

@@ -17,6 +17,7 @@ public class SearchStarResponseDTO {
     private String title;
     private String siteUrl;
     private String thumbnailUrl;
+    private String categoryName;
     private String summaryAI;
     private String userMemo;
     private Integer views;

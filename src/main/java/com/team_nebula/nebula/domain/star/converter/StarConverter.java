@@ -137,6 +137,7 @@ public class StarConverter {
                 .starId(UUID.fromString(document.getId()))
                 .title(document.getTitle())
                 .siteUrl(document.getSiteUrl())
+                .categoryName(document.getCategoryName())
                 .thumbnailUrl(document.getThumbnailUrl())
                 .summaryAI(document.getSummaryAI())
                 .userMemo(document.getUserMemo())
