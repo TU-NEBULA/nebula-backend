@@ -1,6 +1,5 @@
 package com.team_nebula.nebula.domain.star.search.document;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.*;
 import org.springframework.data.elasticsearch.annotations.Document;
@@ -8,7 +7,6 @@ import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
 import org.springframework.data.annotation.Id;
 
-import java.time.OffsetDateTime;
 import java.util.List;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -27,10 +25,13 @@ public class StarSearchDocument {
     private Long userId;
 
     @Field(type = FieldType.Text, analyzer = "standard")
+    private String allContent;
+
+    @Field(type = FieldType.Text, analyzer = "standard")
     private String title;
 
-    @Field(type = FieldType.Keyword)
-    private String siteUrl;
+    @Field(type = FieldType.Text, analyzer = "standard")
+    private String categoryName;
 
     @Field(type = FieldType.Text, analyzer = "standard")
     private String summaryAI;
@@ -41,19 +42,18 @@ public class StarSearchDocument {
     @Field(type = FieldType.Keyword)
     private List<String> keywords;
 
-    @Field(type = FieldType.Integer)
+    @Field(type = FieldType.Keyword, index = false)
+    private String siteUrl;
+
+    @Field(type = FieldType.Integer, index = false)
     private Integer views;
 
-    @Field(type = FieldType.Date)
+    @Field(type = FieldType.Keyword, index = false)
     private String lastAccessedAt;
 
-    @Field(type = FieldType.Keyword)
+    @Field(type = FieldType.Keyword, index = false)
     private String thumbnailUrl;
 
-    @Field(type = FieldType.Keyword)
+    @Field(type = FieldType.Keyword, index = false)
     private String faviconUrl;
-
-    // 통합 검색 필드
-    @Field(type = FieldType.Text, analyzer = "standard")
-    private String allContent;
 }
