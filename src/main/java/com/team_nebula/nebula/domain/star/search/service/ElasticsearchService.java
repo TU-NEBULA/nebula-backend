@@ -83,7 +83,8 @@ public class ElasticsearchService {
     private MultiMatchQuery createMultiMatchQuery(String keyword) {
         return MultiMatchQuery.of(m -> m
                 .query(keyword)
-                .fields("title^3", "summaryAI^2", "userMemo^1", "keywords^2", "allContent^1", "categoryName^2")
+                .fields("allContent")
+//                .fields("title^3", "summaryAI^2", "userMemo^1", "keywords^2", "allContent^1", "categoryName^2")
                 .fuzziness("AUTO")
         );
     }
