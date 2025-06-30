@@ -13,6 +13,9 @@ import com.team_nebula.nebula.domain.star.search.repository.StarSearchRepository
 import com.zaxxer.hikari.HikariDataSource;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
+import org.springframework.data.elasticsearch.core.IndexOperations;
+import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -25,7 +28,7 @@ public class ElasticsearchService {
 
     private final ElasticsearchClient elasticsearchClient;
     private final StarSearchRepository starSearchRepository;
-    private final HikariDataSource dataSource;
+    private final ElasticsearchOperations elasticsearchOperations;
 
     public void indexDocument(StarSearchDocument document)  {
         try {
@@ -45,6 +48,25 @@ public class ElasticsearchService {
         }
     }
 
+    // 인덱스 삭제
+    public void deleteIndex(String indexName) {
+        try {
+            IndexOperations indexOperations = elasticsearchOperations.indexOps(IndexCoordinates.of(indexName));
+            if (indexOperations.exists()) {
+                boolean deleted = indexOperations.delete();
+                if (deleted) {
+                    log.info("Successfully deleted index: {}", indexName);
+                } else {
+                    log.warn("Failed to delete index: {}", indexName);
+                }
+            } else {
+                log.info("Index does not exist: {}", indexName);
+            }
+        } catch (Exception e) {
+            log.error("Error deleting index: {}", indexName, e);
+        }
+    }
+
     public List<SearchResultWithScore> searchStars(String keyword, Long userId, int page, int size) {
         try {
             MultiMatchQuery multiMatchQuery = createMultiMatchQuery(keyword);
@@ -58,20 +80,14 @@ public class ElasticsearchService {
         }
     }
 
-    /**
-     * 다중 필드 검색 쿼리 생성
-     */
     private MultiMatchQuery createMultiMatchQuery(String keyword) {
         return MultiMatchQuery.of(m -> m
                 .query(keyword)
-                .fields("title^3", "summaryAI^2", "userMemo^1", "keywords^2", "allContent^1")
+                .fields("title^3", "summaryAI^2", "userMemo^1", "keywords^2", "allContent^1", "categoryName^2")
                 .fuzziness("AUTO")
         );
     }
 
-    /**
-     * 사용자 필터링 쿼리 생성
-     */
     private Query createUserQuery(Long userId) {
         return Query.of(q -> q
                 .term(t -> t
@@ -81,9 +97,6 @@ public class ElasticsearchService {
         );
     }
 
-    /**
-     * Bool 쿼리 조합 (검색 쿼리 + 사용자 필터)
-     */
     private BoolQuery createBoolQuery(MultiMatchQuery multiMatchQuery, Query userQuery) {
         return BoolQuery.of(b -> b
                 .must(Query.of(q -> q.multiMatch(multiMatchQuery)))
@@ -91,9 +104,6 @@ public class ElasticsearchService {
         );
     }
 
-    /**
-     * SearchRequest 생성 (페이징 및 정렬 포함)
-     */
     private SearchRequest createSearchRequest(BoolQuery boolQuery, int page, int size) {
         return SearchRequest.of(s -> s
                 .index("star_search")
@@ -106,9 +116,6 @@ public class ElasticsearchService {
         );
     }
 
-    /**
-     * Elasticsearch 검색 실행 및 결과 매핑 (점수 포함)
-     */
     private List<SearchResultWithScore> executeSearch(SearchRequest searchRequest) throws Exception {
         SearchResponse<StarSearchDocument> response = elasticsearchClient.search(searchRequest, StarSearchDocument.class);
 
@@ -128,7 +135,7 @@ public class ElasticsearchService {
                             .must(m -> m
                                     .multiMatch(mm -> mm
                                             .query(query)
-                                            .fields("title", "keywords")
+                                            .fields("title", "keywords", "summaryAI", "categoryName")
                                             .type(co.elastic.clients.elasticsearch._types.query_dsl.TextQueryType.PhrasePrefix)
                                     )
                             )

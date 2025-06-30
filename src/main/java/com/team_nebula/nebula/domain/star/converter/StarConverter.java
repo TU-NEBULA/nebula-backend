@@ -1,8 +1,10 @@
 package com.team_nebula.nebula.domain.star.converter;
 
+import com.team_nebula.nebula.domain.keyword.entity.Keyword;
 import com.team_nebula.nebula.domain.star.dto.response.*;
 import com.team_nebula.nebula.domain.star.entity.Star;
 import com.team_nebula.nebula.domain.star.search.document.StarSearchDocument;
+import com.team_nebula.nebula.domain.star.search.dto.response.GetStarOneWithUserIdResponseDTO;
 import com.team_nebula.nebula.domain.star.search.dto.response.SearchStarResponseDTO;
 
 import java.util.*;
@@ -146,21 +148,59 @@ public class StarConverter {
                 .build();
     }
 
-    public static StarSearchDocument convertToSearchDocument(Star star, Long userId, String allContent) {
+    public static StarSearchDocument convertToSearchDocument(GetStarOneWithUserIdResponseDTO starDTO, String allContent) {
+        // lastAccessedAt 안전한 변환
+        String lastAccessedAtStr = null;
+        if (starDTO.getLastAccessedAt() != null) {
+            lastAccessedAtStr = starDTO.getLastAccessedAt().toString();
+        }
+
+        List<String> keywords = new ArrayList<>();
+        if (starDTO.getKeywordList() != null) {
+            keywords = starDTO.getKeywordList();
+        }
+
         return StarSearchDocument.builder()
-                .id(star.getId().toString())
+                .id(starDTO.getStarId().toString())
+                .userId(starDTO.getUserId())
+                .title(starDTO.getTitle())
+                .categoryName(starDTO.getCategoryName())
+                .siteUrl(starDTO.getSiteUrl())
+                .summaryAI(starDTO.getSummaryAI())
+                .userMemo(starDTO.getUserMemo())
+                .keywords(keywords)
+                .views(starDTO.getViews())
+                .lastAccessedAt(lastAccessedAtStr)
+                .thumbnailUrl(starDTO.getThumbnailUrl())
+                .faviconUrl(starDTO.getFaviconUrl())
+                .allContent(allContent)
+                .build();
+    }
+
+    public static GetStarOneWithUserIdResponseDTO convertStarEvent(Star star, Long userId, String faviconUrl, String category) {
+        // keywords 안전한 변환
+        List<String> keywordNames = new ArrayList<>();
+        if (star.getKeywords() != null) {
+            for (Keyword keyword : star.getKeywords()) {
+                if (keyword.getName() != null) {
+                    keywordNames.add(keyword.getName());
+                }
+            }
+        }
+
+        return GetStarOneWithUserIdResponseDTO.builder()
+                .starId(star.getId())
                 .userId(userId)
+                .categoryName(category) // Category 정보가 없으므로 null
                 .title(star.getTitle())
                 .siteUrl(star.getSiteUrl())
+                .thumbnailUrl(star.getThumbnailUrl())
                 .summaryAI(star.getSummaryAI())
                 .userMemo(star.getUserMemo())
-                .keywords(star.getKeywords().stream()
-                        .map(keyword -> keyword.getName())
-                        .collect(Collectors.toList()))
                 .views(star.getViews())
+                .faviconUrl(faviconUrl)
                 .lastAccessedAt(star.getLastAccessedAt())
-                .thumbnailUrl(star.getThumbnailUrl())
-                .allContent(allContent)
+                .keywordList(keywordNames)
                 .build();
     }
 

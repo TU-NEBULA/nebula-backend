@@ -2,6 +2,7 @@ package com.team_nebula.nebula.domain.star.search.listener;
 
 import com.team_nebula.nebula.domain.star.entity.Star;
 import com.team_nebula.nebula.domain.star.search.document.StarSearchDocument;
+import com.team_nebula.nebula.domain.star.search.dto.response.GetStarOneWithUserIdResponseDTO;
 import com.team_nebula.nebula.domain.star.search.event.StarCreatedEvent;
 import com.team_nebula.nebula.domain.star.search.event.StarDeletedEvent;
 import com.team_nebula.nebula.domain.star.search.event.StarUpdatedEvent;
@@ -11,8 +12,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
-
-import java.util.stream.Collectors;
 
 import static com.team_nebula.nebula.domain.star.converter.StarConverter.convertToSearchDocument;
 
@@ -27,9 +26,11 @@ public class StarSearchEventListener {
     @EventListener
     public void handleStarCreated(StarCreatedEvent event) {
         try {
-            String allContent = buildAllContent(event.getStar());
-            StarSearchDocument document = convertToSearchDocument(event.getStar(), event.getUserId(), allContent);
+            GetStarOneWithUserIdResponseDTO starDTO = event.getStarDTO();
+            String allContent = buildAllContent(starDTO);
+            StarSearchDocument document = convertToSearchDocument(starDTO, allContent);
             elasticsearchService.indexDocument(document);
+            log.info("Successfully synced created star to Elasticsearch: {}", starDTO.getStarId());
         } catch (Exception e) {
             log.error("Failed to sync created star to Elasticsearch", e);
         }
@@ -39,9 +40,11 @@ public class StarSearchEventListener {
     @EventListener
     public void handleStarUpdated(StarUpdatedEvent event) {
         try {
-            String allContent = buildAllContent(event.getStar());
-            StarSearchDocument document = convertToSearchDocument(event.getStar(), event.getUserId(), allContent);
+            GetStarOneWithUserIdResponseDTO starDTO = event.getStarDTO();
+            String allContent = buildAllContent(starDTO);
+            StarSearchDocument document = convertToSearchDocument(starDTO, allContent);
             elasticsearchService.indexDocument(document);
+            log.info("Successfully synced updated star to Elasticsearch: {}", starDTO.getStarId());
         } catch (Exception e) {
             log.error("Failed to sync updated star to Elasticsearch", e);
         }
@@ -52,28 +55,34 @@ public class StarSearchEventListener {
     public void handleStarDeleted(StarDeletedEvent event) {
         try {
             elasticsearchService.deleteDocument(event.getStarId());
+            log.info("Successfully deleted star from Elasticsearch: {}", event.getStarId());
         } catch (Exception e) {
             log.error("Failed to delete star from Elasticsearch", e);
         }
     }
 
-
-    private String buildAllContent(Star star) {
+    public static String buildAllContent(GetStarOneWithUserIdResponseDTO starDTO) {
         StringBuilder content = new StringBuilder();
 
-        if (star.getTitle() != null) {
-            content.append(star.getTitle()).append(" ");
+        if (starDTO.getTitle() != null) {
+            content.append(starDTO.getTitle()).append(" ");
         }
-        if (star.getSummaryAI() != null) {
-            content.append(star.getSummaryAI()).append(" ");
+        if (starDTO.getSummaryAI() != null) {
+            content.append(starDTO.getSummaryAI()).append(" ");
         }
-        if (star.getUserMemo() != null) {
-            content.append(star.getUserMemo()).append(" ");
+        if (starDTO.getUserMemo() != null) {
+            content.append(starDTO.getUserMemo()).append(" ");
         }
-
-        star.getKeywords().forEach(keyword ->
-                content.append(keyword.getName()).append(" ")
-        );
+        if (starDTO.getCategoryName() != null) {
+            content.append(starDTO.getCategoryName()).append(" ");
+        }
+        if (starDTO.getKeywordList() != null) {
+            for (String keyword : starDTO.getKeywordList()) {
+                if (keyword != null) {
+                    content.append(keyword).append(" ");
+                }
+            }
+        }
 
         return content.toString().trim();
     }
