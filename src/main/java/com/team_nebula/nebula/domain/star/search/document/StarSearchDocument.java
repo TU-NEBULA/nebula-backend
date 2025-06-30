@@ -1,9 +1,8 @@
 package com.team_nebula.nebula.domain.star.search.document;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import lombok.*;
 import org.springframework.data.elasticsearch.annotations.Document;
 import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
@@ -12,11 +11,13 @@ import org.springframework.data.annotation.Id;
 import java.time.OffsetDateTime;
 import java.util.List;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 @Document(indexName = "star_search")
 @Getter
-@Builder
+@ToString
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class StarSearchDocument {
 
     @Id
@@ -44,7 +45,7 @@ public class StarSearchDocument {
     private Integer views;
 
     @Field(type = FieldType.Date)
-    private OffsetDateTime lastAccessedAt;
+    private String lastAccessedAt;
 
     @Field(type = FieldType.Keyword)
     private String thumbnailUrl;
