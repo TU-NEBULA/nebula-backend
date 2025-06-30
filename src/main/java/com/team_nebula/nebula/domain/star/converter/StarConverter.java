@@ -6,10 +6,12 @@ import com.team_nebula.nebula.domain.star.entity.Star;
 import com.team_nebula.nebula.domain.star.search.document.StarSearchDocument;
 import com.team_nebula.nebula.domain.star.search.dto.response.GetStarOneWithUserIdResponseDTO;
 import com.team_nebula.nebula.domain.star.search.dto.response.SearchStarResponseDTO;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
+@Slf4j
 public class StarConverter {
 
     public static GetStarOneResponseDTO convertToStarOneDto(GetStarOneResponseDTO data) {
@@ -133,8 +135,16 @@ public class StarConverter {
     }
 
     public static SearchStarResponseDTO convertToSearchStarDTO(StarSearchDocument document, Double score) {
+        UUID starId;
+        try {
+            starId = UUID.fromString(document.getId());
+        } catch (IllegalArgumentException e) {
+            log.warn("Invalid UUID format for document ID: {}", document.getId());
+            throw new IllegalArgumentException("Invalid star ID format", e);
+        }
+
         return SearchStarResponseDTO.builder()
-                .starId(UUID.fromString(document.getId()))
+                .starId(starId)
                 .title(document.getTitle())
                 .siteUrl(document.getSiteUrl())
                 .categoryName(document.getCategoryName())
@@ -145,12 +155,12 @@ public class StarConverter {
                 .faviconUrl(document.getFaviconUrl())
                 .lastAccessedAt(document.getLastAccessedAt())
                 .keywords(document.getKeywords())
-                .score(score) // 검색 점수 포함
+                .score(score)
                 .build();
     }
 
+
     public static StarSearchDocument convertToSearchDocument(GetStarOneWithUserIdResponseDTO starDTO, String allContent) {
-        // lastAccessedAt 안전한 변환
         String lastAccessedAtStr = null;
         if (starDTO.getLastAccessedAt() != null) {
             lastAccessedAtStr = starDTO.getLastAccessedAt().toString();
@@ -179,7 +189,6 @@ public class StarConverter {
     }
 
     public static GetStarOneWithUserIdResponseDTO convertStarEvent(Star star, Long userId, String faviconUrl, String category) {
-        // keywords 안전한 변환
         List<String> keywordNames = new ArrayList<>();
         if (star.getKeywords() != null) {
             for (Keyword keyword : star.getKeywords()) {
@@ -192,7 +201,7 @@ public class StarConverter {
         return GetStarOneWithUserIdResponseDTO.builder()
                 .starId(star.getId())
                 .userId(userId)
-                .categoryName(category) // Category 정보가 없으므로 null
+                .categoryName(category)
                 .title(star.getTitle())
                 .siteUrl(star.getSiteUrl())
                 .thumbnailUrl(star.getThumbnailUrl())
