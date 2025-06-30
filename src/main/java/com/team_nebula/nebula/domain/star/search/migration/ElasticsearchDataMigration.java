@@ -39,6 +39,7 @@ import static com.team_nebula.nebula.domain.star.converter.StarConverter.convert
 public class ElasticsearchDataMigration {
 
     private final StarRepository starRepository;
+    private final ElasticsearchService elasticsearchService;
     private final ElasticsearchClient elasticsearchClient;
 
     private static final String INDEX_ALIAS = "star_search";
@@ -206,6 +207,24 @@ public class ElasticsearchDataMigration {
      */
     private void switchAliasToNewIndex(String newIndexName) throws Exception {
         List<Action> actions = new ArrayList<>();
+
+        try {
+            // 먼저 기존 star_search 인덱스가 있는지 확인하고 삭제
+            GetIndexRequest getIndexRequest = GetIndexRequest.of(g -> g.index(INDEX_ALIAS));
+            GetIndexResponse indexResponse = elasticsearchClient.indices().get(getIndexRequest);
+
+            // 기존 인덱스가 존재하면 삭제
+            if (!indexResponse.result().isEmpty()) {
+                log.info("Found existing index with alias name: {}. Deleting it first.", INDEX_ALIAS);
+                DeleteIndexRequest deleteRequest = DeleteIndexRequest.of(d -> d.index(INDEX_ALIAS));
+                elasticsearchClient.indices().delete(deleteRequest);
+                log.info("Deleted existing index: {}", INDEX_ALIAS);
+            }
+
+        } catch (ElasticsearchException e) {
+            // 인덱스가 없으면 무시 (정상 상황)
+            log.info("No existing index found with name: {}", INDEX_ALIAS);
+        }
 
         try {
             // 기존 alias 조회 및 제거 액션 추가

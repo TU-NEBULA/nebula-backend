@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class ElasticsearchService {
 
-    @Value("${elasticsearch.index.star-search}")
+    @Value("${elasticsearch.index.star_search}")
     private String starSearchIndex;
 
     private final ElasticsearchClient elasticsearchClient;
