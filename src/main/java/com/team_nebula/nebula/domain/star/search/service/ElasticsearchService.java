@@ -69,6 +69,13 @@ public class ElasticsearchService {
     }
 
     public SearchResultsWithCount searchStars(String keyword, Long userId, int page, int size) {
+        if (keyword == null || keyword.trim().isEmpty()) {
+            return new SearchResultsWithCount(Collections.emptyList(), 0);
+        }
+        if (userId == null || page < 0 || size <= 0) {
+            throw new IllegalArgumentException("Invalid search parameters");
+        }
+
         try {
             Query matchQuery = createOptimizedQuery(keyword);
             Query userQuery = createUserQuery(userId);
@@ -129,6 +136,13 @@ public class ElasticsearchService {
     }
 
     public List<String> getAutoComplete(String query, Long userId, int size) {
+        if (query == null || query.trim().isEmpty()) {
+            return Collections.emptyList();
+        }
+        if (userId == null || size <= 0) {
+            throw new IllegalArgumentException("Invalid autocomplete parameters");
+        }
+
         try {
             Query prefixQuery = Query.of(q -> q
                     .bool(b -> b
