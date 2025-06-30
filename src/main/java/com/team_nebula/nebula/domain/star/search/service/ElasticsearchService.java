@@ -3,14 +3,11 @@ package com.team_nebula.nebula.domain.star.search.service;
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
 import co.elastic.clients.elasticsearch._types.SortOrder;
 import co.elastic.clients.elasticsearch._types.query_dsl.BoolQuery;
-import co.elastic.clients.elasticsearch._types.query_dsl.MultiMatchQuery;
 import co.elastic.clients.elasticsearch._types.query_dsl.Query;
 import co.elastic.clients.elasticsearch.core.SearchRequest;
 import co.elastic.clients.elasticsearch.core.SearchResponse;
-import co.elastic.clients.elasticsearch.core.search.Hit;
 import com.team_nebula.nebula.domain.star.search.document.StarSearchDocument;
 import com.team_nebula.nebula.domain.star.search.repository.StarSearchRepository;
-import com.zaxxer.hikari.HikariDataSource;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
@@ -18,6 +15,7 @@ import org.springframework.data.elasticsearch.core.IndexOperations;
 import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -48,7 +46,6 @@ public class ElasticsearchService {
         }
     }
 
-    // 인덱스 삭제
     public void deleteIndex(String indexName) {
         try {
             IndexOperations indexOperations = elasticsearchOperations.indexOps(IndexCoordinates.of(indexName));
@@ -67,25 +64,35 @@ public class ElasticsearchService {
         }
     }
 
-    public List<SearchResultWithScore> searchStars(String keyword, Long userId, int page, int size) {
+    public SearchResultsWithCount searchStars(String keyword, Long userId, int page, int size) {
         try {
-            MultiMatchQuery multiMatchQuery = createMultiMatchQuery(keyword);
+            Query matchQuery = createOptimizedQuery(keyword);
             Query userQuery = createUserQuery(userId);
-            BoolQuery boolQuery = createBoolQuery(multiMatchQuery, userQuery);
+            BoolQuery boolQuery = createBoolQuery(matchQuery, userQuery);
             SearchRequest searchRequest = createSearchRequest(boolQuery, page, size);
-            return executeSearch(searchRequest);
+
+            SearchResponse<StarSearchDocument> response = elasticsearchClient.search(searchRequest, StarSearchDocument.class);
+
+            List<SearchResultWithScore> results = response.hits().hits().stream()
+                    .map(hit -> new SearchResultWithScore(hit.source(), hit.score()))
+                    .collect(Collectors.toList());
+
+            long totalCount = response.hits().total().value();
+
+            return new SearchResultsWithCount(results, totalCount);
         } catch (Exception e) {
             log.error("Failed to search stars : " + keyword, e);
-            return List.of();
+            return new SearchResultsWithCount(Collections.emptyList(), 0);
         }
     }
 
-    private MultiMatchQuery createMultiMatchQuery(String keyword) {
-        return MultiMatchQuery.of(m -> m
-                .query(keyword)
-                .fields("allContent")
-//                .fields("title^3", "summaryAI^2", "userMemo^1", "keywords^2", "allContent^1", "categoryName^2")
-                .fuzziness("AUTO")
+    private Query createOptimizedQuery(String keyword) {
+        return Query.of(q -> q
+                .match(m -> m
+                        .field("allContent")
+                        .query(keyword)
+                        .fuzziness("AUTO")
+                )
         );
     }
 
@@ -98,9 +105,9 @@ public class ElasticsearchService {
         );
     }
 
-    private BoolQuery createBoolQuery(MultiMatchQuery multiMatchQuery, Query userQuery) {
+    private BoolQuery createBoolQuery(Query matchQuery, Query userQuery) {
         return BoolQuery.of(b -> b
-                .must(Query.of(q -> q.multiMatch(multiMatchQuery)))
+                .must(matchQuery)
                 .filter(userQuery)
         );
     }
@@ -117,27 +124,14 @@ public class ElasticsearchService {
         );
     }
 
-    private List<SearchResultWithScore> executeSearch(SearchRequest searchRequest) throws Exception {
-        SearchResponse<StarSearchDocument> response = elasticsearchClient.search(searchRequest, StarSearchDocument.class);
-
-        return response.hits().hits().stream()
-                .map(hit -> new SearchResultWithScore(hit.source(), hit.score()))
-                .collect(Collectors.toList());
-    }
-
-    public record SearchResultWithScore(StarSearchDocument document, Double score) {}
-
-
-
     public List<String> getAutoComplete(String query, Long userId, int size) {
         try {
             Query prefixQuery = Query.of(q -> q
                     .bool(b -> b
                             .must(m -> m
-                                    .multiMatch(mm -> mm
+                                    .matchPhrasePrefix(mpp -> mpp
+                                            .field("allContent")
                                             .query(query)
-                                            .fields("title", "keywords", "summaryAI", "categoryName")
-                                            .type(co.elastic.clients.elasticsearch._types.query_dsl.TextQueryType.PhrasePrefix)
                                     )
                             )
                             .filter(f -> f
@@ -164,4 +158,8 @@ public class ElasticsearchService {
             return List.of();
         }
     }
+
+    // Records
+    public record SearchResultWithScore(StarSearchDocument document, Double score) {}
+    public record SearchResultsWithCount(List<SearchResultWithScore> results, long totalCount) {}
 }

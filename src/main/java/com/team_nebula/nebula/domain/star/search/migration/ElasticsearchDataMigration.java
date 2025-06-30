@@ -39,7 +39,6 @@ import static com.team_nebula.nebula.domain.star.converter.StarConverter.convert
 public class ElasticsearchDataMigration {
 
     private final StarRepository starRepository;
-    private final ElasticsearchService elasticsearchService;
     private final ElasticsearchClient elasticsearchClient;
 
     private static final String INDEX_ALIAS = "star_search";

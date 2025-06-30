@@ -143,17 +143,15 @@ public class StarQueryServiceImpl implements StarQueryService {
 		// 최근 검색어 저장
 		// saveRecentSearch(userId, keyword);
 
-		// Elasticsearch 검색 실행 (점수 포함)
-		List<ElasticsearchService.SearchResultWithScore> searchResults =
+		ElasticsearchService.SearchResultsWithCount searchResults =
 				elasticsearchService.searchStars(keyword, userId, page, size);
 
 		// DTO 변환 (검색 점수 포함)
-		List<SearchStarResponseDTO> starDTOs = searchResults.stream()
+		List<SearchStarResponseDTO> starDTOs = searchResults.results().stream()
 				.map(result -> StarConverter.convertToSearchStarDTO(result.document(), result.score()))
 				.collect(Collectors.toList());
 
-		// 총 개수 계산 (실제로는 Elasticsearch에서 가져와야 함)
-		long totalCount = starDTOs.size();
+		long totalCount = searchResults.totalCount();
 		int totalPages = (int) Math.ceil((double) totalCount / size);
 
 		return SearchResultResponseDTO.builder()
@@ -164,6 +162,7 @@ public class StarQueryServiceImpl implements StarQueryService {
 				.hasNext(page < totalPages - 1)
 				.build();
 	}
+
 
 	@Override
 	public List<String> getAutoComplete(String query, Long userId) {
