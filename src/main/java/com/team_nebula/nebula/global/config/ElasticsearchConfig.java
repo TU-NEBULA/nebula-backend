@@ -22,6 +22,8 @@ import org.springframework.data.elasticsearch.client.elc.ElasticsearchConfigurat
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.data.elasticsearch.repository.config.EnableElasticsearchRepositories;
 
+import java.util.Arrays;
+
 @Configuration
 @EnableElasticsearchRepositories(basePackages = "com.team_nebula.nebula.domain.star.search.repository")
 public class ElasticsearchConfig extends ElasticsearchConfiguration {
@@ -48,12 +50,10 @@ public class ElasticsearchConfig extends ElasticsearchConfiguration {
 
     @Bean
     public ObjectMapper elasticsearchObjectMapper() {
-        // JsonMapper.builder() 사용 (ObjectMapper 대신)
         ObjectMapper mapper = JsonMapper.builder()
                 .addModule(new JavaTimeModule())
                 .build();
 
-        // 추가 설정
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
 
@@ -61,17 +61,16 @@ public class ElasticsearchConfig extends ElasticsearchConfiguration {
     }
 
     @Bean
-    @Primary  // Primary 어노테이션 추가
+    @Primary
     public ElasticsearchClient elasticsearchClient() {
-        // 커스텀 ObjectMapper로 JacksonJsonpMapper 생성
         JacksonJsonpMapper jsonpMapper = new JacksonJsonpMapper(elasticsearchObjectMapper());
 
-        // RestClient 생성
-        RestClient restClient = RestClient.builder(
-                org.apache.http.HttpHost.create(elasticsearchUris[0])
-        ).build();
+        org.apache.http.HttpHost[] hosts = Arrays.stream(elasticsearchUris)
+                .map(org.apache.http.HttpHost::create)
+                .toArray(org.apache.http.HttpHost[]::new);
 
-        // ElasticsearchTransport 생성
+        RestClient restClient = RestClient.builder(hosts).build();
+
         ElasticsearchTransport transport = new RestClientTransport(restClient, jsonpMapper);
 
         return new ElasticsearchClient(transport);
@@ -82,3 +81,4 @@ public class ElasticsearchConfig extends ElasticsearchConfiguration {
         return new org.springframework.data.elasticsearch.client.elc.ElasticsearchTemplate(client);
     }
 }
+
