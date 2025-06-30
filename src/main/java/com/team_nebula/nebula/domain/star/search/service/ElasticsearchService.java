@@ -10,6 +10,7 @@ import com.team_nebula.nebula.domain.star.search.document.StarSearchDocument;
 import com.team_nebula.nebula.domain.star.search.repository.StarSearchRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.data.elasticsearch.core.IndexOperations;
 import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates;
@@ -23,6 +24,9 @@ import java.util.stream.Collectors;
 @Slf4j
 @RequiredArgsConstructor
 public class ElasticsearchService {
+
+    @Value("${elasticsearch.index.star-search}")
+    private String starSearchIndex;
 
     private final ElasticsearchClient elasticsearchClient;
     private final StarSearchRepository starSearchRepository;
@@ -114,7 +118,7 @@ public class ElasticsearchService {
 
     private SearchRequest createSearchRequest(BoolQuery boolQuery, int page, int size) {
         return SearchRequest.of(s -> s
-                .index("star_search")
+                .index(starSearchIndex)
                 .query(Query.of(q -> q.bool(boolQuery)))
                 .from(page * size)
                 .size(size)
