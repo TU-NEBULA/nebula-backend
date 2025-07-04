@@ -4,9 +4,11 @@ import java.util.List;
 
 public final class Constants {
 
-	private Constants() {}
+	private Constants() {
+	}
 
 	public static List<String> NO_NEED_FILTER_URLS = List.of(
+		"/actuator/**",
 		"/swagger-ui.html/**",
 		"/v3/api-docs/**",
 		"/swagger-ui/**",
