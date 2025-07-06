@@ -7,7 +7,7 @@ import org.springframework.data.elasticsearch.repository.ElasticsearchRepository
 
 public interface StarSearchRepository extends ElasticsearchRepository<StarSearchDocument, String> {
 
-    Page<StarSearchDocument> findByUserIdAndTitle(Long userId, String title, Pageable pageable);
-
-    Page<StarSearchDocument> findByUserIdAndAllContent(Long userId, String content, Pageable pageable);
+//    Page<StarSearchDocument> findByUserIdAndTitle(Long userId, String title, Pageable pageable);
+//
+//    Page<StarSearchDocument> findByUserIdAndAllContent(Long userId, String content, Pageable pageable);
 }

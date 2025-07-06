@@ -84,6 +84,9 @@ public class StarV2Controller {
             @AuthUser Long userId,
             @RequestParam("q") String query
     ) {
+        if (query.length() > 50) {
+            throw new IllegalArgumentException("Query too long");
+        }
         List<String> suggestions = starQueryService.getAutoComplete(query, userId);
         return ApiResponse.onSuccess(suggestions);
     }

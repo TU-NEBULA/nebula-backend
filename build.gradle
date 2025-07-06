@@ -55,9 +55,6 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-elasticsearch'
     implementation 'co.elastic.clients:elasticsearch-java:8.13.4'
 
-    // Prometheus & Actuator
-    implementation 'org.springframework.boot:spring-boot-starter-actuator'
-    implementation 'io.micrometer:micrometer-registry-prometheus'
 
     compileOnly 'org.projectlombok:lombok'
     developmentOnly 'org.springframework.boot:spring-boot-devtools'

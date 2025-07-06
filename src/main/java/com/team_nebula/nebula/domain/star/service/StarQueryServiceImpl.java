@@ -9,6 +9,7 @@ import com.team_nebula.nebula.domain.star.search.document.StarSearchDocument;
 import com.team_nebula.nebula.domain.star.search.dto.response.SearchResultResponseDTO;
 import com.team_nebula.nebula.domain.star.search.dto.response.SearchStarResponseDTO;
 import com.team_nebula.nebula.domain.star.search.service.ElasticsearchService;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -165,6 +166,7 @@ public class StarQueryServiceImpl implements StarQueryService {
 
 
 	@Override
+	@Cacheable(value = "autocomplete", key = "#query + '_' + #userId")
 	public List<String> getAutoComplete(String query, Long userId) {
 		return elasticsearchService.getAutoComplete(query, userId, 5);
 	}

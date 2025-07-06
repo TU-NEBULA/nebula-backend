@@ -8,6 +8,8 @@ import co.elastic.clients.elasticsearch.core.SearchRequest;
 import co.elastic.clients.elasticsearch.core.SearchResponse;
 import com.team_nebula.nebula.domain.star.search.document.StarSearchDocument;
 import com.team_nebula.nebula.domain.star.search.repository.StarSearchRepository;
+import com.team_nebula.nebula.global.apipayload.code.status.ErrorStatus;
+import com.team_nebula.nebula.global.apipayload.exception.GeneralException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -140,7 +142,7 @@ public class ElasticsearchService {
             return Collections.emptyList();
         }
         if (userId == null || size <= 0) {
-            throw new IllegalArgumentException("Invalid autocomplete parameters");
+            throw new GeneralException(ErrorStatus._USER_NOT_FOUND);
         }
 
         try {
