@@ -166,9 +166,9 @@ public class StarQueryServiceImpl implements StarQueryService {
 
 
 	@Override
-	@Cacheable(value = "autocomplete", key = "#query + '_' + #userId")
-	public List<String> getAutoComplete(String query, Long userId) {
-		return elasticsearchService.getAutoComplete(query, userId, 5);
+	@Cacheable(value = "autocomplete_service", key = "#query + '_' + #userId + '_' + #size")
+	public List<String> getAutoComplete(String query, Long userId, int size) {
+		return elasticsearchService.getAutoComplete(query, userId, size);
 	}
 
 }

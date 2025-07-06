@@ -36,6 +36,6 @@ public interface StarQueryService {
 
 	public SearchResultResponseDTO searchStarsV2(String keyword, Long userId, int page, int size);
 
-	public List<String> getAutoComplete(String query, Long userId);
+	public List<String> getAutoComplete(String query, Long userId, int size);
 
 }

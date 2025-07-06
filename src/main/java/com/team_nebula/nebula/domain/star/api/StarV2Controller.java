@@ -15,6 +15,7 @@ import com.team_nebula.nebula.global.apipayload.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -80,14 +81,16 @@ public class StarV2Controller {
 
     @Operation(summary = "자동완성", description = "검색어 자동완성 제안")
     @GetMapping("/search/autocomplete")
+    @Cacheable(value = "autocomplete", key = "#query + '_' + #userId", unless = "#result.isEmpty()")
     public ApiResponse<List<String>> getAutoComplete(
             @AuthUser Long userId,
             @RequestParam("q") String query
     ) {
-        if (query.length() > 50) {
-            throw new IllegalArgumentException("Query too long");
+        if (query == null || query.trim().isEmpty() || query.length() > 50) {
+            throw new IllegalArgumentException("Search query too long (max 50 characters)");
         }
-        List<String> suggestions = starQueryService.getAutoComplete(query, userId);
+
+        List<String> suggestions = starQueryService.getAutoComplete(query, userId, 5);
         return ApiResponse.onSuccess(suggestions);
     }
 }
