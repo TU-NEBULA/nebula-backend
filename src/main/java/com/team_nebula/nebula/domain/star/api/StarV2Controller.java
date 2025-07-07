@@ -93,31 +93,4 @@ public class StarV2Controller {
         List<String> suggestions = starQueryService.getAutoComplete(query, userId, 5);
         return ApiResponse.onSuccess(suggestions);
     }
-
-    @Autowired
-    private CacheManager cacheManager;
-
-    @GetMapping("/test/cache-content-detail")
-    public Map<String, Object> getCacheContentDetail(@RequestParam String query) {
-        Map<String, Object> result = new HashMap<>();
-
-        Cache cache = cacheManager.getCache("autocomplete_service");
-        if (cache != null) {
-            String key = query + "_1_5";
-            Cache.ValueWrapper wrapper = cache.get(key);
-
-            result.put("cacheExists", cache != null);
-            result.put("keyExists", wrapper != null);
-            result.put("cacheType", cache.getClass().getName());
-
-            if (wrapper != null) {
-                result.put("cachedValue", wrapper.get());
-            }
-        }
-
-        return result;
-    }
-
-
-
 }
