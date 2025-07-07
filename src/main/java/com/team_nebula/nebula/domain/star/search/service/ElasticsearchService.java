@@ -140,8 +140,6 @@ public class ElasticsearchService {
 
     @Cacheable(value = "autocomplete_service", key = "#query + '_' + #userId + '_' + #size")
     public List<String> getAutoComplete(String query, Long userId, int size) {
-        System.out.println("=== 캐시 메서드 실행 시작 ===");
-        System.out.println("Query: " + query + ", UserId: " + userId + ", Size: " + size);
         try {
             Query prefixQuery = Query.of(q -> q
                     .bool(b -> b
@@ -169,9 +167,6 @@ public class ElasticsearchService {
                     .map(hit -> hit.source().getTitle())
                     .distinct()
                     .collect(Collectors.toList());
-
-            System.out.println("검색 결과: " + results.size() + "개");
-            System.out.println("=== 캐시 메서드 실행 완료 ===");
 
             return results;
 
