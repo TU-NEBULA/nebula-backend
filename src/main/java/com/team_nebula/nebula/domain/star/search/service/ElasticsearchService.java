@@ -13,6 +13,7 @@ import com.team_nebula.nebula.global.apipayload.exception.GeneralException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.data.elasticsearch.core.IndexOperations;
 import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates;
@@ -137,14 +138,10 @@ public class ElasticsearchService {
         );
     }
 
+    @Cacheable(value = "autocomplete_service", key = "#query + '_' + #userId + '_' + #size")
     public List<String> getAutoComplete(String query, Long userId, int size) {
-        if (query == null || query.trim().isEmpty()) {
-            return Collections.emptyList();
-        }
-        if (userId == null || size <= 0) {
-            throw new GeneralException(ErrorStatus._USER_NOT_FOUND);
-        }
-
+        System.out.println("=== 캐시 메서드 실행 시작 ===");
+        System.out.println("Query: " + query + ", UserId: " + userId + ", Size: " + size);
         try {
             Query prefixQuery = Query.of(q -> q
                     .bool(b -> b
@@ -168,10 +165,15 @@ public class ElasticsearchService {
 
             SearchResponse<StarSearchDocument> response = elasticsearchClient.search(searchRequest, StarSearchDocument.class);
 
-            return response.hits().hits().stream()
+            List<String> results = response.hits().hits().stream()
                     .map(hit -> hit.source().getTitle())
                     .distinct()
                     .collect(Collectors.toList());
+
+            System.out.println("검색 결과: " + results.size() + "개");
+            System.out.println("=== 캐시 메서드 실행 완료 ===");
+
+            return results;
 
         } catch (Exception e) {
             log.error("Auto complete failed for query: {}", query, e);

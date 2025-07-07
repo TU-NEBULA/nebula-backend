@@ -165,10 +165,20 @@ public class StarQueryServiceImpl implements StarQueryService {
 	}
 
 
-	@Override
-	@Cacheable(value = "autocomplete_service", key = "#query + '_' + #userId + '_' + #size")
-	public List<String> getAutoComplete(String query, Long userId, int size) {
-		return elasticsearchService.getAutoComplete(query, userId, size);
-	}
 
+	@Override
+	public List<String> getAutoComplete(String query, Long userId, int size) {
+
+		if (query == null || query.trim().isEmpty()) {
+			return Collections.emptyList();
+		}
+		if (userId == null) {
+			throw new GeneralException(ErrorStatus._USER_NOT_FOUND);
+		}
+		if (size <= 0 || size > 10) {
+			throw new IllegalArgumentException("Size must be between 1 and 10");
+		}
+		return elasticsearchService.getAutoComplete(query, userId, size);
+
+	}
 }
