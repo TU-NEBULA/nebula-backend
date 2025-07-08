@@ -1,13 +1,12 @@
 package com.team_nebula.nebula.domain.star.search.listener;
 
-import com.team_nebula.nebula.domain.star.entity.Star;
 import com.team_nebula.nebula.domain.star.search.document.StarSearchDocument;
 import com.team_nebula.nebula.domain.star.search.dto.response.GetStarOneWithUserIdResponseDTO;
 import com.team_nebula.nebula.domain.star.search.event.StarCreatedEvent;
 import com.team_nebula.nebula.domain.star.search.event.StarDeletedEvent;
 import com.team_nebula.nebula.domain.star.search.event.StarUpdatedEvent;
+import com.team_nebula.nebula.domain.star.search.batch.ElasticsearchBatchService;
 import com.team_nebula.nebula.domain.star.search.service.ElasticsearchService;
-import com.team_nebula.nebula.domain.star.search.service.StarSearchAsyncBatchService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;
@@ -27,7 +26,7 @@ import static com.team_nebula.nebula.domain.star.converter.StarConverter.convert
 @Slf4j
 public class StarSearchEventListener {
 
-    private final StarSearchAsyncBatchService asyncBatchService;
+    private final ElasticsearchBatchService elasticsearchBatchService;
     private final ElasticsearchService elasticsearchService;
 
     private final Queue<StarSearchDocument> pendingDocuments = new ConcurrentLinkedQueue<>();
@@ -124,7 +123,7 @@ public class StarSearchEventListener {
             while (!pendingDocuments.isEmpty() && batch.size() < 100) {
                 batch.add(pendingDocuments.poll());
             }
-            asyncBatchService.processBatchAsync(batch);
+            elasticsearchBatchService.processBatchAsync(batch);
         }
     }
 }

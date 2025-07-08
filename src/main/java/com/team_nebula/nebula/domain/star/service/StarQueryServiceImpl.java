@@ -169,7 +169,7 @@ public class StarQueryServiceImpl implements StarQueryService {
 	@Override
 	public List<String> getAutoComplete(String query, Long userId, int size) {
 
-		if (query == null || query.trim().isEmpty()) {
+		if (query == null || query.trim().isEmpty() || query.length() > 50) {
 			return Collections.emptyList();
 		}
 		if (userId == null) {

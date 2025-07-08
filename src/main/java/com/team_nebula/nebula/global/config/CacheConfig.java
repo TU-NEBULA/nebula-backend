@@ -21,7 +21,6 @@ import java.util.Map;
 public class CacheConfig {
 
     @Bean
-    @Primary
     public CacheManager cacheManager(RedisConnectionFactory redisConnectionFactory) {
         RedisCacheConfiguration defaultConfig = RedisCacheConfiguration.defaultCacheConfig()
                 .entryTtl(Duration.ofMinutes(5))

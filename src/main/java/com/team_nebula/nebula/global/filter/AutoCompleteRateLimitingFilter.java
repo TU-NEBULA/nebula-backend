@@ -1,4 +1,4 @@
-package com.team_nebula.nebula.global.util;
+package com.team_nebula.nebula.global.filter;
 
 import io.github.bucket4j.Bucket;
 import jakarta.servlet.FilterChain;
