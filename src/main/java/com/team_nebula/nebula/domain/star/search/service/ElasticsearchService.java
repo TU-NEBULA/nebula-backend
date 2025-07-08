@@ -138,7 +138,7 @@ public class ElasticsearchService {
         );
     }
 
-    @Cacheable(value = "autocomplete_service", key = "#query + '_' + #userId + '_' + #size")
+    @Cacheable(value = "autocomplete_service", key = "T(String).format('%s:%d:%d', #query, #userId, #size)")
     public List<String> getAutoComplete(String query, Long userId, int size) {
         try {
             Query prefixQuery = Query.of(q -> q

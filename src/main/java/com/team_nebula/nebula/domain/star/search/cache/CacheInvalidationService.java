@@ -18,9 +18,8 @@ public class CacheInvalidationService {
 
     private final RedisTemplate<String, Object> redisTemplate;
 
-    // 특정 사용자의 모든 캐시 삭제
     public void clearUserCache(Long userId) {
-        clearCacheByPattern("autocomplete_service::*_" + userId + "_*");
+        clearCacheByPattern("autocomplete_service::*:" + userId + ":*");
     }
 
     private void clearCacheByPattern(String pattern) {
