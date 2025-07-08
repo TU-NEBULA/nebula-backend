@@ -1,5 +1,6 @@
 package com.team_nebula.nebula.domain.star.search.listener;
 
+import com.team_nebula.nebula.domain.star.search.cache.CacheInvalidationService;
 import com.team_nebula.nebula.domain.star.search.document.StarSearchDocument;
 import com.team_nebula.nebula.domain.star.search.dto.response.GetStarOneWithUserIdResponseDTO;
 import com.team_nebula.nebula.domain.star.search.event.StarCreatedEvent;
@@ -28,6 +29,7 @@ public class StarSearchEventListener {
 
     private final ElasticsearchBatchService elasticsearchBatchService;
     private final ElasticsearchService elasticsearchService;
+    private final CacheInvalidationService cacheInvalidationService;
 
     private final Queue<StarSearchDocument> pendingDocuments = new ConcurrentLinkedQueue<>();
 
@@ -35,23 +37,13 @@ public class StarSearchEventListener {
     @EventListener
     public void handleStarCreated(StarCreatedEvent event) {
         try {
-            GetStarOneWithUserIdResponseDTO starDTO = event.getStarDTO();
-            String allContent = buildAllContent(starDTO);
-            StarSearchDocument document = convertToSearchDocument(starDTO, allContent);
+            StarSearchDocument document = createSearchDocument(event.getStarDTO());
             elasticsearchService.indexDocument(document);
-            log.info("Successfully synced created star to Elasticsearch: {}", starDTO.getStarId());
+            cacheInvalidationService.clearUserCache(document.getUserId());
+            log.info("Successfully synced created star to Elasticsearch: {}", event.getStarDTO().getStarId());
         } catch (Exception e) {
             log.error("Failed to sync created star to Elasticsearch", e);
-
-            try {
-                GetStarOneWithUserIdResponseDTO starDTO = event.getStarDTO();
-                String allContent = buildAllContent(starDTO);
-                StarSearchDocument document = convertToSearchDocument(starDTO, allContent);
-                pendingDocuments.offer(document);
-                log.warn("Added failed updated document to batch queue: {}", starDTO.getStarId());
-            } catch (Exception batchException) {
-                log.error("Failed to add updated document to batch queue", batchException);
-            }
+            addToBatchQueueWithCacheInvalidation(event.getStarDTO(), "created");
         }
     }
 
@@ -59,23 +51,13 @@ public class StarSearchEventListener {
     @EventListener
     public void handleStarUpdated(StarUpdatedEvent event) {
         try {
-            GetStarOneWithUserIdResponseDTO starDTO = event.getStarDTO();
-            String allContent = buildAllContent(starDTO);
-            StarSearchDocument document = convertToSearchDocument(starDTO, allContent);
+            StarSearchDocument document = createSearchDocument(event.getStarDTO());
             elasticsearchService.indexDocument(document);
-            log.info("Successfully synced updated star to Elasticsearch: {}", starDTO.getStarId());
+            cacheInvalidationService.clearUserCache(document.getUserId());
+            log.info("Successfully synced updated star to Elasticsearch: {}", event.getStarDTO().getStarId());
         } catch (Exception e) {
             log.error("Failed to sync updated star to Elasticsearch", e);
-
-            try {
-                GetStarOneWithUserIdResponseDTO starDTO = event.getStarDTO();
-                String allContent = buildAllContent(starDTO);
-                StarSearchDocument document = convertToSearchDocument(starDTO, allContent);
-                pendingDocuments.offer(document);
-                log.warn("Added failed updated document to batch queue: {}", starDTO.getStarId());
-            } catch (Exception batchException) {
-                log.error("Failed to add updated document to batch queue", batchException);
-            }
+            addToBatchQueueWithCacheInvalidation(event.getStarDTO(), "updated");
         }
     }
 
@@ -84,9 +66,26 @@ public class StarSearchEventListener {
     public void handleStarDeleted(StarDeletedEvent event) {
         try {
             elasticsearchService.deleteDocument(event.getStarId());
+            cacheInvalidationService.clearUserCache(event.getUserId());
             log.info("Successfully deleted star from Elasticsearch: {}", event.getStarId());
         } catch (Exception e) {
             log.error("Failed to delete star from Elasticsearch", e);
+        }
+    }
+
+    private StarSearchDocument createSearchDocument(GetStarOneWithUserIdResponseDTO starDTO) {
+        String allContent = buildAllContent(starDTO);
+        return convertToSearchDocument(starDTO, allContent);
+    }
+
+    private void addToBatchQueueWithCacheInvalidation(GetStarOneWithUserIdResponseDTO starDTO, String operation) {
+        try {
+            StarSearchDocument document = createSearchDocument(starDTO);
+            pendingDocuments.offer(document);
+            cacheInvalidationService.clearUserCache(document.getUserId());
+            log.warn("Added failed {} document to batch queue: {}", operation, starDTO.getStarId());
+        } catch (Exception batchException) {
+            log.error("Failed to add {} document to batch queue", operation, batchException);
         }
     }
 
@@ -124,6 +123,7 @@ public class StarSearchEventListener {
                 batch.add(pendingDocuments.poll());
             }
             elasticsearchBatchService.processBatchAsync(batch);
+            log.info("Processed batch of {} documents from pending queue", batch.size());
         }
     }
 }

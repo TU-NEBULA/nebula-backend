@@ -207,7 +207,7 @@ public class StarCommandServiceImpl implements StarCommandService {
         // 유저 스타 작업 횟수 증가
 //        aiService.checkUpdatedCnt(userId);
 
-        eventPublisher.publishEvent(new StarDeletedEvent(starId.toString()));
+        eventPublisher.publishEvent(new StarDeletedEvent(starId.toString(), userId));
 
         String deleteMessage = "Star with ID : " + starId + " was deleted";
         return DeleteStarResponseDTO.builder()
