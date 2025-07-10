@@ -306,8 +306,7 @@ public class RecommendationServiceImpl implements RecommendationService {
 	}
 
 	private String formatDateTime(java.time.LocalDateTime dateTime) {
-		return dateTime != null ?
-			dateTime.atZone(java.time.ZoneOffset.UTC).format(DateTimeFormatter.ISO_INSTANT) : null;
+		return dateTime.atZone(java.time.ZoneId.of("Asia/Seoul")).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
 	}
 
 	private List<String> parseStringList(JsonNode parent, String field) {
