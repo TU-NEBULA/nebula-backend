@@ -22,7 +22,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/api/v1/recommendations")
+@RequestMapping("/api/v2/recommendations")
 @RequiredArgsConstructor
 @Tag(name = "[추천]")
 public class RecommendationController {
