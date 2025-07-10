@@ -1,5 +1,6 @@
 package com.team_nebula.nebula.domain.recommendation.service;
 
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -15,11 +16,13 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.team_nebula.nebula.domain.recommendation.dto.request.RecommendationFeedbackRequestDTO;
 import com.team_nebula.nebula.domain.recommendation.dto.request.SearchBasedRecommendationRequestDTO;
 import com.team_nebula.nebula.domain.recommendation.dto.response.ClusterTrendDTO;
 import com.team_nebula.nebula.domain.recommendation.dto.response.ClusterTrendsResponseDTO;
 import com.team_nebula.nebula.domain.recommendation.dto.response.GeneralRecommendationResponseDTO;
 import com.team_nebula.nebula.domain.recommendation.dto.response.RecommendationDTO;
+import com.team_nebula.nebula.domain.recommendation.dto.response.RecommendationFeedbackResponseDTO;
 import com.team_nebula.nebula.domain.recommendation.dto.response.SearchBasedRecommendationDTO;
 import com.team_nebula.nebula.domain.recommendation.dto.response.SearchBasedRecommendationResponseDTO;
 import com.team_nebula.nebula.domain.recommendation.dto.response.TrendingKeywordDTO;
@@ -139,6 +142,51 @@ public class RecommendationServiceImpl implements RecommendationService {
 
 		} catch (Exception e) {
 			log.error("AI 클러스터 트렌드 서버 호출 실패: {}", e.getMessage());
+			throw new GeneralException(ErrorStatus._AI_SERVER_ERROR);
+		}
+	}
+
+	@Override
+	public RecommendationFeedbackResponseDTO feedback(Long userId, RecommendationFeedbackRequestDTO request) {
+		try {
+			String url = aiRecommendationUrl + "/feedback";
+
+			log.info("AI 추천 피드백 서버 호출: {}", url);
+
+			Map<String, Object> requestBody = new HashMap<>();
+			requestBody.put("user_id", userId);
+			requestBody.put("recommendation_id", request.getRecommendationId());
+			requestBody.put("bookmark_id", request.getBookmarkId());
+			requestBody.put("action_type", request.getActionType());
+			requestBody.put("shown_at", request.getShownAt() != null ?
+				request.getShownAt().atZone(java.time.ZoneOffset.UTC).format(DateTimeFormatter.ISO_INSTANT) : null);
+			requestBody.put("action_at", request.getActionAt() != null ?
+				request.getActionAt().atZone(java.time.ZoneOffset.UTC).format(DateTimeFormatter.ISO_INSTANT) : null);
+			requestBody.put("session_id", request.getSessionId());
+			requestBody.put("page_context", request.getPageContext());
+			requestBody.put("recommendation_position", request.getRecommendationPosition());
+			requestBody.put("explicit_rating",
+				request.getExplicitRating() != null && request.getExplicitRating() > 0 ? request.getExplicitRating() :
+					1);
+			requestBody.put("engagement_time", request.getEngagementTime());
+
+			String response = webClient.post()
+				.uri(url)
+				.contentType(MediaType.APPLICATION_JSON)
+				.accept(MediaType.APPLICATION_JSON)
+				.bodyValue(requestBody)
+				.retrieve()
+				.bodyToMono(String.class)
+				.block();
+
+			if (response != null) {
+				return parseFeedbackResponse(response);
+			} else {
+				throw new GeneralException(ErrorStatus._AI_SERVER_ERROR);
+			}
+
+		} catch (Exception e) {
+			log.error("AI 추천 피드백 서버 호출 실패: {}", e.getMessage());
 			throw new GeneralException(ErrorStatus._AI_SERVER_ERROR);
 		}
 	}
@@ -392,5 +440,23 @@ public class RecommendationServiceImpl implements RecommendationService {
 			}
 		}
 		return result;
+	}
+
+	private RecommendationFeedbackResponseDTO parseFeedbackResponse(String responseBody) {
+		try {
+			JsonNode root = objectMapper.readTree(responseBody);
+
+			return RecommendationFeedbackResponseDTO.builder()
+				.feedbackId(root.path("feedback_id").asText(null))
+				.processed(root.path("processed").isNull() ? null : root.path("processed").asBoolean())
+				.impactScore(root.path("impact_score").isNull() ? null : root.path("impact_score").asDouble())
+				.modelUpdated(root.path("model_updated").isNull() ? null : root.path("model_updated").asBoolean())
+				.message(root.path("message").asText(null))
+				.build();
+
+		} catch (Exception e) {
+			log.error("AI 추천 피드백 응답 파싱 실패: {}", e.getMessage());
+			throw new GeneralException(ErrorStatus._AI_SERVER_ERROR);
+		}
 	}
 }
