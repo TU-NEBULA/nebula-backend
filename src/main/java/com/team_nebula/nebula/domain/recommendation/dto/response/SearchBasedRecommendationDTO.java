@@ -2,6 +2,8 @@ package com.team_nebula.nebula.domain.recommendation.dto.response;
 
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -12,6 +14,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class SearchBasedRecommendationDTO {
+	@JsonProperty("bookmark_id")
 	private String bookmarkId;
 
 	private String title;
@@ -20,8 +23,10 @@ public class SearchBasedRecommendationDTO {
 
 	private Double score;
 
+	@JsonProperty("reason_type")
 	private String reasonType;
 
+	@JsonProperty("reason_details")
 	private SearchBasedReasonDetailsDTO reasonDetails;
 
 	private String domain;
@@ -30,6 +35,7 @@ public class SearchBasedRecommendationDTO {
 
 	private String category;
 
+	@JsonProperty("published_at")
 	private String publishedAt;
 
 	private String summary;
@@ -41,8 +47,10 @@ public class SearchBasedRecommendationDTO {
 	public static class SearchBasedReasonDetailsDTO {
 		private String type;
 
+		@JsonProperty("search_query")
 		private String searchQuery;
 
+		@JsonProperty("expanded_keywords")
 		private List<String> expandedKeywords;
 
 		private List<RecommendationFactorDTO> factors;

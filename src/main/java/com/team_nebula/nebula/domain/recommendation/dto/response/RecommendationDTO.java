@@ -2,8 +2,6 @@ package com.team_nebula.nebula.domain.recommendation.dto.response;
 
 import java.util.List;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -43,13 +41,10 @@ public class RecommendationDTO {
 	public static class ReasonDetailsDTO {
 		private String algorithm;
 
-		@JsonProperty("similarity_score")
 		private Double similarityScore;
 
-		@JsonProperty("cluster_score")
 		private Double clusterScore;
 
-		@JsonProperty("popularity_score")
 		private Double popularityScore;
 	}
 } 

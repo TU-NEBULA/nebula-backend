@@ -1,7 +1,5 @@
 package com.team_nebula.nebula.domain.recommendation.service;
 
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -18,10 +16,13 @@ import org.springframework.web.util.UriComponentsBuilder;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.team_nebula.nebula.domain.recommendation.dto.request.SearchBasedRecommendationRequestDTO;
+import com.team_nebula.nebula.domain.recommendation.dto.response.ClusterTrendDTO;
+import com.team_nebula.nebula.domain.recommendation.dto.response.ClusterTrendsResponseDTO;
 import com.team_nebula.nebula.domain.recommendation.dto.response.GeneralRecommendationResponseDTO;
 import com.team_nebula.nebula.domain.recommendation.dto.response.RecommendationDTO;
 import com.team_nebula.nebula.domain.recommendation.dto.response.SearchBasedRecommendationDTO;
 import com.team_nebula.nebula.domain.recommendation.dto.response.SearchBasedRecommendationResponseDTO;
+import com.team_nebula.nebula.domain.recommendation.dto.response.TrendingKeywordDTO;
 import com.team_nebula.nebula.global.apipayload.code.status.ErrorStatus;
 import com.team_nebula.nebula.global.apipayload.exception.GeneralException;
 
@@ -62,29 +63,16 @@ public class RecommendationServiceImpl implements RecommendationService {
 				.bodyToMono(String.class)
 				.block();
 
-			log.info("AI 서버 응답: {}", response);
-
 			if (response != null) {
 				return parseRecommendationResponse(response);
+			} else {
+				throw new GeneralException(ErrorStatus._AI_SERVER_ERROR);
 			}
 
 		} catch (Exception e) {
 			log.error("AI 추천 서버 호출 실패: {}", e.getMessage());
+			throw new GeneralException(ErrorStatus._AI_SERVER_ERROR);
 		}
-
-		// AI 서버 호출 실패 시 기본 응답 생성
-		List<RecommendationDTO> recommendations = new ArrayList<>();
-
-		return GeneralRecommendationResponseDTO.builder()
-			.recommendations(recommendations)
-			.userClusterId(5L)
-			.clusterDescription("프론트엔드 개발자 그룹")
-			.totalRecommendations(0)
-			.generatedAt(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS")))
-			.algorithmVersion("v1.0")
-			.personalizationScore(null)
-			.diversityScore(null)
-			.build();
 	}
 
 	@Override
@@ -104,8 +92,6 @@ public class RecommendationServiceImpl implements RecommendationService {
 			requestBody.put("session_id", requestDTO.getSessionId());
 			requestBody.put("previous_queries", requestDTO.getPreviousQueries());
 
-			log.info("AI 서버로 보내는 요청 데이터: {}", requestBody);
-
 			String response = webClient.post()
 				.uri(url)
 				.contentType(MediaType.APPLICATION_JSON)
@@ -115,27 +101,46 @@ public class RecommendationServiceImpl implements RecommendationService {
 				.bodyToMono(String.class)
 				.block();
 
-			log.info("AI 서버 응답: {}", response);
-
 			if (response != null) {
 				return parseSearchBasedRecommendationResponse(response);
+			} else {
+				throw new GeneralException(ErrorStatus._AI_SERVER_ERROR);
 			}
 
 		} catch (Exception e) {
 			log.error("AI 검색 기반 추천 서버 호출 실패: {}", e.getMessage());
+			throw new GeneralException(ErrorStatus._AI_SERVER_ERROR);
 		}
+	}
 
-		List<SearchBasedRecommendationDTO> recommendations = new ArrayList<>();
+	@Override
+	public ClusterTrendsResponseDTO clusterTrends(Integer clusterId, String timePeriod, boolean includeGlobal) {
+		try {
+			String url = UriComponentsBuilder.fromHttpUrl(aiRecommendationUrl + "/cluster-trends")
+				.queryParam("time_period", timePeriod)
+				.queryParam("include_global", includeGlobal)
+				.queryParamIfPresent("cluster_id", Optional.ofNullable(clusterId))
+				.toUriString();
 
-		return SearchBasedRecommendationResponseDTO.builder()
-			.recommendations(recommendations)
-			.queryKeywords(new ArrayList<>())
-			.expandedConcepts(new ArrayList<>())
-			.searchIntent(null)
-			.totalRecommendations(0)
-			.processingTimeMs(null)
-			.similarityThresholdUsed(null)
-			.build();
+			log.info("AI 클러스터 트렌드 서버 호출: {}", url);
+
+			String response = webClient.get()
+				.uri(url)
+				.accept(MediaType.APPLICATION_JSON)
+				.retrieve()
+				.bodyToMono(String.class)
+				.block();
+
+			if (response != null) {
+				return parseClusterTrendsResponse(response);
+			} else {
+				throw new GeneralException(ErrorStatus._AI_SERVER_ERROR);
+			}
+
+		} catch (Exception e) {
+			log.error("AI 클러스터 트렌드 서버 호출 실패: {}", e.getMessage());
+			throw new GeneralException(ErrorStatus._AI_SERVER_ERROR);
+		}
 	}
 
 	private GeneralRecommendationResponseDTO parseRecommendationResponse(String responseBody) {
@@ -317,5 +322,75 @@ public class RecommendationServiceImpl implements RecommendationService {
 			log.error("AI 검색 기반 추천 응답 파싱 실패: {}", e.getMessage());
 			throw new GeneralException(ErrorStatus._AI_SERVER_ERROR);
 		}
+	}
+
+	private ClusterTrendsResponseDTO parseClusterTrendsResponse(String responseBody) {
+		try {
+			JsonNode root = objectMapper.readTree(responseBody);
+
+			// 클러스터 트렌드 목록 파싱
+			List<ClusterTrendDTO> clusterTrends = new ArrayList<>();
+			JsonNode clusterTrendsNode = root.path("cluster_trends");
+
+			if (clusterTrendsNode.isArray()) {
+				for (JsonNode clusterNode : clusterTrendsNode) {
+					// 트렌딩 키워드 파싱
+					List<TrendingKeywordDTO> trendingKeywords = new ArrayList<>();
+					JsonNode keywordsNode = clusterNode.path("trending_keywords");
+					if (!keywordsNode.isMissingNode() && keywordsNode.isArray()) {
+						for (JsonNode keywordNode : keywordsNode) {
+							trendingKeywords.add(TrendingKeywordDTO.builder()
+								.keyword(keywordNode.path("keyword").asText(null))
+								.score(keywordNode.path("score").isNull() ? null : keywordNode.path("score").asDouble())
+								.growth(keywordNode.path("growth").isNull() ? null : keywordNode.path("growth").asInt())
+								.frequency(keywordNode.path("frequency").isNull() ? null :
+									keywordNode.path("frequency").asInt())
+								.build());
+						}
+					}
+
+					// 배열 필드들 파싱
+					List<String> popularDomains = parseStringArray(clusterNode, "popular_domains");
+					List<String> activityPeakHours = parseStringArray(clusterNode, "activity_peak_hours");
+					List<String> primaryInterests = parseStringArray(clusterNode, "primary_interests");
+					List<String> emergingTopics = parseStringArray(clusterNode, "emerging_topics");
+
+					clusterTrends.add(ClusterTrendDTO.builder()
+						.clusterId(
+							clusterNode.path("cluster_id").isNull() ? null : clusterNode.path("cluster_id").asInt())
+						.clusterName(clusterNode.path("cluster_name").asText(null))
+						.memberCount(
+							clusterNode.path("member_count").isNull() ? null : clusterNode.path("member_count").asInt())
+						.trendingKeywords(trendingKeywords)
+						.popularDomains(popularDomains)
+						.activityPeakHours(activityPeakHours)
+						.primaryInterests(primaryInterests)
+						.emergingTopics(emergingTopics)
+						.build());
+				}
+			}
+
+			return ClusterTrendsResponseDTO.builder()
+				.clusterTrends(clusterTrends)
+				.globalTrends(root.path("global_trends").isNull() ? null : root.path("global_trends"))
+				.generatedAt(root.path("generated_at").asText(null))
+				.analysisPeriod(root.path("analysis_period").asText(null))
+				.build();
+
+		} catch (Exception e) {
+			log.error("AI 클러스터 트렌드 응답 파싱 실패: {}", e.getMessage());
+			throw new GeneralException(ErrorStatus._AI_SERVER_ERROR);
+		}
+	}
+
+	private List<String> parseStringArray(JsonNode parentNode, String fieldName) {
+		List<String> result = new ArrayList<>();
+		JsonNode arrayNode = parentNode.path(fieldName);
+		if (!arrayNode.isMissingNode() && arrayNode.isArray()) {
+			for (JsonNode item : arrayNode) {
+				result.add(item.asText());
+			}
+		}
+		return result;
 	}
 }

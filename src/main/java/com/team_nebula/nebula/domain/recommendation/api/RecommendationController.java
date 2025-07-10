@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.team_nebula.nebula.domain.recommendation.dto.request.SearchBasedRecommendationRequestDTO;
+import com.team_nebula.nebula.domain.recommendation.dto.response.ClusterTrendsResponseDTO;
 import com.team_nebula.nebula.domain.recommendation.dto.response.GeneralRecommendationResponseDTO;
 import com.team_nebula.nebula.domain.recommendation.dto.response.SearchBasedRecommendationResponseDTO;
 import com.team_nebula.nebula.domain.recommendation.service.RecommendationService;
@@ -45,5 +46,14 @@ public class RecommendationController {
 		@AuthUser Long userId,
 		@RequestBody SearchBasedRecommendationRequestDTO request) {
 		return ApiResponse.onSuccess(recommendationService.searchBasedRecommendation(userId, request));
+	}
+
+	@Operation(summary = "클러스터 트렌드 분석", description = "사용자 클러스터별 트렌딩 키워드와 관심사를 분석하는 API")
+	@GetMapping("/cluster-trends")
+	public ApiResponse<ClusterTrendsResponseDTO> clusterTrends(
+		@RequestParam(required = false) Integer clusterId,
+		@RequestParam(defaultValue = "week") String timePeriod,
+		@RequestParam(defaultValue = "true") boolean includeGlobal) {
+		return ApiResponse.onSuccess(recommendationService.clusterTrends(clusterId, timePeriod, includeGlobal));
 	}
 }

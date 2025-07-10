@@ -1,6 +1,5 @@
 package com.team_nebula.nebula.domain.recommendation.dto.request;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import lombok.AllArgsConstructor;
@@ -24,9 +23,7 @@ public class SearchBasedRecommendationRequestDTO {
 	@Builder.Default
 	private Boolean boostUserPreferences = true;
 
-	@Builder.Default
-	private String sessionId = "default_session";
-
-	@Builder.Default
-	private List<String> previousQueries = new ArrayList<>();
+	private String sessionId;
+	
+	private List<String> previousQueries;
 } 
