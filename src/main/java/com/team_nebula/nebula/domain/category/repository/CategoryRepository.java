@@ -18,9 +18,12 @@ public interface CategoryRepository extends Neo4jRepository<Category, UUID> {
     MATCH (u:UserNode {userId: $userId})-[:GENERATED]->(c:Category)
     WHERE c.isDeletedStatus = false OR c.isDeletedStatus IS NULL
     OPTIONAL MATCH (c)<-[:BELONGS_TO]-(s:Star)
-    RETURN c.id AS id, c.name AS name, COUNT(s) AS includedStarCnt
+    WITH c, COUNT(s) AS includedStarCnt
+    RETURN c.id AS id, c.name AS name, includedStarCnt
+    ORDER BY c.created_at DESC
     """)
     List<GetCategoryOneResponseDTO> findUserCategoriesWithStarCount(@Param("userId") Long userId);
+
 
     @Query("""
     MATCH (u:UserNode {userId: $userId})-[:GENERATED]->(c:Category {name: $name})
