@@ -1,24 +1,22 @@
 package com.team_nebula.nebula.domain.star.search.migration;
 
-import co.elastic.clients.elasticsearch.ElasticsearchClient;
-import co.elastic.clients.elasticsearch._types.ElasticsearchException;
-import co.elastic.clients.elasticsearch.core.CountRequest;
-import co.elastic.clients.elasticsearch.core.CountResponse;
-import co.elastic.clients.elasticsearch.core.IndexRequest;
-import co.elastic.clients.elasticsearch.core.SearchRequest;
-import co.elastic.clients.elasticsearch.core.SearchResponse;
-import co.elastic.clients.elasticsearch.indices.*;
-import co.elastic.clients.elasticsearch.indices.update_aliases.Action;
-import co.elastic.clients.elasticsearch.indices.update_aliases.AddAction;
-import co.elastic.clients.elasticsearch.indices.update_aliases.RemoveAction;
-import com.team_nebula.nebula.domain.star.converter.StarConverter;
+import lombok.extern.slf4j.Slf4j;
+import org.opensearch.client.opensearch.OpenSearchClient;
+import org.opensearch.client.opensearch._types.OpenSearchException;
+import org.opensearch.client.opensearch.core.CountRequest;
+import org.opensearch.client.opensearch.core.CountResponse;
+import org.opensearch.client.opensearch.core.IndexRequest;
+import org.opensearch.client.opensearch.core.SearchRequest;
+import org.opensearch.client.opensearch.core.SearchResponse;
+import org.opensearch.client.opensearch.indices.*;
+import org.opensearch.client.opensearch.indices.update_aliases.Action;
+import org.opensearch.client.opensearch.indices.update_aliases.AddAction;
+import org.opensearch.client.opensearch.indices.update_aliases.RemoveAction;
 import com.team_nebula.nebula.domain.star.repository.StarRepository;
 import com.team_nebula.nebula.domain.star.search.document.StarSearchDocument;
 import com.team_nebula.nebula.domain.star.search.dto.response.GetStarOneWithUserIdResponseDTO;
 import com.team_nebula.nebula.domain.star.search.listener.StarSearchEventListener;
-import com.team_nebula.nebula.domain.star.search.service.ElasticsearchService;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
@@ -35,12 +33,11 @@ import static com.team_nebula.nebula.domain.star.converter.StarConverter.convert
 @Component
 @RequiredArgsConstructor
 @Slf4j
-@ConditionalOnProperty(name = "elasticsearch.migration.enabled", havingValue = "true", matchIfMissing = false)
+@ConditionalOnProperty(name = "spring.opensearch.migration.enabled", havingValue = "true", matchIfMissing = false)
 public class ElasticsearchDataMigration {
 
     private final StarRepository starRepository;
-    private final ElasticsearchService elasticsearchService;
-    private final ElasticsearchClient elasticsearchClient;
+    private final OpenSearchClient openSearchClient;
 
     private static final String INDEX_ALIAS = "star_search";
     private static final String INDEX_PATTERN = "star_search_v";
@@ -48,7 +45,7 @@ public class ElasticsearchDataMigration {
     @EventListener(ApplicationReadyEvent.class)
     @Async("taskExecutor")
     public void migrateExistingData() {
-        log.info("Starting safe Elasticsearch data migration...");
+        log.info("Starting safe OpenSearch data migration...");
 
         try {
             // 1. 새로운 인덱스 이름 생성
@@ -81,16 +78,10 @@ public class ElasticsearchDataMigration {
         }
     }
 
-    /**
-     * 타임스탬프 기반 새 인덱스 이름 생성
-     */
     private String generateNewIndexName() {
         return INDEX_PATTERN + System.currentTimeMillis();
     }
 
-    /**
-     * 새 인덱스 생성
-     */
     private void createNewIndex(String indexName) throws Exception {
         CreateIndexRequest request = CreateIndexRequest.of(c -> c
                 .index(indexName)
@@ -100,13 +91,10 @@ public class ElasticsearchDataMigration {
                 )
         );
 
-        elasticsearchClient.indices().create(request);
+        openSearchClient.indices().create(request);
         log.info("Successfully created new index: {}", indexName);
     }
 
-    /**
-     * 데이터를 새 인덱스로 마이그레이션
-     */
     private int migrateDataToNewIndex(String newIndexName) {
         List<GetStarOneWithUserIdResponseDTO> allStars = starRepository.findAllStarWithKeywordsAndFavicons();
         log.info("Found {} stars to migrate", allStars.size());
@@ -135,9 +123,6 @@ public class ElasticsearchDataMigration {
         return successCount;
     }
 
-    /**
-     * 특정 인덱스에 문서 인덱싱
-     */
     private void indexDocumentToSpecificIndex(StarSearchDocument document, String indexName) throws Exception {
         IndexRequest<StarSearchDocument> request = IndexRequest.of(i -> i
                 .index(indexName)
@@ -145,30 +130,24 @@ public class ElasticsearchDataMigration {
                 .document(document)
         );
 
-        elasticsearchClient.index(request);
+        openSearchClient.index(request);
     }
 
-    /**
-     * 인덱스 refresh
-     */
     private void refreshIndex(String indexName) {
         try {
             RefreshRequest request = RefreshRequest.of(r -> r.index(indexName));
-            elasticsearchClient.indices().refresh(request);
+            openSearchClient.indices().refresh(request);
             log.info("Refreshed index: {}", indexName);
         } catch (Exception e) {
             log.error("Failed to refresh index: {}", indexName, e);
         }
     }
 
-    /**
-     * 마이그레이션 검증
-     */
     private boolean verifyMigration(String newIndexName, int expectedCount) {
         try {
             // 새 인덱스의 문서 수 확인
             CountRequest countRequest = CountRequest.of(c -> c.index(newIndexName));
-            CountResponse countResponse = elasticsearchClient.count(countRequest);
+            CountResponse countResponse = openSearchClient.count(countRequest);
 
             long actualCount = countResponse.count();
             log.info("Verification: Expected {}, Actual {} documents in new index",
@@ -186,7 +165,7 @@ public class ElasticsearchDataMigration {
             );
 
             SearchResponse<StarSearchDocument> searchResponse =
-                    elasticsearchClient.search(searchRequest, StarSearchDocument.class);
+                    openSearchClient.search(searchRequest, StarSearchDocument.class);
 
             if (searchResponse.hits().hits().isEmpty() && expectedCount > 0) {
                 log.error("Migration verification failed: no searchable documents");
@@ -202,26 +181,23 @@ public class ElasticsearchDataMigration {
         }
     }
 
-    /**
-     * Alias를 새 인덱스로 원자적 전환
-     */
     private void switchAliasToNewIndex(String newIndexName) throws Exception {
         List<Action> actions = new ArrayList<>();
 
         try {
             // 먼저 기존 star_search 인덱스가 있는지 확인하고 삭제
             GetIndexRequest getIndexRequest = GetIndexRequest.of(g -> g.index(INDEX_ALIAS));
-            GetIndexResponse indexResponse = elasticsearchClient.indices().get(getIndexRequest);
+            GetIndexResponse indexResponse = openSearchClient.indices().get(getIndexRequest);
 
             // 기존 인덱스가 존재하면 삭제
             if (!indexResponse.result().isEmpty()) {
                 log.info("Found existing index with alias name: {}. Deleting it first.", INDEX_ALIAS);
                 DeleteIndexRequest deleteRequest = DeleteIndexRequest.of(d -> d.index(INDEX_ALIAS));
-                elasticsearchClient.indices().delete(deleteRequest);
+                openSearchClient.indices().delete(deleteRequest);
                 log.info("Deleted existing index: {}", INDEX_ALIAS);
             }
 
-        } catch (ElasticsearchException e) {
+        } catch (OpenSearchException e) {
             // 인덱스가 없으면 무시 (정상 상황)
             log.info("No existing index found with name: {}", INDEX_ALIAS);
         }
@@ -229,14 +205,14 @@ public class ElasticsearchDataMigration {
         try {
             // 기존 alias 조회 및 제거 액션 추가
             GetAliasRequest getAliasRequest = GetAliasRequest.of(g -> g.name(INDEX_ALIAS));
-            GetAliasResponse aliasResponse = elasticsearchClient.indices().getAlias(getAliasRequest);
+            GetAliasResponse aliasResponse = openSearchClient.indices().getAlias(getAliasRequest);
 
             for (String indexName : aliasResponse.result().keySet()) {
                 actions.add(Action.of(a -> a
                         .remove(RemoveAction.of(r -> r.index(indexName).alias(INDEX_ALIAS)))
                 ));
             }
-        } catch (ElasticsearchException e) {
+        } catch (OpenSearchException e) {
             log.info("No existing alias found, creating new one");
         }
 
@@ -247,18 +223,15 @@ public class ElasticsearchDataMigration {
 
         // 원자적 alias 전환 실행
         UpdateAliasesRequest updateRequest = UpdateAliasesRequest.of(u -> u.actions(actions));
-        elasticsearchClient.indices().updateAliases(updateRequest);
+        openSearchClient.indices().updateAliases(updateRequest);
 
         log.info("Successfully switched alias '{}' to new index '{}'", INDEX_ALIAS, newIndexName);
     }
 
-    /**
-     * 구 인덱스들 정리
-     */
     private void cleanupOldIndices(String currentIndexName) {
         try {
             GetIndexRequest getIndexRequest = GetIndexRequest.of(g -> g.index(INDEX_PATTERN + "*"));
-            GetIndexResponse indexResponse = elasticsearchClient.indices().get(getIndexRequest);
+            GetIndexResponse indexResponse = openSearchClient.indices().get(getIndexRequest);
 
             for (String indexName : indexResponse.result().keySet()) {
                 if (!indexName.equals(currentIndexName)) {
@@ -272,27 +245,21 @@ public class ElasticsearchDataMigration {
         }
     }
 
-    /**
-     * 인덱스가 alias와 연결되어 있는지 확인
-     */
     private boolean isIndexLinkedToAlias(String indexName) {
         try {
             GetAliasRequest request = GetAliasRequest.of(g -> g.index(indexName));
-            GetAliasResponse response = elasticsearchClient.indices().getAlias(request);
+            GetAliasResponse response = openSearchClient.indices().getAlias(request);
             return !response.result().get(indexName).aliases().isEmpty();
         } catch (Exception e) {
             return false;
         }
     }
 
-    /**
-     * 지연 후 구 인덱스 삭제
-     */
     private void deleteOldIndexWithDelay(String indexName) {
         CompletableFuture.delayedExecutor(5, TimeUnit.MINUTES).execute(() -> {
             try {
                 DeleteIndexRequest deleteRequest = DeleteIndexRequest.of(d -> d.index(indexName));
-                elasticsearchClient.indices().delete(deleteRequest);
+                openSearchClient.indices().delete(deleteRequest);
                 log.info("Deleted old index: {}", indexName);
             } catch (Exception e) {
                 log.warn("Failed to delete old index: {}", indexName, e);
@@ -300,13 +267,10 @@ public class ElasticsearchDataMigration {
         });
     }
 
-    /**
-     * 마이그레이션 롤백
-     */
     private void rollbackMigration(String newIndexName) {
         try {
             DeleteIndexRequest deleteRequest = DeleteIndexRequest.of(d -> d.index(newIndexName));
-            elasticsearchClient.indices().delete(deleteRequest);
+            openSearchClient.indices().delete(deleteRequest);
             log.info("Rolled back migration: deleted failed index {}", newIndexName);
         } catch (Exception e) {
             log.error("Failed to rollback migration", e);

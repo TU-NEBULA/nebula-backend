@@ -119,7 +119,7 @@ public class StarCommandServiceImpl implements StarCommandService {
                 .orElseThrow(() -> new GeneralException(ErrorStatus._STAR_NOT_FOUND));
 
         // 카테고리 관계 설정
-        categoryCommandService.linkStarToCategory(star, requestDTO.getCategoryName());
+        categoryCommandService.linkStarToCategory(star, requestDTO.getCategoryName(), userId);
 
         // 키워드 생성 및 관계 설정
         keywordCommandService.linkStarToKeywords(star, requestDTO.getKeywordList());
@@ -275,7 +275,12 @@ public class StarCommandServiceImpl implements StarCommandService {
         userNodeRepository.save(userNode);
 
         // 카테고리 생성 및 유저-카테고리 관게설정
-        categoryCommandService.linkStarToCategory(star, requestDTO.getCategoryName());
+        String categoryName = Optional.ofNullable(requestDTO.getCategoryName())
+                .map(String::trim)
+                .filter(name -> !name.isEmpty())
+                .orElse("basic");
+
+        categoryCommandService.linkStarToCategory(star, categoryName, userId);
 
         // 스타-파비콘 관계 설정
         Favicon favicon = faviconRepository.findByFaviconUrl(requestDTO.getFaviconUrl());

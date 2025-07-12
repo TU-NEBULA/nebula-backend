@@ -1,22 +1,20 @@
 package com.team_nebula.nebula.domain.star.search.service;
 
-import co.elastic.clients.elasticsearch.ElasticsearchClient;
-import co.elastic.clients.elasticsearch._types.SortOrder;
-import co.elastic.clients.elasticsearch._types.query_dsl.BoolQuery;
-import co.elastic.clients.elasticsearch._types.query_dsl.Query;
-import co.elastic.clients.elasticsearch.core.SearchRequest;
-import co.elastic.clients.elasticsearch.core.SearchResponse;
 import com.team_nebula.nebula.domain.star.search.document.StarSearchDocument;
 import com.team_nebula.nebula.domain.star.search.repository.StarSearchRepository;
-import com.team_nebula.nebula.global.apipayload.code.status.ErrorStatus;
-import com.team_nebula.nebula.global.apipayload.exception.GeneralException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.opensearch.client.opensearch.OpenSearchClient;
+import org.opensearch.client.opensearch._types.FieldValue;
+import org.opensearch.client.opensearch._types.SortOrder;
+import org.opensearch.client.opensearch._types.query_dsl.BoolQuery;
+import org.opensearch.client.opensearch._types.query_dsl.Query;
+import org.opensearch.client.opensearch.core.SearchRequest;
+import org.opensearch.client.opensearch.core.SearchResponse;
+import org.opensearch.client.opensearch.indices.DeleteIndexRequest;
+import org.opensearch.client.opensearch.indices.ExistsRequest;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
-import org.springframework.data.elasticsearch.core.IndexOperations;
-import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates;
 import org.springframework.stereotype.Service;
 
 import java.util.Collections;
@@ -28,37 +26,41 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class ElasticsearchService {
 
-    @Value("${elasticsearch.index.star_search}")
+    @Value("${opensearch.index.star_search:star_search}")
     private String starSearchIndex;
 
-    private final ElasticsearchClient elasticsearchClient;
+    private final OpenSearchClient openSearchClient;
     private final StarSearchRepository starSearchRepository;
-    private final ElasticsearchOperations elasticsearchOperations;
 
-    public void indexDocument(StarSearchDocument document)  {
+    public void indexDocument(StarSearchDocument document) {
         try {
             starSearchRepository.save(document);
             log.info("Document indexed successfully : " + document.getId());
-        }   catch (Exception e) {
+        } catch (Exception e) {
             log.error("Failed to index document : " + document.getId(), e);
         }
     }
 
-    public void deleteDocument(String documentId)  {
+    public void deleteDocument(String documentId) {
         try {
             starSearchRepository.deleteById(documentId);
             log.info("Document deleted successfully : " + documentId);
-        }   catch (Exception e) {
+        } catch (Exception e) {
             log.error("Failed to delete document : " + documentId, e);
         }
     }
 
     public void deleteIndex(String indexName) {
         try {
-            IndexOperations indexOperations = elasticsearchOperations.indexOps(IndexCoordinates.of(indexName));
-            if (indexOperations.exists()) {
-                boolean deleted = indexOperations.delete();
-                if (deleted) {
+            // OpenSearch 클라이언트로 인덱스 존재 여부 확인
+            ExistsRequest existsRequest = ExistsRequest.of(e -> e.index(indexName));
+            boolean exists = openSearchClient.indices().exists(existsRequest).value();
+
+            if (exists) {
+                DeleteIndexRequest deleteRequest = DeleteIndexRequest.of(d -> d.index(indexName));
+                var response = openSearchClient.indices().delete(deleteRequest);
+
+                if (response.acknowledged()) {
                     log.info("Successfully deleted index: {}", indexName);
                 } else {
                     log.warn("Failed to delete index: {}", indexName);
@@ -71,6 +73,7 @@ public class ElasticsearchService {
         }
     }
 
+    // 기존 searchStars 메서드 (V2에서 사용)
     public SearchResultsWithCount searchStars(String keyword, Long userId, int page, int size) {
         if (keyword == null || keyword.trim().isEmpty()) {
             return new SearchResultsWithCount(Collections.emptyList(), 0);
@@ -85,7 +88,7 @@ public class ElasticsearchService {
             BoolQuery boolQuery = createBoolQuery(matchQuery, userQuery);
             SearchRequest searchRequest = createSearchRequest(boolQuery, page, size);
 
-            SearchResponse<StarSearchDocument> response = elasticsearchClient.search(searchRequest, StarSearchDocument.class);
+            SearchResponse<StarSearchDocument> response = openSearchClient.search(searchRequest, StarSearchDocument.class);
 
             List<SearchResultWithScore> results = response.hits().hits().stream()
                     .map(hit -> new SearchResultWithScore(hit.source(), hit.score()))
@@ -104,7 +107,7 @@ public class ElasticsearchService {
         return Query.of(q -> q
                 .match(m -> m
                         .field("allContent")
-                        .query(keyword)
+                        .query(FieldValue.of(keyword))
                         .fuzziness("AUTO")
                 )
         );
@@ -114,7 +117,7 @@ public class ElasticsearchService {
         return Query.of(q -> q
                 .term(t -> t
                         .field("userId")
-                        .value(userId)
+                        .value(FieldValue.of(userId))
                 )
         );
     }
@@ -150,7 +153,7 @@ public class ElasticsearchService {
                                     )
                             )
                             .filter(f -> f
-                                    .term(t -> t.field("userId").value(userId))
+                                    .term(t -> t.field("userId").value(FieldValue.of(userId)))
                             )
                     )
             );
@@ -161,18 +164,65 @@ public class ElasticsearchService {
                     .size(size)
             );
 
-            SearchResponse<StarSearchDocument> response = elasticsearchClient.search(searchRequest, StarSearchDocument.class);
-
-            List<String> results = response.hits().hits().stream()
+            SearchResponse<StarSearchDocument> response = openSearchClient.search(searchRequest, StarSearchDocument.class);
+            
+            return response.hits().hits().stream()
                     .map(hit -> hit.source().getTitle())
                     .distinct()
                     .collect(Collectors.toList());
-
-            return results;
-
+                    
         } catch (Exception e) {
             log.error("Auto complete failed for query: {}", query, e);
             return List.of();
+        }
+    }
+
+    // 새로운 검색 메서드 (다른 용도로 사용)
+    @Cacheable(value = "starSearch", key = "#userId + '_' + #keyword + '_' + #page + '_' + #size")
+    public List<StarSearchDocument> searchStarsSimple(Long userId, String keyword, int page, int size) {
+        try {
+            BoolQuery.Builder boolQuery = new BoolQuery.Builder();
+            
+            // 사용자 ID 필터
+            boolQuery.must(Query.of(q -> q
+                .term(t -> t
+                    .field("userId")
+                    .value(FieldValue.of(userId))
+                )
+            ));
+
+            // 키워드 검색 (여러 필드에서 검색)
+            if (keyword != null && !keyword.trim().isEmpty()) {
+                boolQuery.must(Query.of(q -> q
+                    .multiMatch(m -> m
+                        .query(keyword)
+                        .fields("title^2", "allContent", "categoryName", "summaryAI", "userMemo", "keywords")
+                    )
+                ));
+            }
+
+            SearchRequest searchRequest = SearchRequest.of(s -> s
+                .index(starSearchIndex)
+                .query(Query.of(q -> q.bool(boolQuery.build())))
+                .from(page * size)
+                .size(size)
+                .sort(sort -> sort
+                    .field(f -> f
+                        .field("lastAccessedAt")
+                        .order(SortOrder.Desc)
+                    )
+                )
+            );
+
+            SearchResponse<StarSearchDocument> response = openSearchClient.search(searchRequest, StarSearchDocument.class);
+            
+            return response.hits().hits().stream()
+                    .map(hit -> hit.source())
+                    .collect(Collectors.toList());
+                    
+        } catch (Exception e) {
+            log.error("Failed to search stars for user: {}, keyword: {}", userId, keyword, e);
+            return Collections.emptyList();
         }
     }
 

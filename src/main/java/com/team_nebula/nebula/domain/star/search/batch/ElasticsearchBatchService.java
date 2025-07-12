@@ -1,9 +1,9 @@
 package com.team_nebula.nebula.domain.star.search.batch;
 
-import co.elastic.clients.elasticsearch.ElasticsearchClient;
-import co.elastic.clients.elasticsearch.core.BulkRequest;
-import co.elastic.clients.elasticsearch.core.BulkResponse;
-import co.elastic.clients.elasticsearch.core.bulk.IndexOperation;
+import org.opensearch.client.opensearch.OpenSearchClient;
+import org.opensearch.client.opensearch.core.BulkRequest;
+import org.opensearch.client.opensearch.core.BulkResponse;
+import org.opensearch.client.opensearch.core.bulk.IndexOperation;
 import com.google.common.collect.Lists;
 import com.team_nebula.nebula.domain.star.search.document.StarSearchDocument;
 import lombok.RequiredArgsConstructor;
@@ -19,7 +19,7 @@ import java.util.concurrent.CompletableFuture;
 @Slf4j
 public class ElasticsearchBatchService {
 
-    private final ElasticsearchClient elasticsearchClient;
+    private final OpenSearchClient openSearchClient;
 
     @Async("batchExecutor")
     public CompletableFuture<Void> processBatchAsync(List<StarSearchDocument> documents) {
@@ -58,7 +58,7 @@ public class ElasticsearchBatchService {
             );
         }
 
-        BulkResponse response = elasticsearchClient.bulk(bulkBuilder.build());
+        BulkResponse response = openSearchClient.bulk(bulkBuilder.build());
         if (response.errors()) {
             log.error("Bulk indexing failed for some documents in batch");
             response.items().forEach(item -> {
@@ -71,4 +71,3 @@ public class ElasticsearchBatchService {
         }
     }
 }
-

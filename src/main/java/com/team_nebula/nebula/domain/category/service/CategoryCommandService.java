@@ -13,7 +13,7 @@ public interface CategoryCommandService {
 
     public CreateCategoryResponseDTO createCategory(CreateCategoryRequestDTO request, Long userId);
 
-    public void linkStarToCategory(Star star, String categoryName);
+    public void linkStarToCategory(Star star, String categoryName, Long userId);
 
     public String linkStarToCategoryAndGetName(Star star, String categoryName);
 
