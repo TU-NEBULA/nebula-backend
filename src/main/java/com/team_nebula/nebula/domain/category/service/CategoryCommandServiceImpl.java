@@ -59,20 +59,20 @@ public class CategoryCommandServiceImpl implements CategoryCommandService {
 
     @Override
     public void linkStarToCategory(Star star, String categoryName, Long userId){
-        Category category = categoryRepository.findByName(categoryName)
+        Category category = categoryRepository.findByNameAndUserId(categoryName, userId)
                 .orElseGet(() -> {
-                    if (categoryName.equalsIgnoreCase("basic")) {
-                        Category basicCategory = Category.builder()
-                                .name("basic")
-                                .build();
-
-
-                        return categoryRepository.save(basicCategory);
-                    } else {
-                        throw new GeneralException(ErrorStatus._CATEGORY_NOT_FOUND);
-                    }
+                    Category newCategory = Category.builder()
+                            .name(categoryName)
+                            .build();
+                    categoryRepository.save(newCategory);
+                    
+                    UserNode userNode = userNodeRepository.findById(userId)
+                            .orElseThrow(() -> new GeneralException(ErrorStatus._USER_NOT_FOUND));
+                    userNode.getCategorySet().add(newCategory);
+                    userNodeRepository.save(userNode);
+                    
+                    return newCategory;
                 });
-
         category.getStars().add(star);
         categoryRepository.save(category);
     }
