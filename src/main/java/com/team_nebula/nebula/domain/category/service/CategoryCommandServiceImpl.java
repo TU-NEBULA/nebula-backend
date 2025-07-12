@@ -58,9 +58,20 @@ public class CategoryCommandServiceImpl implements CategoryCommandService {
     }
 
     @Override
-    public void linkStarToCategory(Star star, String categoryName){
+    public void linkStarToCategory(Star star, String categoryName, Long userId){
         Category category = categoryRepository.findByName(categoryName)
-                .orElseThrow(() -> new GeneralException(ErrorStatus._CATEGORY_NOT_FOUND));
+                .orElseGet(() -> {
+                    if (categoryName.equalsIgnoreCase("basic")) {
+                        Category basicCategory = Category.builder()
+                                .name("basic")
+                                .build();
+
+
+                        return categoryRepository.save(basicCategory);
+                    } else {
+                        throw new GeneralException(ErrorStatus._CATEGORY_NOT_FOUND);
+                    }
+                });
 
         category.getStars().add(star);
         categoryRepository.save(category);
@@ -97,9 +108,6 @@ public class CategoryCommandServiceImpl implements CategoryCommandService {
 
     @Override
     public DeleteCategoryResponseDTO deleteCategory(Long userId, UUID categoryId){
-        UserNode userNode = userNodeRepository.findByUserId(userId)
-                .orElseThrow(() -> new GeneralException(ErrorStatus._USER_NOT_FOUND));
-
         Category category = categoryRepository.findById(categoryId)
                 .orElseThrow(() -> new GeneralException(ErrorStatus._CATEGORY_NOT_FOUND));
 

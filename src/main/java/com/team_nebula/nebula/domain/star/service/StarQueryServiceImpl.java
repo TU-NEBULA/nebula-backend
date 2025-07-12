@@ -9,6 +9,7 @@ import com.team_nebula.nebula.domain.star.search.document.StarSearchDocument;
 import com.team_nebula.nebula.domain.star.search.dto.response.SearchResultResponseDTO;
 import com.team_nebula.nebula.domain.star.search.dto.response.SearchStarResponseDTO;
 import com.team_nebula.nebula.domain.star.search.service.ElasticsearchService;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -164,9 +165,20 @@ public class StarQueryServiceImpl implements StarQueryService {
 	}
 
 
-	@Override
-	public List<String> getAutoComplete(String query, Long userId) {
-		return elasticsearchService.getAutoComplete(query, userId, 5);
-	}
 
+	@Override
+	public List<String> getAutoComplete(String query, Long userId, int size) {
+
+		if (query == null || query.trim().isEmpty() || query.length() > 50) {
+			return Collections.emptyList();
+		}
+		if (userId == null) {
+			throw new GeneralException(ErrorStatus._USER_NOT_FOUND);
+		}
+		if (size <= 0 || size > 10) {
+			throw new IllegalArgumentException("Size must be between 1 and 10");
+		}
+		return elasticsearchService.getAutoComplete(query, userId, size);
+
+	}
 }

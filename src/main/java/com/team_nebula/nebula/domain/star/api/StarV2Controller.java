@@ -15,13 +15,19 @@ import com.team_nebula.nebula.global.apipayload.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.redis.connection.RedisConnectionFactory;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.UUID;
+import java.lang.reflect.Field;
+import java.util.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -84,7 +90,7 @@ public class StarV2Controller {
             @AuthUser Long userId,
             @RequestParam("q") String query
     ) {
-        List<String> suggestions = starQueryService.getAutoComplete(query, userId);
+        List<String> suggestions = starQueryService.getAutoComplete(query, userId, 5);
         return ApiResponse.onSuccess(suggestions);
     }
 }
