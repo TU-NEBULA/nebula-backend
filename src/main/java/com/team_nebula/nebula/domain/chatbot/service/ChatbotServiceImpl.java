@@ -21,6 +21,7 @@ import com.team_nebula.nebula.domain.chatbot.dto.response.CharResponseDTO;
 import com.team_nebula.nebula.domain.chatbot.dto.response.MessageResponseDTO;
 import com.team_nebula.nebula.domain.chatbot.dto.response.SessionListResponseDTO;
 import com.team_nebula.nebula.domain.chatbot.dto.response.SessionResponseDTO;
+import com.team_nebula.nebula.domain.chatbot.dto.response.SessionsResponseDTO;
 import com.team_nebula.nebula.global.apipayload.code.status.ErrorStatus;
 import com.team_nebula.nebula.global.apipayload.exception.GeneralException;
 
@@ -79,7 +80,7 @@ public class ChatbotServiceImpl implements ChatbotService {
 	}
 
 	@Override
-	public List<SessionListResponseDTO> getSessions(Long userId, int limit, int offset) {
+	public SessionsResponseDTO getSessions(Long userId, int limit, int offset) {
 		try {
 			String url = String.format("%s/chat/sessions?user_id=%d&limit=%d&offset=%d", aiChatUrl, userId, limit,
 				offset);
@@ -101,16 +102,23 @@ public class ChatbotServiceImpl implements ChatbotService {
 		}
 	}
 
-	private List<SessionListResponseDTO> parseSessionsFromResponse(String responseBody) {
+	private SessionsResponseDTO parseSessionsFromResponse(String responseBody) {
 		List<SessionListResponseDTO> sessions = new ArrayList<>();
+		int total = 0;
 
 		try {
 			JsonNode root = objectMapper.readTree(responseBody);
-			JsonNode sessionsNode = root.path("data").path("sessions");
+			JsonNode dataNode = root.path("data");
+			JsonNode sessionsNode = dataNode.path("sessions");
+
+			total = dataNode.path("total").asInt(0);
 
 			if (!sessionsNode.isArray()) {
 				log.warn("세션 목록이 배열이 아닙니다.");
-				return sessions;
+				return SessionsResponseDTO.builder()
+					.sessions(sessions)
+					.total(total)
+					.build();
 			}
 
 			for (JsonNode sessionNode : sessionsNode) {
@@ -129,7 +137,10 @@ public class ChatbotServiceImpl implements ChatbotService {
 			log.error("AI 세션 목록 JSON 파싱 실패", e);
 		}
 
-		return sessions;
+		return SessionsResponseDTO.builder()
+			.sessions(sessions)
+			.total(total)
+			.build();
 	}
 
 	private String getText(JsonNode node, String fieldName) {

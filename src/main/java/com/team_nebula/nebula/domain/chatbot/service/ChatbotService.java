@@ -8,12 +8,13 @@ import com.team_nebula.nebula.domain.chatbot.dto.request.ChatRequestDTO;
 import com.team_nebula.nebula.domain.chatbot.dto.request.SessionRequestDTO;
 import com.team_nebula.nebula.domain.chatbot.dto.response.CharResponseDTO;
 import com.team_nebula.nebula.domain.chatbot.dto.response.SessionListResponseDTO;
+import com.team_nebula.nebula.domain.chatbot.dto.response.SessionsResponseDTO;
 import com.team_nebula.nebula.domain.chatbot.dto.response.SessionResponseDTO;
 
 public interface ChatbotService {
 	SseEmitter chatStream(Long userId, ChatRequestDTO request);
 
-	List<SessionListResponseDTO> getSessions(Long userId, int limit, int offset);
+	SessionsResponseDTO getSessions(Long userId, int limit, int offset);
 
 	SessionListResponseDTO updateSession(Long userId, String sessionId, SessionRequestDTO request);
 

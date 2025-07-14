@@ -16,6 +16,7 @@ import com.team_nebula.nebula.domain.chatbot.dto.request.ChatRequestDTO;
 import com.team_nebula.nebula.domain.chatbot.dto.request.SessionRequestDTO;
 import com.team_nebula.nebula.domain.chatbot.dto.response.CharResponseDTO;
 import com.team_nebula.nebula.domain.chatbot.dto.response.SessionListResponseDTO;
+import com.team_nebula.nebula.domain.chatbot.dto.response.SessionsResponseDTO;
 import com.team_nebula.nebula.domain.chatbot.dto.response.SessionResponseDTO;
 import com.team_nebula.nebula.domain.chatbot.service.ChatbotService;
 import com.team_nebula.nebula.global.annotation.AuthUser;
@@ -43,7 +44,7 @@ public class ChatbotController {
 
 	@Operation(summary = "사용자 채팅 세션 목록 조회", description = "사용자 채팅 세션 목록을 조회하는 API")
 	@GetMapping("/sessions")
-	public ApiResponse<List<SessionListResponseDTO>> getSessions(
+	public ApiResponse<SessionsResponseDTO> getSessions(
 		@AuthUser Long userId,
 		@RequestParam(name = "limit", defaultValue = "20") int limit,
 		@RequestParam(name = "offset", defaultValue = "0") int offset) {
