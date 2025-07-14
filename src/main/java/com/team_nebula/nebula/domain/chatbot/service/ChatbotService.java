@@ -1,23 +1,22 @@
 package com.team_nebula.nebula.domain.chatbot.service;
 
-import java.util.List;
-
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import com.team_nebula.nebula.domain.chatbot.dto.request.ChatRequestDTO;
 import com.team_nebula.nebula.domain.chatbot.dto.request.SessionRequestDTO;
-import com.team_nebula.nebula.domain.chatbot.dto.response.CharResponseDTO;
+import com.team_nebula.nebula.domain.chatbot.dto.response.ChatResponseDTO;
 import com.team_nebula.nebula.domain.chatbot.dto.response.SessionListResponseDTO;
 import com.team_nebula.nebula.domain.chatbot.dto.response.SessionResponseDTO;
+import com.team_nebula.nebula.domain.chatbot.dto.response.SessionsResponseDTO;
 
 public interface ChatbotService {
 	SseEmitter chatStream(Long userId, ChatRequestDTO request);
 
-	List<SessionListResponseDTO> getSessions(Long userId, int limit, int offset);
+	SessionsResponseDTO getSessions(Long userId, int limit, int offset);
 
 	SessionListResponseDTO updateSession(Long userId, String sessionId, SessionRequestDTO request);
 
 	SessionResponseDTO createSession(Long userId, SessionRequestDTO request);
 
-	List<CharResponseDTO> getSessionMessages(Long userId, String sessionId);
+	ChatResponseDTO getSessionMessages(Long userId, String sessionId, int page, int size);
 }
