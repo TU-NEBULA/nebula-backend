@@ -17,8 +17,9 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.team_nebula.nebula.domain.chatbot.dto.request.ChatRequestDTO;
 import com.team_nebula.nebula.domain.chatbot.dto.request.SessionRequestDTO;
-import com.team_nebula.nebula.domain.chatbot.dto.response.CharResponseDTO;
+import com.team_nebula.nebula.domain.chatbot.dto.response.ChatResponseDTO;
 import com.team_nebula.nebula.domain.chatbot.dto.response.MessageResponseDTO;
+import com.team_nebula.nebula.domain.chatbot.dto.response.PaginationResponseDTO;
 import com.team_nebula.nebula.domain.chatbot.dto.response.SessionListResponseDTO;
 import com.team_nebula.nebula.domain.chatbot.dto.response.SessionResponseDTO;
 import com.team_nebula.nebula.domain.chatbot.dto.response.SessionsResponseDTO;
@@ -235,9 +236,10 @@ public class ChatbotServiceImpl implements ChatbotService {
 	}
 
 	@Override
-	public List<CharResponseDTO> getSessionMessages(Long userId, String sessionId) {
+	public ChatResponseDTO getSessionMessages(Long userId, String sessionId, int page, int size) {
 		try {
-			String url = String.format("%s/chat/sessions/%s/messages?user_id=%d", aiChatUrl, sessionId, userId);
+			String url = String.format("%s/chat/sessions/%s/messages?user_id=%d&page=%d&size=%d",
+				aiChatUrl, sessionId, userId, page, size);
 
 			HttpHeaders headers = new HttpHeaders();
 			headers.setContentType(MediaType.APPLICATION_JSON);
@@ -256,6 +258,7 @@ public class ChatbotServiceImpl implements ChatbotService {
 
 			String receivedSessionId = getText(data, "session_id");
 			JsonNode messagesNode = data.path("messages");
+			JsonNode paginationNode = data.path("pagination");
 
 			List<MessageResponseDTO> messageList = new ArrayList<>();
 
@@ -272,12 +275,22 @@ public class ChatbotServiceImpl implements ChatbotService {
 				}
 			}
 
-			CharResponseDTO responseDto = CharResponseDTO.builder()
-				.sessionId(receivedSessionId)
-				.messages(messageList)
+			PaginationResponseDTO pagination = PaginationResponseDTO.builder()
+				.currentPage(paginationNode.path("current_page").asInt(1))
+				.pageSize(paginationNode.path("page_size").asInt(20))
+				.totalCount(paginationNode.path("total_count").asInt(0))
+				.totalPages(paginationNode.path("total_pages").asInt(0))
+				.hasNext(paginationNode.path("has_next").asBoolean(false))
+				.hasPrev(paginationNode.path("has_prev").asBoolean(false))
+				.nextPage(paginationNode.path("next_page").isNull() ? null : paginationNode.path("next_page").asInt())
+				.prevPage(paginationNode.path("prev_page").isNull() ? null : paginationNode.path("prev_page").asInt())
 				.build();
 
-			return List.of(responseDto);
+			return ChatResponseDTO.builder()
+				.sessionId(receivedSessionId)
+				.messages(messageList)
+				.pagination(pagination)
+				.build();
 
 		} catch (Exception e) {
 			log.error("세션 메시지 조회 중 오류 발생", e);

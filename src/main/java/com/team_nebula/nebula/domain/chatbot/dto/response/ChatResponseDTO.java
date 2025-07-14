@@ -11,8 +11,10 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class CharResponseDTO {
+public class ChatResponseDTO {
 	private String sessionId;
+
 	private List<MessageResponseDTO> messages;
 
-}
+	private PaginationResponseDTO pagination;
+} 
