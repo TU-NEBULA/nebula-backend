@@ -274,7 +274,6 @@ public class StarCommandServiceImpl implements StarCommandService {
         userNode.getStars().add(savedStar);
         userNodeRepository.save(userNode);
 
-        // 카테고리 생성 및 유저-카테고리 관게설정
         String categoryName = Optional.ofNullable(requestDTO.getCategoryName())
                 .map(String::trim)
                 .filter(name -> !name.isEmpty())
