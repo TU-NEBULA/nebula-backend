@@ -5,11 +5,11 @@ import java.util.stream.Collectors;
 
 import com.team_nebula.nebula.domain.star.dto.response.*;
 import com.team_nebula.nebula.domain.star.repository.StarNeo4jRepositoryCustom;
-import com.team_nebula.nebula.domain.star.search.document.StarSearchDocument;
 import com.team_nebula.nebula.domain.star.search.dto.response.SearchResultResponseDTO;
 import com.team_nebula.nebula.domain.star.search.dto.response.SearchStarResponseDTO;
 import com.team_nebula.nebula.domain.star.search.service.ElasticsearchService;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,6 +21,8 @@ import com.team_nebula.nebula.global.apipayload.exception.GeneralException;
 
 import lombok.RequiredArgsConstructor;
 
+import static org.springframework.data.neo4j.core.ReactiveNeo4jClient.log;
+
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -30,6 +32,9 @@ public class StarQueryServiceImpl implements StarQueryService {
 	private final LinkQueryService linkQueryService;
 	private final StarNeo4jRepositoryCustom starNeo4jRepositoryCustom;
 	private final ElasticsearchService elasticsearchService;
+
+	private final RedisTemplate<String, Object> redisTemplate;
+	private static final int MAX_RECENT_SEARCHES = 10;
 
 	// 스타 + 링크 전체 조회
 	@Override
@@ -164,8 +169,6 @@ public class StarQueryServiceImpl implements StarQueryService {
 				.build();
 	}
 
-
-
 	@Override
 	public List<String> getAutoComplete(String query, Long userId, int size) {
 
@@ -180,5 +183,21 @@ public class StarQueryServiceImpl implements StarQueryService {
 		}
 		return elasticsearchService.getAutoComplete(query, userId, size);
 
+	}
+
+	@Override
+	@Cacheable(value = "recent_searches", key = "#userId")
+	public List<String> getRecentSearches(Long userId) {
+		try {
+			String key = "recent_searches"+userId.toString();
+			List<Object> searches = redisTemplate.opsForList().range(key, 0, MAX_RECENT_SEARCHES - 1);
+			return searches.stream()
+					.map(Object::toString)
+					.collect(Collectors.toList());
+		}
+		catch (Exception e) {
+			log.error(e, "Failed to get recent searches");
+			return Collections.emptyList();
+		}
 	}
 }

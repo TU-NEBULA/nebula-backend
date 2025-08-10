@@ -38,4 +38,5 @@ public interface StarQueryService {
 
 	public List<String> getAutoComplete(String query, Long userId, int size);
 
+	public List<String> getRecentSearches(Long userId);
 }

@@ -80,6 +80,7 @@ public class StarV2Controller {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
     ) {
+        starCommandService.saveRecentSearches(userId, query);
         SearchResultResponseDTO result = starQueryService.searchStarsV2(query, userId, page, size);
         return ApiResponse.onSuccess(result);
     }
@@ -92,5 +93,12 @@ public class StarV2Controller {
     ) {
         List<String> suggestions = starQueryService.getAutoComplete(query, userId, 5);
         return ApiResponse.onSuccess(suggestions);
+    }
+
+    @Operation(summary = "최근 검색어 조회", description = "사용자 최근 검색어 10개 조회")
+    @GetMapping("/recent-searches")
+    public ApiResponse<List<String>> getRecentSearches(@AuthUser Long userId) {
+        List<String> recentSearches = starQueryService.getRecentSearches(userId);
+        return ApiResponse.onSuccess(recentSearches);
     }
 }
