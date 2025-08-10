@@ -29,17 +29,23 @@ import com.team_nebula.nebula.global.apipayload.code.status.ErrorStatus;
 import com.team_nebula.nebula.global.apipayload.exception.GeneralException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 
 import java.time.OffsetDateTime;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
+
+import static org.springframework.data.neo4j.core.ReactiveNeo4jClient.log;
 
 @Service
 @RequiredArgsConstructor
@@ -58,6 +64,9 @@ public class StarCommandServiceImpl implements StarCommandService {
     private final AiMessageService aiMessageService;
     private final FaviconRepository faviconRepository;
     private final ApplicationEventPublisher eventPublisher;
+
+    private final RedisTemplate<String, Object> redisTemplate;
+    private static final int MAX_RECENT_SEARCHES = 10;
 
 
     @Override
@@ -314,5 +323,32 @@ public class StarCommandServiceImpl implements StarCommandService {
                 .build();
     }
 
+    @Override
+    @Async
+    public void saveRecentSearches(Long userId, String keyword){
+        try {
+            String key = "recent_search:" + userId;
+            String normalizedKeyword = keyword.trim().toLowerCase();
+
+            // 중복 제거
+            redisTemplate.opsForList().remove(key, 0, normalizedKeyword);
+            redisTemplate.opsForList().leftPush(key, normalizedKeyword);
+            redisTemplate.opsForList().trim(key, 0, MAX_RECENT_SEARCHES - 1);
+            redisTemplate.expire(key, Duration.ofDays(30));
+        }
+        catch (Exception e) {
+            log.error(e, "Failed to save recent search");
+        }
+    }
+
+    @Override
+    public void deleteRecentSearch(Long userId, String keyword) {
+        try {
+            String key = "recent_search:" + userId;
+            redisTemplate.opsForList().remove(key, 0, keyword.trim().toLowerCase());
+        } catch (Exception e) {
+            log.error(e, "Failed to delete recent search");
+        }
+    }
 
 }

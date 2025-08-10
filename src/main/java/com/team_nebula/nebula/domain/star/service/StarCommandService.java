@@ -6,6 +6,7 @@ import com.team_nebula.nebula.domain.star.dto.request.UpdateStarOneRequestDTO;
 import com.team_nebula.nebula.domain.star.dto.response.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
 import java.util.UUID;
 
 public interface StarCommandService {
@@ -23,4 +24,9 @@ public interface StarCommandService {
     public AddBookMarkResponseDTO addBookMark(Long userId, MultipartFile htmlFile, String title, String siteUrl);
 
     public CreateStarResponseDTO createStar(Long userId, CreateStarRequestDTO requestDTO);
+
+    public void saveRecentSearches(Long userId, String keyword);
+
+    public void deleteRecentSearch(Long userId, String keyword);
+
 }

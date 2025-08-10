@@ -177,7 +177,7 @@ public class ElasticsearchService {
         }
     }
 
-    // 새로운 검색 메서드 (다른 용도로 사용)
+    //  검색 메서드 (더 넓은 범위 검색)
     @Cacheable(value = "starSearch", key = "#userId + '_' + #keyword + '_' + #page + '_' + #size")
     public List<StarSearchDocument> searchStarsSimple(Long userId, String keyword, int page, int size) {
         try {
